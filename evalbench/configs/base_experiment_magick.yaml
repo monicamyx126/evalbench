@@ -1,0 +1,12 @@
+dataset_config: ../datasets/bird_pg_dev/california_schools.json
+database_config: configs/db/alloydb.yaml
+model_config: configs/model/base_magick_model.yaml
+prompt_generator: 'NOOPGenerator'
+eval_ids: []
+scorers: 
+  exact_match:
+  recall_match:
+  vertexmatcher:
+    gcp_project_location: "us-central1"
+    gcp_project_id: "cloud-db-nl2sql"
+    model: "gemini-1.0-pro-001"

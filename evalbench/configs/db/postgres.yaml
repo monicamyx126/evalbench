@@ -1,0 +1,7 @@
+db: postgres
+project_id: cloud-db-nl2sql
+region: us-central1
+instance_name: nl2sql-synthetic-pg
+database_name: air_travel
+user_name: nl2sql
+password: !ENV ${EVAL_DB_PASSWORD}

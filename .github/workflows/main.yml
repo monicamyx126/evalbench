@@ -1,0 +1,22 @@
+on:
+  pull_request:
+    branches:
+      - main
+name: pycodestyle
+jobs:
+  pycodestyle:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.8"
+    - name: Install pycodestyle
+      run: |
+        sudo apt update
+        sudo apt install pycodestyle -y
+    - name: Run pycodestyle
+      run: |
+        pycodestyle --max-line-length=120 evalbench

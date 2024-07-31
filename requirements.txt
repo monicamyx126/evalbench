@@ -1,0 +1,10 @@
+# Package dependencies
+cloud-sql-python-connector[pg8000]
+google-cloud-alloydb-connector[pg8000]
+google-cloud-aiplatform
+openai
+pandas
+pymysql
+sqlalchemy
+pyaml_env
+pyarrow

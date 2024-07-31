@@ -1,0 +1,2310 @@
+[
+  {
+    "prompt": " -- How many airports are there in US  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM airport WHERE iso_country = 'US' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many accounts in my account table that has a first name starts with the letter p?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM account WHERE first_name LIKE 'p%' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Return 10 boarding passes ids with the first and last name of each passanger ordered by their boarding pass id ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 10 B.pass_id, P.first_name, P.last_name FROM boarding_pass AS B INNER JOIN passenger AS P ON B.passenger_id = P.passenger_id ORDER BY B.pass_id"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show the number of passengers having account never booked a flight ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT COUNT(*) FROM passenger WHERE booking_id IS NULL AND account_id IS NOT NULL"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me all airports codes but reverse the strings ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT REVERSE(airport_code) FROM airport "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- sort the flyer in the frequent_flyer table by award_points ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT * FROM frequent_flyer ORDER BY award_points DESC  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- average bookings per passenger name this year  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT AVG(cnt) FROM ( SELECT T2.first_name, T2.last_name, COUNT(T1.booking_id) as cnt FROM booking AS T1 INNER JOIN passenger AS T2 ON T1.booking_id = T2.booking_id WHERE T1.update_ts >= '2023-01-01' AND T1.update_ts < '2024-01-01' GROUP BY T2.first_name, T2.last_name) booking_count_per_passenger  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- give the top 10 duplicate entries on frequent_flyer_id from account  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 10 frequent_flyer_id, count(*) as count FROM account GROUP BY frequent_flyer_id HAVING COUNT(*) > 1 ORDER BY count(*)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Break down the number of booked passengers that left tokyo by date ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT CAST(flight.scheduled_departure AS DATE) AS departure_date, COUNT(*) FROM airport INNER JOIN flight ON airport.airport_code = flight.departure_airport INNER JOIN booking_leg ON booking_leg.flight_id = flight.flight_id WHERE airport.city = 'TOKYO' GROUP BY CAST(flight.scheduled_departure AS DATE) ORDER BY CAST(flight.scheduled_departure AS DATE)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- retrieve all airports in NA  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT * FROM airport WHERE continent = 'NA'  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- tell me the first two letters of the first name for each account ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": ["SELECT substr(first_name,1,2) FROM account"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- are there any foreign keys in the air_travel schema? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT IIF(COUNT(*) > 0, 'Yes', 'No') FROM information_schema.REFERENTIAL_CONSTRAINTS"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["information schema"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many accounts are there? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM account  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which airport city has the longest airport name  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT city FROM airport WHERE LEN(airport_name) = (SELECT  MAX(LEN(AIRPORT_0.airport_name)) FROM airport AS AIRPORT_0 )"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show all passenger data  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" select * from passenger"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the most recent flight?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 flight_no FROM flight ORDER BY actual_arrival DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which flight had most frequent flyers booked ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 f.flight_id , count(frequent_flyer_id) FROM flight f JOIN booking_leg bl ON bl.flight_id = f.flight_id JOIN booking b ON b.booking_id = bl.booking_id JOIN account a ON a.account_id = b.account_id GROUP BY f.flight_id ORDER BY 2 DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many airports are in the united states ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": ["SELECT COUNT(*) FROM airport WHERE iso_country = 'US'"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the latest departing flight from SFO to SEA? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT TOP 1 flight_no FROM flight WHERE departure_airport = 'SFO'  AND arrival_airport = 'SEA' ORDER BY scheduled_departure DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many booked passengers left tokyo on Sep 28 2023 ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT COUNT(*) FROM airport INNER JOIN flight ON airport.airport_code = flight.departure_airport INNER JOIN booking_leg ON booking_leg.flight_id = flight.flight_id WHERE airport.city = 'TOKYO' AND CAST(flight.scheduled_departure AS DATE) = CAST('2023-09-28' AS DATE)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Show me all airport codes in upper case  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT UPPER(airport_code) FROM airport "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- select unique regions from airport table ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT iso_region FROM airport GROUP BY iso_region"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many passengers were on the most recent flight 1293  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT COUNT(*) FROM passenger AS T1 INNER JOIN booking_leg AS T2 ON T1.booking_id = T2.booking_id INNER JOIN ( SELECT TOP 1 flight_id FROM flight WHERE flight_no = '1293' ORDER BY actual_arrival DESC) as T3 ON T2.flight_id = T3.flight_id"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- give me a valid booking record, just do a select to get a single row",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT TOP 1 * FROM booking"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many rows does the account table have? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": ["SELECT COUNT(*) FROM account"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many cities have more than one airport?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM (SELECT city, COUNT(*) cnt FROM airport GROUP BY city) AS city_count WHERE cnt > 1 "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many passengers on flight id 173886 are level 4 frequent flyers? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM passenger AS T1 INNER JOIN booking_leg AS T2 ON T1.booking_id = T2.booking_id INNER JOIN account AS T3 ON T1.account_id = T3.account_id INNER JOIN frequent_flyer AS T4 ON T3.frequent_flyer_id = T4.frequent_flyer_id WHERE T2.flight_id = 173886 AND T4.level = 4  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many duplicate frequent_flyer ids are present in account ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " select count(*) from account GROUP BY frequent_flyer_id having count(*) > 1 "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the count of passengers per flight ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT  T1.flight_no, COUNT(T4.passenger_id) AS passenger_count FROM flight T1 JOIN booking_leg T2 ON T1.flight_id = T2.flight_id JOIN booking T3 ON T2.booking_id = T3.booking_id JOIN passenger T4 ON T3.booking_id = T4.booking_id GROUP BY T1.flight_no;  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the most flied aircraft  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 T2.model, COUNT(*) AS num_flights FROM flight T1 JOIN aircraft T2 ON T1.aircraft_code = T2.code GROUP BY T2.model ORDER BY num_flights DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "--select top 3 aircrafts landing most frequently at ord airport",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 3 T2.model FROM flight T1 JOIN aircraft T2 ON T1.aircraft_code = T2.code WHERE T1.arrival_airport = 'ORD' GROUP BY T2.model ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- top 5 fastest aircraft model names and speed in order  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 5 model,velocity FROM aircraft ORDER BY velocity DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me a breakdown by departure airports for all the flights that have the fastest aircrafts. ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT T2.airport_name AS departure_airport, COUNT(*) AS num_flights FROM flight T1 INNER JOIN airport T2 ON T1.departure_airport = T2.airport_code INNER JOIN aircraft T3 ON T1.aircraft_code = T3.code WHERE T3.velocity = (SELECT MAX(velocity) FROM aircraft) GROUP BY T2.airport_name ORDER BY num_flights DESC;"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the aircraft with the longest range  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT aircraft.model FROM aircraft AS aircraft WHERE aircraft.range = ( SELECT MAX(AIRCRAFT_0.range) FROM aircraft AS AIRCRAFT_0 ) "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the earliest departing flight from SFO to SEA? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT flight.flight_no FROM flight WHERE flight.departure_airport = 'SFO' AND flight.arrival_airport = 'SEA' AND flight.scheduled_departure = (SELECT MIN(air_travel_0.scheduled_departure) FROM flight AS air_travel_0 WHERE air_travel_0.departure_airport = 'SFO' AND air_travel_0.arrival_airport = 'SEA') "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many passengers were on flight 1293  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM passenger AS T1 INNER JOIN booking_leg AS T2 ON T1.booking_id = T2.booking_id INNER JOIN flight AS T3 ON T2.flight_id = T3.flight_id WHERE T3.flight_no = '1293' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- List me all the departure airport codes in alphabetical order. ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT DISTINCT departure_airport FROM flight ORDER BY departure_airport  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me the last name in all caps for each account ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT upper(last_name) FROM account  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Can I get the IDs, names, and number of legs for the first 50 bookings?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 50 T1.booking_id, T1.booking_name, COUNT(*) AS num_legs FROM booking as T1 INNER JOIN booking_leg AS T2 ON T1.booking_id = T2.booking_id GROUP BY T1.booking_id, T1.booking_name ORDER BY booking_id"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- List out the distinct account ids of all the passengers whose first names contain 'Jo' and last names contain 'au' ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT DISTINCT account_id FROM passenger WHERE first_name LIKE '%Jo%' AND last_name LIKE '%au%'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many airports are there? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM airport  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many flights are flying out of SFO on sept 7th ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM flight WHERE departure_airport = 'SFO' AND scheduled_departure >= '2023-09-07' AND scheduled_departure < '2023-09-08'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Which aircraft model had the most delays?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 T1.model, COUNT(*) AS Delays FROM aircraft AS T1 INNER JOIN flight AS T2 ON T1.code = T2.aircraft_code WHERE T2.status = 'Delayed' GROUP BY T1.model ORDER BY 2 DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me a list of departing locations for flights. ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT departure_airport FROM flight GROUP BY departure_airport"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many tables are there in the database? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT table_schema, count(*) as num_tables FROM information_schema.tables group by table_schema "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["information schema", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many airports are there in SAO PAULO city? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM airport WHERE city = 'SAO PAULO' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many aircrafts do we have for each type of the plane ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT aircraft.model, COUNT(*) FROM aircraft GROUP BY model  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many aircraft do we have?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM aircraft "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many flights were delayed  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM flight WHERE status = 'Delayed'  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show me all the unique seats in the boarding pass table. ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT DISTINCT boarding_pass.seat FROM boarding_pass "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many flights were delayed out of LAX?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM flight WHERE departure_airport = 'LAX' AND status = 'Delayed'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Which airports are in the tokyo timezone?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT airport_name FROM airport WHERE airport_tz = 'Asia/Tokyo'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many distinct passengers have phones numbers with a 917 area code? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(DISTINCT T2.account_id) FROM phone AS T1 INNER JOIN account AS T2 ON T1.ACCOUNT_ID = T2.ACCOUNT_ID WHERE T1.PHONE LIKE '917%'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show me last ten boarded flights with passenger counts ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 10 F.flight_no, F.scheduled_departure, COUNT(*) FROM boarding_pass AS T1 JOIN booking_leg AS BL ON BL.booking_leg_id = T1.booking_leg_id JOIN flight AS F ON F.flight_id = BL.flight_id GROUP BY F.flight_no, F.scheduled_departure ORDER BY F.scheduled_departure DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many frequent_flyer ids are present in account ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM account WHERE frequent_flyer_id IS NOT NULL  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many different options for seat are there in the boarding passes table?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM (SELECT DISTINCT boarding_pass.seat FROM boarding_pass) AS distinct_seats  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many passengers under 30 had bookings with a price under 1000  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM passenger JOIN booking ON passenger.booking_id = booking.booking_id WHERE passenger.age < 30 AND booking.price < 1000  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many airports are in each continent  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " select continent, count(*) as num from airport group by continent "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many aircrafts are there?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM aircraft "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many passengers on flight id 173886 are not frequent flyers? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " select count(*) from account as a inner join passenger as p on a.account_id = p.account_id inner join booking_leg as bl on p.booking_id = bl.booking_id where bl.flight_id = 173886 and a.frequent_flyer_id is null "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show the top 10 passenger bookings, return columns passenger id, account id first name last name ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 10 T1.account_id , T2.passenger_id, T2.first_name,T2.last_name, count(*) FROM booking T1 join passenger T2 on T1.account_id = T2.account_id Group by T1.account_id , T2.passenger_id, T2.first_name,T2.last_name order by count(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show all data in aircraft table  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT * FROM aircraft  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which cities in the US have airports?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT city FROM airport WHERE iso_country = 'US' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what are the top 10 most crowded flights ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 10 T1.flight_no, COUNT(*) FROM flight AS T1 INNER JOIN booking_leg AS T2 ON T1.flight_id = T2.flight_id INNER JOIN booking T3 ON T2.booking_id = T3.booking_id GROUP BY T1.flight_no ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show the top 10 accounts that booked, return account id, firs name, last name, number of bookings  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT TOP 10 T1.account_id, T2.first_name,T2.last_name, COUNT(*) FROM booking AS T1 JOIN account T2 on T1.account_id=T2.account_id GROUP BY t1.account_id, T2.first_name,T2.last_name ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me average flights per year for a frequent flyer 1st level  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT YEAR,AVG(NUM_FLIGHTS) FROM ( SELECT T1.frequent_flyer_id, DATEPART(year, T4.scheduled_departure) AS YEAR, COUNT(T4.flight_id) AS NUM_FLIGHTS FROM frequent_flyer AS T1 INNER JOIN booking AS T2 ON T1.frequent_flyer_id = T2.account_id INNER JOIN booking_leg AS T3 ON T2.booking_id = T3.booking_id INNER JOIN flight AS T4 ON T3.flight_id = T4.flight_id WHERE T1.level=1 GROUP BY T1.frequent_flyer_id, DATEPART(year, T4.scheduled_departure)) A GROUP BY YEAR"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the average length of last name for all accounts who have a valid frequent flyer id  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT AVG(LEN(last_name)) FROM account WHERE frequent_flyer_id IS NOT NULL  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- select all columns from airport table and limit the output to only 10 rows ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" select TOP 10 * from airport"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what columns do I have in the airport table? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT column_name FROM information_schema.columns WHERE table_name = 'airport' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["information schema"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many unique aircraft models are there  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(DISTINCT model) FROM aircraft  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Is Noah Smith a frequent flyer?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) > 0 FROM frequent_flyer WHERE first_name = 'NOAH' AND last_name = 'SMITH' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- please join the account and frequent flayer tables by first and last name",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT  T1.first_name, T1.last_name FROM frequent_flyer AS T1 INNER JOIN account AS T2 ON T1.frequent_flyer_id = T2.account_id WHERE T2.first_name = T1.first_name AND T2.last_name = T1.last_name  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many records are there in the account table  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM account"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show me all the uniquie airport names  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT DISTINCT airport_name FROM airport "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- does the passenger_no column contain any value in the passenger table? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT IIF(COUNT(*) > 0, 'Yes', 'No') FROM passenger WHERE passenger.passenger_no IS NOT NULL "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- are there non frequent flyers in the accounts table? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT (SELECT count(*) as num_accounts FROM account a) - ( SELECT count(*) as num_accounts_with_valid_frequent_flyer FROM account a JOIN frequent_flyer f ON a.frequent_flyer_id = f.frequent_flyer_id ) as num_non_frequent_flyers"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["hard", "subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many passengers are under 18 years old ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) from passenger WHERE age < 18 "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Does Stockholm have an airport?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT IIF(COUNT(*) > 0, 'Yes', 'No') airport_stockholm FROM airport WHERE city = 'STOCKHOLM'"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Which are the fastest aircrafts? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT model FROM aircraft WHERE velocity = ( SELECT MAX(AIRCRAFT_0.velocity) FROM aircraft AS AIRCRAFT_0)  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the airport code for airports in Knoxville?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT airport_code FROM airport WHERE city = 'KNOXVILLE' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Find all the flights which started in time but reached late  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT * FROM flight WHERE scheduled_departure >= actual_departure AND scheduled_arrival < actual_arrival "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the most common aircraft model?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 t2.model, numAircraft FROM (SELECT aircraft_code, COUNT(*) AS numAircraft FROM flight GROUP BY aircraft_code) AS t1 INNER JOIN aircraft AS t2 ON t1.aircraft_code = t2.code ORDER BY 2 DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many bookings were made on an Airbus 340?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM booking AS T1 INNER JOIN booking_leg AS T2 ON T1.booking_id = T2.booking_id INNER JOIN flight AS T3 ON T2.flight_id = T3.flight_id INNER JOIN aircraft AS T4 ON T3.aircraft_code = T4.code WHERE T4.model = 'Airbus 340' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- get the email of flyers in the frequent_flyer table with awards points >= 5  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT frequent_flyer.email FROM frequent_flyer WHERE frequent_flyer.award_points >= 5  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show me first ten lines from table booking ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT TOP 10 * FROM booking"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- get the largest value for range in the aircraft table  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT MAX(aircraft.range) FROM aircraft  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Generate a query list all the airport codes of asia  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT airport_code FROM airport WHERE continent = 'AS' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Find me Abby Gardner's phone number. ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT T2.phone FROM passenger AS T1 INNER JOIN phone AS T2 ON T1.account_id = T2.account_id WHERE T1.first_name = 'Abby' AND T1.last_name = 'Gardner'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show the date on which maximum bookings were done  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT TOP 1 CAST(update_ts AS DATE), COUNT(*) FROM booking GROUP BY CAST(update_ts AS DATE) ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Show me the count of flights for every type of status  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT status, COUNT(*) AS flight_count FROM flight GROUP BY 2"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which flight had most frequent flyers pre-checked  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT TOP 10  f.flight_id , count(frequent_flyer_id) FROM flight f JOIN booking_leg bl ON bl.flight_id = f.flight_id JOIN boarding_pass bp ON bp.booking_leg_id = bl.booking_leg_id AND bp.precheck = 1 JOIN passenger p ON p.passenger_id = bp.passenger_id JOIN account a ON a.account_id = p.account_id GROUP BY f.flight_id ORDER BY 2 DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Show the five fastest aircraft models and their velocities ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 5 aircraft.model, aircraft.velocity FROM aircraft ORDER BY aircraft.velocity DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many unique flights fly from SEA to SFO  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(flight_id) FROM flight WHERE departure_airport = 'SEA' AND arrival_airport = 'SFO' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Find possible duplicate records in accounts using different records for the same names ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT first_name, last_name, COUNT(*) FROM account GROUP BY first_name, last_name HAVING COUNT(*) > 1 "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show 10 rows from airport table  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" select TOP 10 * from airport"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Find the flyer with highest number of awards ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT first_name, last_name, award_points FROM frequent_flyer WHERE award_points = ( SELECT MAX(FREQUENT_FLYER_0.award_points) FROM frequent_flyer AS FREQUENT_FLYER_0 ) "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which frequent flyer has the most award points?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT first_name, last_name, award_points FROM frequent_flyer ORDER BY 3 DESC  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- check if there are any bookings where booking account does not mached the account of the booked passenger  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT B.booking_id FROM booking AS B JOIN passenger AS P ON B.booking_id = P.booking_id WHERE B.account_id <> P.account_id "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the latest flight booking  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 booking_ref FROM booking ORDER BY update_ts DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Cities with one airport  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT city FROM airport GROUP BY city HAVING COUNT(*) = 1 "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me the phone number of the person with the most frequent flyer award points.  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT T3.first_name, T3.last_name, T2.phone FROM frequent_flyer AS T1 INNER JOIN account as T3 ON T1.frequent_flyer_id = T3.frequent_flyer_id INNER JOIN phone AS T2 ON T3.account_id = T2.account_id WHERE T1.AWARD_POINTS = ( SELECT MAX(frequent_flyer.award_points) FROM frequent_flyer) "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me strings that concatenate airport codes and city  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT CONCAT(airport_code, ', ', city) FROM airport  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What are the 3 most common first names amoung all passangers ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 3 first_name, COUNT(*) FROM passenger GROUP BY first_name ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Find me the earliest departing flight from SFO?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT flight_no, scheduled_departure FROM flight WHERE scheduled_departure IN (SELECT MIN(scheduled_departure) FROM flight WHERE departure_airport = 'SFO') AND departure_airport = 'SFO'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Which continent has the least airports ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " select TOP 1 continent, count(*) as airport_count from airport group by continent order by num"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What are the earliest two flights by scheduled departure?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 2 flight_no FROM flight ORDER BY scheduled_departure"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- how many airports in new york and show all details",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT * FROM airport WHERE city = 'NEW YORK' "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many different types of aircraft are there in the data?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(model) FROM aircraft "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many airports are there ?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM airport  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many passengers under 30 spent more than 1000 on a flight departing from LAX?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT COUNT(*) FROM flight JOIN booking_leg ON flight.flight_id = booking_leg.flight_id JOIN passenger ON passenger.booking_id = booking_leg.booking_id JOIN booking ON booking_leg.booking_id = booking.booking_id WHERE passenger.age < 30 AND booking.price > 1000 AND flight.departure_airport = 'LAX' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["hard", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- find the first and last names of the passenger with the highest award points ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT T1.first_name, T1.last_name FROM frequent_flyer AS T1 WHERE T1.award_points = (SELECT MAX(award_points) FROM frequent_flyer) "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Show me all airport codes in lower case  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT LOWER(airport_code) FROM airport "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- retrieve all airports in NYC ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT * FROM airport WHERE LOWER(airport.city) = LOWER('New York') "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- are there duplicated emails in frequent flyer table? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT email, COUNT(*) FROM frequent_flyer GROUP BY email HAVING COUNT(*) > 1 "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which aircraft has the most flights? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 T2.model, COUNT(*) AS Flights FROM flight T1 INNER JOIN aircraft T2 ON T1.aircraft_code = T2.code GROUP BY T2.model ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show number of daily flights ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT CAST(actual_departure AS DATE), count(*) FROM flight GROUP BY CAST(actual_departure AS DATE)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the airport name of airport with code DEL  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT airport_name FROM airport where airport_code = 'DEL' "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- concatenate first name and last name columns into one for the account table  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " select concat(first_name, last_name) as full_name from account  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- select unique timezones from airport table ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT airport_tz FROM airport GROUP BY airport_tz"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What aircraft was the most recent arrived flight?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT model FROM ( SELECT TOP 1 aircraft_code FROM FLIGHT ORDER BY actual_arrival DESC) as T1 INNER JOIN aircraft AS t2 ON t1.aircraft_code = t2.code "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me a breakdown by departure airports for all the flights that have the fastest aircrafts. ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT T1.departure_airport, COUNT(*) AS count FROM flight AS T1 INNER JOIN aircraft AS T2 ON T1.aircraft_code = T2.code WHERE T2.velocity = ( SELECT MAX(velocity) FROM aircraft ) GROUP BY T1.departure_airport"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what timezone is shreveport airport? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT airport_tz FROM airport WHERE city = 'SHREVEPORT'  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the number of departing flights for each airport?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT departure_airport, COUNT(*) FROM flight GROUP BY departure_airport"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show number of flights each day from ORD ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT CAST(actual_departure AS DATE), count(*) FROM flight WHERE departure_airport = 'ORD' GROUP BY CAST(actual_departure AS DATE)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Which city has the most airports?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 city FROM airport GROUP BY city ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- What is the average velocity of all aircrafts  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT AVG(velocity) FROM aircraft  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show the number of flights grouped by status ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT status, COUNT(*) FROM flight GROUP BY status "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what are all the flight between Seattle and New York on May 30th ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT T1.flight_no FROM flight AS T1 WHERE T1.departure_airport = 'SEA' AND T1.arrival_airport = 'JFK' AND T1.scheduled_departure BETWEEN '2023-05-30' AND '2023-05-31' order by T1.scheduled_departure"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many distinct phone numbers are in the database? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT count(distinct phone.phone) FROM phone "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what are the distinct departure airport names? ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT DISTINCT T2.airport_name FROM flight T1 INNER JOIN airport T2 ON T1.departure_airport = T2.airport_code  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- Give me a list of flight destinations out of JFK.  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT arrival_airport FROM flight WHERE departure_airport = 'JFK' GROUP BY arrival_airport "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which cities have the largest number of international airports?  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      "SELECT city FROM ( SELECT city, COUNT(*) AS airport_count FROM airport WHERE intnl = 1 GROUP BY city ) T where T.airport_count = ( SELECT TOP 1 COUNT(*) FROM airport WHERE intnl = 1 GROUP BY city ORDER BY COUNT(*) DESC)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["hard", "subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- which airport names contain the letter Q ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT airport_name FROM airport WHERE airport_name LIKE '%Q%'  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- what is the most popular aircraft  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT TOP 1 T1.model, COUNT(*) AS num_flights FROM aircraft T1 JOIN flight T2 ON T1.code = T2.aircraft_code GROUP BY T1.model ORDER BY num_flights DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- How many passengers are flying with precheck ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT COUNT(*) FROM boarding_pass WHERE precheck = 1"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- how many bookings are there  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [" SELECT count(*) FROM booking  "],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": " -- show me the average price for every seat number  ",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["sqlserver"],
+    "examples": [
+      " SELECT boarding_pass.seat, AVG(booking.price) FROM boarding_pass JOIN booking_leg ON booking_leg.booking_leg_id = boarding_pass.booking_leg_id JOIN booking ON booking.booking_id = booking_leg.booking_id GROUP BY boarding_pass.seat  "
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- find bookings without issued boarding pass",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT distinct b.booking_id FROM booking b INNER JOIN booking_leg bl ON b.booking_id = bl.booking_id INNER JOIN boarding_pass bp ON bl.booking_leg_id = bp.booking_leg_id WHERE bl.booking_leg_id NOT IN( SELECT bp.booking_leg_id FROM boarding_pass )"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- find me all flights that go to Helsinki that are on time?",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.* FROM flight AS T1 INNER JOIN airport AS T2 ON T1.arrival_airport = T2.airport_code WHERE T2.airport_name LIKE 'Helsinki%' AND T1.status = 'On schedule'"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["hard", "join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- Find the account_id, first and last name, and award points of the top 10 accounts with highest frequent flyer award points",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 10 a.account_id, a.first_name, a.last_name, f.award_points FROM account a JOIN frequent_flyer f ON a.frequent_flyer_id = f.frequent_flyer_id ORDER BY f.award_points DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- Find the top 5 passenger who flew the most in 2023.",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 5 p.passenger_id, p.first_name, p.last_name, count(b.pass_id) from passenger p inner join boarding_pass b on b.passenger_id = p.passenger_id where b.boarding_time BETWEEN '2023-01-01' AND '2023-12-31' group by p.passenger_id, p.first_name, p.last_name order by count(b.pass_id) desc"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- get accounts with matching first name and last name from the frequent_flyer",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.* FROM account AS T1 INNER JOIN frequent_flyer AS T2 ON T1.account_id = T2.frequent_flyer_id WHERE T1.first_name = T2.first_name AND T1.last_name = T2.last_name"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- give me all accounts that have a last name starting with 'A'",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": ["SELECT * FROM account WHERE last_name LIKE 'A%'"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- how many passengers also have a frequent flyer number?",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT COUNT(*) FROM passenger LEFT JOIN frequent_flyer ON passenger.first_name = frequent_flyer.first_name AND passenger.last_name = frequent_flyer.last_name WHERE frequent_flyer_id IS NOT NULL"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- list top three frequent flyers based on their award points",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 3 first_name, last_name, award_points FROM frequent_flyer ORDER BY award_points DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- login of the oldest passenger in passenger table using logins in account table",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 1 T2.login FROM passenger AS T1 INNER JOIN account AS T2 ON T1.ACCOUNT_ID = T2.ACCOUNT_ID order by T1.age DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- select flight id from flight where departure_airport is SFO",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": ["select flight_id from flight where departure_airport= 'SFO'"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- select the top 10 frequent_flyer_id from frequent_flyer",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 10 frequent_flyer_id FROM frequent_flyer ORDER BY award_points DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- show all direct flights from sfo",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": ["SELECT * FROM flight WHERE departure_airport = 'SFO'"],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- show me all on schedule flights to NYC",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.*, T2.* FROM flight AS T1 INNER JOIN airport AS T2 ON T1.arrival_airport = T2.airport_code WHERE T2.city = 'NEW YORK' AND T1.status = 'On schedule'"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- show the top 10 frequent flyer ids from frequent flyer having most award points",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 10 frequent_flyer_id FROM frequent_flyer ORDER BY award_points DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["simple"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- show the top account id from booking which has booked max no of times",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 1 T1.account_id, T2.first_name,T2.last_name, count(*) FROM booking AS T1 INNER JOIN passenger AS T2 ON T1.booking_id = T2.booking_id GROUP BY T1.account_id , T2.first_name, T2.last_name order by count(*) desc"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- what are the first and last names of the passengers that flew from Seattle to New York on June 15th 2023",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T2.first_name, T2.last_name FROM booking_leg AS T1 INNER JOIN passenger AS T2 ON T1.booking_id = T2.booking_id INNER JOIN flight AS T3 ON T1.flight_id = T3.flight_id WHERE T3.departure_airport = 'SEA' AND T3.arrival_airport = 'JFK' AND T3.scheduled_departure BETWEEN '2023-06-15T00:00:00Z' AND '2023-06-15T23:59:59Z'"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- What is the id of the most expensive booking",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT booking_id FROM booking WHERE PRICE = ( SELECT MAX(price) FROM booking )"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- what is the phone number of passenger whose last name is BALDWIN",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "select phone.phone from passenger left JOIN phone ON passenger.account_id = phone.account_id where passenger.last_name = 'BALDWIN'"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- what's the direct flights from SFO to new york",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.* FROM flight AS T1 WHERE T1.departure_airport = 'SFO' AND T1.arrival_airport in ('JFK', 'GLA', 'EWR')"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- Which airbus model had the most delays?",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.model, COUNT(*) as Delays FROM aircraft AS T1 INNER JOIN flight AS T2 ON T1.code = T2.aircraft_code WHERE T2.status = 'Delayed' and T1.model like 'Airbus%') GROUP BY 1 ORDER BY COUNT(*) DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- Which date has the most bookings departing from tokyo?",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT TOP 1 departures.departure_date FROM ( SELECT scheduled_departure AS departure_date, COUNT(*) cnt FROM booking INNER JOIN booking_leg ON booking.booking_id = booking.booking_id INNER JOIN flight ON flight.flight_id = booking_leg.flight_id INNER JOIN airport ON flight.departure_airport = airport.airport_code WHERE city = 'TOKYO' GROUP BY scheduled_departure) AS departures ORDER BY cnt DESC"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- Which flights have the fastest aircrafts?",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.flight_id FROM flight AS T1 INNER JOIN aircraft AS T2 ON T1.aircraft_code = T2.code WHERE T2.velocity = ( SELECT MAX(velocity) FROM aircraft)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  },
+  {
+    "prompt": "-- Who has the most award points?",
+    "query_type": "dql",
+    "database": "air_travel",
+    "dialects": ["gsql", "spanner postgres", "mysql", "postgres", "sqlserver"],
+    "examples": [
+      "SELECT T1.first_name, T1.last_name, T1.award_points FROM frequent_flyer AS T1 INNER JOIN account AS T2 ON T1.frequent_flyer_id = T2.frequent_flyer_id WHERE T1.award_points = ( SELECT MAX(frequent_flyer.award_points) FROM frequent_flyer)"
+    ],
+    "eval_query": [],
+    "partials": [],
+    "setup_sql": [],
+    "cleanup_sql": [],
+    "tags": ["subquery", "join", "function"],
+    "cuj": ["Query"]
+  }
+]

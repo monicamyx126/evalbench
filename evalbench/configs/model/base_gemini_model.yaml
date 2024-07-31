@@ -1,0 +1,5 @@
+generator: gemini
+project_id: stofe-storage
+location: us-central1
+vertex_model: gemini-1.0-pro
+base_prompt: ""
