@@ -41,7 +41,7 @@ def load_dataset_from_json(json_file_path):
 
 def load_dataset_from_regular(dataset: Sequence[dict]):
     input_items = []
-    gen_id = 0
+    gen_id = 1
     for item in dataset:
         eval_input = EvalInput(
             id=gen_id,
@@ -55,6 +55,7 @@ def load_dataset_from_regular(dataset: Sequence[dict]):
             cleanup_sql=item["cleanup_sql"],
             tags=item["tags"],
         )
+        gen_id = gen_id + 1
         input_items.append(eval_input)
     return input_items
 

@@ -23,17 +23,11 @@ class GeminiGenerator(QueryGenerator):
         self.model = GenerativeModel(self.vertex_model)
         self.base_prompt = self.base_prompt
 
-        response = self.model.generate_content(
-            "what LLM version is this ?", generation_config=self.generation_config
-        )
-        logging.debug(response.text)
-
     def generate(self, human_language_question):
         response = self.model.generate_content(
             self.base_prompt + human_language_question,
             generation_config=self.generation_config,
         )
-
         if isinstance(response, GenerationResponse):
             r = response.text
             r = r.replace("```sql", "")

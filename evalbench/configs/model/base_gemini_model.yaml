@@ -1,5 +1,5 @@
 generator: gemini
-project_id: stofe-storage
+project_id: cloud-db-nl2sql
 location: us-central1
 vertex_model: gemini-1.0-pro
 base_prompt: ""
