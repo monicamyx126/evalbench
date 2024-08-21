@@ -123,6 +123,8 @@ def convert_to_set(results: list[Any]) -> list[Any] | None:
     Returns:
     """
     try:
+        if isinstance(results, list):
+            return results
         # trying to not process unless required to avoid File too large error as
         # results set are too large specially for air_travel.
         results = list(set(results))
