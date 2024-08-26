@@ -18,6 +18,7 @@ class ExactMatcher(comparator.Comparator):
 
     def compare(
         self,
+        nl_prompt: str,
         golden_query: str,
         golden_execution_result: str,
         generated_query: str,

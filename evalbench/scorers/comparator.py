@@ -24,6 +24,7 @@ class Comparator(abc.ABC):
     @abc.abstractmethod
     def compare(
         self,
+        nl_prompt: Any,
         golden_query: Any,
         golden_execution_result: Any,
         generated_query: Any,
