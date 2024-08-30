@@ -39,4 +39,4 @@ class GeneratedQueryRegexpMatcher(comparator.Comparator):
 
         if self.invert_results:
             score = 100 - score
-        return score
+        return score, str(matching_regexps)

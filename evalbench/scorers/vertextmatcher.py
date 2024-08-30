@@ -90,4 +90,5 @@ class VertexMatcher(comparator.Comparator):
         )
         logging.debug("\n --------- json_output:   --------- \n %s ", json_output)
         score = json.loads(json_output)["score"]
-        return score
+        logs = json.loads(json_output)["explain"]
+        return score, logs

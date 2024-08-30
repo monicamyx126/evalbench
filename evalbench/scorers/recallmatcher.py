@@ -99,4 +99,4 @@ class RecallMatcher(Comparator):
         full_result = self.compute_precision_recall(
             golden_execution_result, generated_execution_result
         )
-        return full_result["recall"]
+        return full_result["recall"], str(full_result)

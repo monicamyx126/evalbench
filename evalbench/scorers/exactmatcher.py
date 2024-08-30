@@ -26,4 +26,4 @@ class ExactMatcher(comparator.Comparator):
     ) -> Tuple[float, str]:
         """Simple comparison strategy that checks if the two execution results are exactly the same."""
         score = 100 if golden_execution_result == generated_execution_result else 0
-        return score
+        return score, None

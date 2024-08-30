@@ -98,4 +98,4 @@ class LLMRater(comparator.Comparator):
 
         logging.debug("\n --------- llm_rater_output:   --------- \n %s ", response)
         score = 100 if ('INFORMATION_MATCHES' in response or 'EXTRA_INFORMATION' in response) else 0
-        return score
+        return score, response
