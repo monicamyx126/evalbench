@@ -4,11 +4,6 @@ package cloud_databases_nl2sql_eval_sqlgen_proto;
 
 option java_multiple_files = true;
 
-message PingRequest {
-  string id = 1;
+message EvalConnectRequest {
+  string client_id = 1;
 }
-
-message EvalInputRequest {
-  string id = 1;
-}
-
