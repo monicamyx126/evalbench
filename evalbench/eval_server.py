@@ -7,8 +7,9 @@ from absl import app
 from absl import flags
 from absl import logging
 import grpc
-
-import eval_service
+import util
+from eval_service import EvalServicer
+from eval_service import SessionManagerInterceptor
 import eval_service_pb2_grpc
 
 _LOCALHOST = flags.DEFINE_bool(
@@ -24,8 +25,12 @@ _cleanup_coroutines = []
 async def _serve():
     """Starts the server."""
     logging.info("Starting server")
-    server = grpc.aio.server()
-    servicer = eval_service.EvalServicer()
+    interceptors = [
+        SessionManagerInterceptor("SessionManagerInterceptor"),
+    ]
+
+    server = grpc.aio.server(interceptors=interceptors)
+    servicer = EvalServicer()
     eval_service_pb2_grpc.add_EvalServiceServicer_to_server(servicer, server)
     if _LOCALHOST.value:
         # --localhost is for testing purpose. Use insecure_server_credentials()
@@ -55,6 +60,8 @@ def main(argv: Sequence[str]) -> None:
     asyncio.set_event_loop(loop)
     try:
         loop.run_until_complete(_serve())
+    except KeyboardInterrupt:
+        util.get_SessionManager().shutdown()
     finally:
         loop.run_until_complete(asyncio.gather(*_cleanup_coroutines))
         loop.close()

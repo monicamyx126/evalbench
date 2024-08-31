@@ -7,4 +7,3 @@ option java_multiple_files = true;
 message EvalConfigRequest {
   bytes yaml_config = 1;
 }
-
