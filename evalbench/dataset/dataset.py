@@ -43,6 +43,7 @@ def load_dataset_from_json(json_file_path, experiment_config):
 
     return input_items, input_items[0].database
 
+
 def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
     input_items = []
     gen_id = 1
@@ -63,6 +64,7 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
         gen_id += 1
         input_items.append(eval_input)
     return input_items
+
 
 def load_dataset_from_regular(dataset: Sequence[dict]):
     input_items = []
