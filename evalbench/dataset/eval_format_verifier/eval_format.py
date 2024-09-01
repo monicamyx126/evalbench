@@ -3,25 +3,25 @@ from typing import Any, List, Optional, TypedDict
 
 
 class DialectBasedSQL(TypedDict):
-  postgres: Optional[List[str]]
-  mysql: Optional[List[str]]
-  sqlserver: Optional[List[str]]
+    postgres: Optional[List[str]]
+    mysql: Optional[List[str]]
+    sqlserver: Optional[List[str]]
 
 
 class EvalFormat(TypedDict):
-  """The type to be used with jsonschema."""
+    """The type to be used with jsonschema."""
 
-  id: int
-  nl_prompt: str
-  query_type: str
-  database: str
-  dialects: List[str]
-  golden_sql: DialectBasedSQL
-  eval_query: Optional[DialectBasedSQL]
-  setup_sql: Optional[DialectBasedSQL]
-  cleanup_sql: Optional[DialectBasedSQL]
-  tags: Optional[List[str]]
-  other: Optional[dict[str, Any]]
+    id: int
+    nl_prompt: str
+    query_type: str
+    database: str
+    dialects: List[str]
+    golden_sql: DialectBasedSQL
+    eval_query: Optional[DialectBasedSQL]
+    setup_sql: Optional[DialectBasedSQL]
+    cleanup_sql: Optional[DialectBasedSQL]
+    tags: Optional[List[str]]
+    other: Optional[dict[str, Any]]
 
 
 SUPPORTED_DIALECTS = ["postgres", "mysql", "sqlserver"]

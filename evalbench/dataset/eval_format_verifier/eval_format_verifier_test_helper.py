@@ -7,45 +7,45 @@ from typing import Any
 def get_default_single_json(
     update: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-  """Returns a list of a single json object with the given update.
+    """Returns a list of a single json object with the given update.
 
-  Args:
-    update: A dictionary of updates to apply to the default json object.
-  """
-  json_data = [{
-      "id": 1,
-      "nl_prompt": "count all the pokemon",
-      "query_type": "DQL",
-      "database": "pokemon",
-      "dialects": ["postgres"],
-      "golden_sql": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
-      "eval_query": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
-  }]
-  if update:
-    json_data[0].update(update)
-  return json_data
+    Args:
+      update: A dictionary of updates to apply to the default json object.
+    """
+    json_data = [{
+        "id": 1,
+        "nl_prompt": "count all the pokemon",
+        "query_type": "DQL",
+        "database": "pokemon",
+        "dialects": ["postgres"],
+        "golden_sql": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
+        "eval_query": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
+    }]
+    if update:
+        json_data[0].update(update)
+    return json_data
 
 
 def get_default_good_json_list(num_items: int = -1) -> list[dict[str, Any]]:
-  """Returns a list of json objects with the given number of items.
+    """Returns a list of json objects with the given number of items.
 
-  Args:
-    num_items: The number of items to return. If num_items is negative, returns
-      all items in default list.
-  """
-  json_data = copy.deepcopy(_DEFAULT_GOOD_JSON_LIST)
-  if num_items < 0:
-    return json_data
-  elif num_items == 0:
-    return []
-  elif num_items > 0 and num_items <= len(json_data):
-    return json_data[:num_items]
-  else:
-    final_item = json_data[-1]
-    append_items = [final_item] * (num_items - len(json_data))
-    for i, item in enumerate(append_items):
-      item.update({"id": final_item.get("id") + i})
-    return json_data + append_items
+    Args:
+      num_items: The number of items to return. If num_items is negative, returns
+        all items in default list.
+    """
+    json_data = copy.deepcopy(_DEFAULT_GOOD_JSON_LIST)
+    if num_items < 0:
+        return json_data
+    elif num_items == 0:
+        return []
+    elif num_items > 0 and num_items <= len(json_data):
+        return json_data[:num_items]
+    else:
+        final_item = json_data[-1]
+        append_items = [final_item] * (num_items - len(json_data))
+        for i, item in enumerate(append_items):
+            item.update({"id": final_item.get("id") + i})
+        return json_data + append_items
 
 
 _DEFAULT_GOOD_JSON_LIST = [
