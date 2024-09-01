@@ -10,6 +10,7 @@ import jsonschema
 
 import eval_format
 
+
 def validate_json_format(json_data: Any) -> None:
     """Validates the JSON format of the data.
 
