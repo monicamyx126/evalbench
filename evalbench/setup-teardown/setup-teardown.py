@@ -1,16 +1,17 @@
+import sys
 import os
 import csv
 import logging
 import argparse
-import sys
 sys.path.append('..')
+
 from util.config import load_yaml_config
 from databases import get_database
-from tabulate import tabulate
 from google.protobuf import text_format
 from schema_detail_pb2 import SchemaDetails
 
 logging.getLogger().setLevel(logging.INFO)
+
 
 def connect_and_execute(setup_config, query_list: list[str]):
     result = None
@@ -28,7 +29,7 @@ def drop_all_tables(setup_config):
 
     if setup_config["db"] == "postgres":
         drop_all_query = """
-        DO $$ 
+        DO $$
         DECLARE
             r RECORD;
         BEGIN
@@ -51,11 +52,13 @@ def drop_all_tables(setup_config):
 
     return result, error
 
+
 def parse_textproto_file(textproto_path):
     schema_details = SchemaDetails()
     with open(textproto_path, 'r') as file:
         text_format.Merge(file.read(), schema_details)
     return schema_details
+
 
 def generate_insert_commands(directory, engine):
     insertion_strings = []
@@ -75,6 +78,7 @@ def generate_insert_commands(directory, engine):
                         insertion_strings.append(f"INSERT INTO `{table_name}` VALUES ({values});")
 
     return insertion_strings
+
 
 def generate_table_creation_commands(schema, excluded_columns=None):
     create_statements = []
@@ -98,6 +102,7 @@ def generate_table_creation_commands(schema, excluded_columns=None):
 
     return create_statements
 
+
 def main():
     logging.info("Running setup-teardown...")
 
@@ -120,7 +125,6 @@ def main():
         return
 
     drop_all_tables(setup_config)
-
 
     setup_commands = {
       "pre_setup": [],
@@ -148,6 +152,7 @@ def main():
         connect_and_execute(setup_config, setup_commands[section])
 
     print("Setup completed successfully.")
+
 
 if __name__ == "__main__":
     main()
