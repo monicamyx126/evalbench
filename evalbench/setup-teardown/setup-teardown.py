@@ -17,18 +17,21 @@ def connect_and_execute(setup_config, query_list: list[str]):
     result = None
     error = None
     db_instance = get_database(setup_config)
-    combined_query = "\n".join(query_list)
-    result, error = db_instance.execute(combined_query)
-    if error:
-        logging.error("An error occurred while executing error: %s", error)
+    if setup_config["db"] == "mysql":
+        for query in query_list:
+            result, error = db_instance.execute(query)
+            if error:
+                logging.error("An error occurred: %s", error)
+    elif setup_config["db"] == "postgres":
+        combined_query = "\n".join(query_list)
+        result, error = db_instance.execute(combined_query)
+        if error:
+            logging.error("An error occurred: %s", error)
     return result, error
 
-
 def drop_all_tables(setup_config):
-    db_instance = get_database(setup_config)
-
     if setup_config["db"] == "postgres":
-        drop_all_query = """
+        query = """
         DO $$
         DECLARE
             r RECORD;
@@ -39,17 +42,20 @@ def drop_all_tables(setup_config):
             END LOOP;
         END $$;
         """
+        drop_all_query = [query]
     elif setup_config["db"] == "mysql":
-        # Todo
-        pass
+        drop_all_query = [
+        "SET GROUP_CONCAT_MAX_LEN = 32768;",
+        "SET @tables = NULL;",
+        "SELECT GROUP_CONCAT('`', table_name, '`') INTO @tables FROM information_schema.tables \
+        WHERE table_schema = (SELECT DATABASE());",
+        "SET @tables = CONCAT('DROP TABLE IF EXISTS ', @tables);",
+        "PREPARE stmt FROM @tables;",
+        "EXECUTE stmt;",
+        "DEALLOCATE PREPARE stmt;"
+        ]
 
-    result, error = db_instance.execute(drop_all_query)
-
-    if error:
-        logging.error("An error occurred: %s", error)
-    else:
-        logging.info("All tables dropped successfully.")
-
+    result, error = connect_and_execute(setup_config, drop_all_query)
     return result, error
 
 
