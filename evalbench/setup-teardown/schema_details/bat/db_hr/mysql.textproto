@@ -141,6 +141,18 @@ tables: {
     data_type: "varchar(255) DEFAULT NULL"
   }
   columns: {
+    column: "contact_person"
+    data_type: "varchar(50) DEFAULT NULL"
+  }
+  columns: {
+    column: "contact_email"
+    data_type: "varchar(50) DEFAULT NULL"
+  }
+  columns: {
+    column: "contact_phone"
+    data_type: "int DEFAULT NULL"
+  }
+  columns: {
     column: "founded_date"
     data_type: "date DEFAULT NULL"
   }
@@ -183,18 +195,6 @@ tables: {
   columns: {
     column: "financial_year_end"
     data_type: "date DEFAULT NULL"
-  }
-  columns: {
-    column: "contact_person"
-    data_type: "varchar(50) DEFAULT NULL"
-  }
-  columns: {
-    column: "contact_email"
-    data_type: "varchar(50) DEFAULT NULL"
-  }
-  columns: {
-    column: "contact_phone"
-    data_type: "int DEFAULT NULL"
   }
 }
 tables: {
@@ -507,6 +507,10 @@ tables: {
     data_type: "varchar(20) DEFAULT NULL"
   }
   columns: {
+    column: "national_identification"
+    data_type: "varchar(255) DEFAULT NULL"
+  }
+  columns: {
     column: "bank_account_number"
     data_type: "json DEFAULT NULL"
   }
@@ -541,10 +545,6 @@ tables: {
   columns: {
     column: "company_id"
     data_type: "int DEFAULT NULL"
-  }
-  columns: {
-    column: "national_identification"
-    data_type: "varchar(255) DEFAULT NULL"
   }
 }
 tables: {
