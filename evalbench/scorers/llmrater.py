@@ -5,9 +5,10 @@ positive cases, where either there is a Mismatch of Columns names or Extra Relev
 Columns in Generated SQL exists.
 """
 
-from typing import Tuple
 import logging
+from typing import Tuple
 
+from ratelimit import limits, sleep_and_retry
 from scorers import comparator
 import vertexai
 from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
@@ -35,6 +36,8 @@ class LLMRater(comparator.Comparator):
         self.generation_config = GenerationConfig(temperature=0)
         self.model = GenerativeModel(self.config["model"])
 
+    @sleep_and_retry
+    @limits(calls=30, period=60)
     def compare(
         self,
         nl_prompt: str,
@@ -71,28 +74,31 @@ class LLMRater(comparator.Comparator):
         Thinking step by step, compare the two outputs and look for differences in data presentation.
         Here are steps to follow:
 
-        1) Map all columns in OUTPUT #1 to the same columns in OUTPUT #2. Their names might be different
-           so long as the content represents the same data.
-        2) If all columns in OUTPUT #1 do not map to OUTPUT #2 then information is missing.
-        3) Compare the data in the mapped columns between OUTPUT #1 and OUTPUT #2. The data should be an
-           exact match, there should be no extra or missing data in OUTPUT #2
+        1. Map all columns in OUTPUT #1 to the same columns in OUTPUT #2. Column names might differ as
+           long as the data they contain represents the same information.
+        2. All columns present in OUTPUT #1 must also be present in OUTPUT #2. OUTPUT #2 is allowed to
+           have additional columns relevant to the query.
+        3. Compare the data in the mapped columns between OUTPUT #1 and OUTPUT #2. The data should be
+           an exact match; there should be no extra or missing data in OUTPUT #2.
+        4. Minor string transformations are allowed (e.g., concatenating first and last name), but the
+           underlying information must be preserved.
+        5. Only compare the result sets; do not make any assumptions beyond the data presented.
 
-        Rules:
-        1) Always assume that OUTPUT #1 is correct.
-        2) Only compare the result sets, don't make other assumptions.
-        3) OUTPUT #2 can be correct even if the order of columns is different
-        4) Adding additional information, like more columns is not a problem as long as they are relevant.
-            Numbers, dates, timestamps, measurements or metrics MUST be the same between the two outputs.
-        5) It's ok to concatenate or change strings in minor ways (for example, combining first name and last name)
+
+        RULES - These MUST be strictly followed, to answer the FINAL QUESTION:
+
+        1. Assume OUTPUT #1 is the gold standard and is ALWAYS correct.
+        2. The order of columns in OUTPUT #2 does not matter.
+        3. Numbers, dates, timestamps, measurements, and metrics MUST match EXACTLY between the two outputs.
+
 
         FINAL QUESTION: Does OUTPUT #2 provide the same information as OUTPUT #1?
-        FINAL ANSWER:
+        FINAL ANSWER: Choose ONLY ONE
         - INFORMATION_MATCHES -- OUTPUT #1 and OUTPUT #2 provide the same information.
         - MISSING_INFORMATION -- Something important is missing from OUTPUT #2.
         - EXTRA_INFORMATION -- Some non-harmful extra relevant columns were added to OUTPUT #2.
-        - INCORRECT_INFORMATION -- Some incorrect information was added to OUTPUT #2, likely due to an incorrect
-          filter or incorrect aggregation.
-
+        - INCORRECT_INFORMATION -- Some incorrect information was added to OUTPUT #2, likely due to
+          an incorrect filter or incorrect aggregation.
         """
         logging.debug("\n --------- prompt:   --------- \n %s ", prompt)
         response = self.model.generate_content(
