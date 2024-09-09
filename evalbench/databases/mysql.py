@@ -5,6 +5,7 @@ from .db import DB
 from .util import generate_ddl
 from typing import Any, Tuple
 
+
 class MySQLDB(DB):
 
     def __init__(self, db_config):

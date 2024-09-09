@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Tuple, List
 
+
 class DBHandler(ABC):
 
     def __init__(self, db_config: dict):
@@ -31,7 +32,6 @@ class DBHandler(ABC):
     def execute(self, queries: List[str]):
         """
         Execute a list of query strings and return the execution results and total time spent.
-        
         Args:
             queries (List[str]): The SQL queries to execute.
         """

@@ -38,10 +38,10 @@ def main():
     if not setup:
         logging.error("setup.yaml file not found.")
         return
-    
+
     db_handler = databaseHandler.get_db_handler(setup_config)
     result, error = db_handler.drop_all_tables()
-    if error: 
+    if error:
         print("Error while dropping tables: ", error)
 
     setup_commands = {
