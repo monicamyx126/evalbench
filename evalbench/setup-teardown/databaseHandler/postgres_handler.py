@@ -4,20 +4,25 @@ from typing import Any, Tuple, List
 from .db_handler import DBHandler
 from databases import get_database
 
-drop_all_tables_query = """
-DO $$
-DECLARE
-    r RECORD;
-BEGIN
-    FOR r IN (
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public'
-    ) LOOP
-        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.table_name) || ' CASCADE';
-    END LOOP;
-END $$;
-"""
+# drop_all_tables_query = """
+# DO $$
+# DECLARE
+#     r RECORD;
+# BEGIN
+#     FOR r IN (
+#         SELECT table_name
+#         FROM information_schema.tables =
+#         WHERE table_schema = 'public'
+#     ) LOOP
+#         EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.table_name) || ' CASCADE';
+#     END LOOP;
+# END $$;
+# """
+
+drop_all_tables_query = [
+    "DROP SCHEMA public CASCADE;",
+    "CREATE SCHEMA public;",
+]
 
 
 class PostgresHandler(DBHandler):
@@ -27,7 +32,7 @@ class PostgresHandler(DBHandler):
         self.db_config = db_config
 
     def drop_all_tables(self):
-        return self.execute([drop_all_tables_query])
+        return self.execute(drop_all_tables_query)
 
     def create_schema_statements(self, schema, excluded_columns):
         excluded_columns = excluded_columns or set()
@@ -72,4 +77,3 @@ class PostgresHandler(DBHandler):
         combined_query = "\n".join(queries)
         result, error = db_instance.execute(combined_query)
         return result, error
-    

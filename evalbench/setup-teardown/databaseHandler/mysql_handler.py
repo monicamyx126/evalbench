@@ -4,17 +4,6 @@ from typing import Any, Tuple, List
 from .db_handler import DBHandler
 from databases import get_database
 
-drop_all_tables_query = [
-        "SET GROUP_CONCAT_MAX_LEN = 32768;",
-        "SET @tables = NULL;",
-        "SELECT GROUP_CONCAT('`', table_name, '`') INTO @tables FROM information_schema.tables \
-        WHERE table_schema = (SELECT DATABASE());",
-        "SET @tables = CONCAT('DROP TABLE IF EXISTS ', @tables);",
-        "PREPARE stmt FROM @tables;",
-        "EXECUTE stmt;",
-        "DEALLOCATE PREPARE stmt;"
-    ]
-
 
 class MYSQLHandler(DBHandler):
 
@@ -23,6 +12,10 @@ class MYSQLHandler(DBHandler):
         self.db_config = db_config
 
     def drop_all_tables(self):
+        drop_all_tables_query = [
+            f"DROP DATABASE IF EXISTS {self.db_config['database_name']};",
+            f"CREATE DATABASE {self.db_config['database_name']};"
+        ]
         return self.execute(drop_all_tables_query)
 
     def create_schema_statements(self, schema, excluded_columns):
@@ -76,4 +69,3 @@ class MYSQLHandler(DBHandler):
             if error:
                 print(f"Error while executing query. error: {error}")
         return result, error
-
