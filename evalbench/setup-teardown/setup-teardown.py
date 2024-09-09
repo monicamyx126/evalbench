@@ -1,62 +1,14 @@
 import sys
-import os
-import csv
 import logging
 import argparse
 sys.path.append('..')
 
 from util.config import load_yaml_config
-from databases import get_database
 from google.protobuf import text_format
 from schema_detail_pb2 import SchemaDetails
+import databaseHandler
 
 logging.getLogger().setLevel(logging.INFO)
-
-
-def connect_and_execute(setup_config, query_list: list[str]):
-    result = None
-    error = None
-    db_instance = get_database(setup_config)
-    if setup_config["db"] == "mysql":
-        for query in query_list:
-            result, error = db_instance.execute(query)
-            if error:
-                logging.error("An error occurred: %s", error)
-    elif setup_config["db"] == "postgres":
-        combined_query = "\n".join(query_list)
-        result, error = db_instance.execute(combined_query)
-        if error:
-            logging.error("An error occurred: %s", error)
-    return result, error
-
-def drop_all_tables(setup_config):
-    if setup_config["db"] == "postgres":
-        query = """
-        DO $$
-        DECLARE
-            r RECORD;
-        BEGIN
-            FOR r IN (SELECT table_name FROM information_schema.tables WHERE table_schema = 'public')
-            LOOP
-                EXECUTE 'DROP TABLE IF EXISTS ' || r.table_name || ' CASCADE';
-            END LOOP;
-        END $$;
-        """
-        drop_all_query = [query]
-    elif setup_config["db"] == "mysql":
-        drop_all_query = [
-        "SET GROUP_CONCAT_MAX_LEN = 32768;",
-        "SET @tables = NULL;",
-        "SELECT GROUP_CONCAT('`', table_name, '`') INTO @tables FROM information_schema.tables \
-        WHERE table_schema = (SELECT DATABASE());",
-        "SET @tables = CONCAT('DROP TABLE IF EXISTS ', @tables);",
-        "PREPARE stmt FROM @tables;",
-        "EXECUTE stmt;",
-        "DEALLOCATE PREPARE stmt;"
-        ]
-
-    result, error = connect_and_execute(setup_config, drop_all_query)
-    return result, error
 
 
 def parse_textproto_file(textproto_path):
@@ -64,49 +16,6 @@ def parse_textproto_file(textproto_path):
     with open(textproto_path, 'r') as file:
         text_format.Merge(file.read(), schema_details)
     return schema_details
-
-
-def generate_insert_commands(directory, engine):
-    insertion_strings = []
-
-    for filename in os.listdir(directory):
-        if filename.endswith(".csv"):
-            table_name = filename[:-4]
-
-            with open(os.path.join(directory, filename), 'r') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    values = ", ".join([f"{value}" for value in row])
-
-                    if engine == 'postgres':
-                        insertion_strings.append(f"INSERT INTO public.{table_name} VALUES ({values});")
-                    elif engine == 'mysql':
-                        insertion_strings.append(f"INSERT INTO `{table_name}` VALUES ({values});")
-
-    return insertion_strings
-
-
-def generate_table_creation_commands(schema, excluded_columns=None):
-    create_statements = []
-
-    for table in schema.tables:
-        table_name = table.table
-        columns = []
-
-        for column in table.columns:
-            column_name = column.column
-            data_type = column.data_type
-
-            if excluded_columns and column_name in excluded_columns:
-                continue
-
-            columns.append(f"{column_name} {data_type}")
-
-        columns_str = ",\n    ".join(columns)
-        create_statement = f"CREATE TABLE {table_name} (\n    {columns_str}\n);"
-        create_statements.append(create_statement)
-
-    return create_statements
 
 
 def main():
@@ -129,8 +38,11 @@ def main():
     if not setup:
         logging.error("setup.yaml file not found.")
         return
-
-    drop_all_tables(setup_config)
+    
+    db_handler = databaseHandler.get_db_handler(setup_config)
+    result, error = db_handler.drop_all_tables()
+    if error: 
+        print("Error while dropping tables: ", error)
 
     setup_commands = {
       "pre_setup": [],
@@ -147,16 +59,17 @@ def main():
 
     # Create schema creation commands
     schema = parse_textproto_file(f"schema_details/bat/{database_name}/{db_engine}.textproto")
-    setup_commands['schema_creation'] = generate_table_creation_commands(schema, setup['setup_commands']['excluded_columns'][db_engine])
+    setup_commands['schema_creation'] = db_handler.create_schema_statements(schema, setup['setup_commands']['excluded_columns'][db_engine])
 
     # Create data insertion commands
     data_directory = f"datasets/bat/{database_name}/"
-    setup_commands['data_insertion'] = generate_insert_commands(data_directory, db_engine)
+    setup_commands['data_insertion'] = db_handler.create_insert_statements(data_directory)
 
     for section in setup_commands:
         print(f"Executing setup commands for section: {section}")
-        connect_and_execute(setup_config, setup_commands[section])
-
+        result, error = db_handler.execute(setup_commands[section])
+        if error is not None:
+            print("Error is: ", error)
     print("Setup completed successfully.")
 
 
