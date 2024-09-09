@@ -1,7 +1,6 @@
 import asyncio
 from aiologger import Logger
 import grpc
-import contextvars
 from evalproto import eval_request_pb2, eval_connect_pb2, eval_config_pb2
 from evalproto import eval_service_pb2_grpc
 import random
@@ -10,7 +9,9 @@ import argparse
 
 class EvalbenchClient:
     def __init__(self):
-        self.channel = grpc.aio.insecure_channel("127.0.0.1:50051")
+        channel_creds = grpc.alts_channel_credentials()
+        address = "127.0.0.1:50051"
+        self.channel = grpc.aio.secure_channel(address, channel_creds)
         self.stub = eval_service_pb2_grpc.EvalServiceStub(self.channel)
         rpc_id = "{:032x}".format(random.getrandbits(128))
         self.metadata = grpc.aio.Metadata(
@@ -48,6 +49,14 @@ class EvalbenchClient:
                 break
             yield response
 
+    async def eval(self, evalinputs):
+        eval_call = self.stub.Eval(metadata=self.metadata)
+        for eval_input in evalinputs:
+            await eval_call.write(eval_input)
+        await eval_call.done_writing()
+        response = await eval_call
+        return response
+
 
 async def run(experiment: str) -> None:
     logger = Logger.with_default_handlers(name="evalbench-logger")
@@ -64,8 +73,12 @@ async def run(experiment: str) -> None:
     response = await evalbenchclient.set_evalconfig(experiment)
     logger.info(f"get_evalinput Returned: {response.response}")
 
+    evalInputs = []
     async for response in evalbenchclient.get_evalinputs():
-        logger.info(f"ID: {response.id} nl_prompt:{response.nl_prompt}")
+        evalInputs.append(response)
+    logger.info(f"evalInputs: {len(evalInputs)}")
+    response = await evalbenchclient.eval(evalInputs)
+    logger.info(f"eval Returned: {response.response}")
 
 
 async def main():
