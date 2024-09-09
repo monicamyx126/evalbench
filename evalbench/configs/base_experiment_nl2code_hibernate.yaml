@@ -1,0 +1,6 @@
+dataset_config: https://dar-internal.googlesource.com/nl2code-dataset/cymbalshop-spring/dataset.json
+database_config: configs/db/nl2code_postgres.yaml
+model_config: configs/model/base_nl2code_model.yaml
+prompt_generator: 'NOOPGenerator'
+eval_ids: []
+scorers: 
