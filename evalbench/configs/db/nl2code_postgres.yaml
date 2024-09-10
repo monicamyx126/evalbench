@@ -1,0 +1,7 @@
+db: postgres
+project_id: google.com:astana-team
+region: us-central1
+instance_name: nl2code
+database_name: cymbalShop
+user_name: app
+password: "projects/545589951893/secrets/cymbalshop-app-password/versions/1"
