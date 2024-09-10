@@ -63,9 +63,10 @@ class PGDB(DB):
             with self.engine.connect() as connection:
                 with connection.begin():
                     resultset = connection.execute(text(query))
-            rows = resultset.fetchall()
-            for r in rows:
-                result.append(r._asdict())
+            if resultset.returns_rows:
+                    rows = resultset.fetchall()
+                    for r in rows:
+                        result.append(r._asdict())
         except Exception as e:
             error = str(e)
         return result, error

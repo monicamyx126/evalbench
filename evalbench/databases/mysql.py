@@ -52,10 +52,11 @@ class MySQLDB(DB):
             with self.engine.connect() as connection:
                 with connection.begin():
                     resultset = connection.execute(text(query))
-            column_names = resultset.keys()
-            rows = resultset.fetchall()
-            for row in rows:
-                result.append(dict(zip(column_names, row)))
+            if resultset.returns_rows:
+                    column_names = resultset.keys()
+                    rows = resultset.fetchall()
+                    for row in rows:
+                        result.append(dict(zip(column_names, row)))
         except Exception as e:
             error = str(e)
         return result, error
