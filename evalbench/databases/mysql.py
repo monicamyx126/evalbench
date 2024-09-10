@@ -1,28 +1,18 @@
-
 import sqlalchemy
 from sqlalchemy import text
-
-from .db import DB
 from google.cloud.sql.connector import Connector
-from .util import generate_ddl, get_db_secret
+from .db import DB
+from .util import generate_ddl
 from typing import Any, Tuple
 
-SCHEMA_QUERY = """
-SELECT table_name, column_name, data_type
-FROM information_schema.columns
-WHERE table_schema = 'public'
-ORDER BY table_name, column_name;
-"""
 
-
-class PGDB(DB):
+class MySQLDB(DB):
 
     def __init__(self, db_config):
         super().__init__(db_config)
         instance_connection_name = f"{db_config['project_id']}:{db_config['region']}:{db_config['instance_name']}"
         db_user = db_config["user_name"]
-        db_pass_secret_path = db_config["password"]
-        db_pass = get_db_secret(db_pass_secret_path)
+        db_pass = db_config["password"]
         self.db_name = db_config["database_name"]
 
         # Initialize the Cloud SQL Connector object
@@ -31,30 +21,29 @@ class PGDB(DB):
         def getconn():
             conn = connector.connect(
                 instance_connection_name,
-                'pg8000',
+                'pymysql',
                 user=db_user,
                 password=db_pass,
-                db=self.db_name,
+                database=self.db_name,
             )
             return conn
 
         self.engine = sqlalchemy.create_engine(
-            "postgresql+pg8000://",
+            "mysql+pymysql://",
             creator=getconn,
             pool_size=50,
-            connect_args={"command_timeout": 60},
+            connect_args={
+                "connect_timeout": 60,
+            },
         )
 
     def generate_schema(self):
-        with self.engine.connect() as conn:
-            result = conn.execute(text(SCHEMA_QUERY))
-            headers = tuple(result.keys())
-            rows = result.fetchall()
-            return headers, rows
+        # To be implemented
+        pass
 
     def generate_ddl(self):
-        headers, rows = self.generate_schema()
-        return generate_ddl(rows, self.db_name)
+        # To be implemented
+        pass
 
     def execute(self, query: str) -> Tuple[Any, float]:
         result = []
@@ -64,9 +53,10 @@ class PGDB(DB):
                 with connection.begin():
                     resultset = connection.execute(text(query))
             if resultset.returns_rows:
+                    column_names = resultset.keys()
                     rows = resultset.fetchall()
-                    for r in rows:
-                        result.append(r._asdict())
+                    for row in rows:
+                        result.append(dict(zip(column_names, row)))
         except Exception as e:
             error = str(e)
         return result, error
