@@ -21,7 +21,7 @@ def parse_textproto_file(textproto_path):
     return schema_details
 
 
-def setupDatabase(db_config: dict):
+def setupDatabase(db_config: dict, no_data: bool = False):
     logging.info("Running setup-teardown...")
     db_engine = db_config['db']
     database_name = db_config['database_name']
@@ -47,7 +47,7 @@ def setupDatabase(db_config: dict):
         "post_data_insertion_checks": []
     }
 
-    for section in ["pre_setup", "post_schema_creation", "post_setup", "post_data_insertion_checks"]:
+    for section in ["pre_setup", "post_schema_creation", "post_setup"]:
         commands = setup['setup_commands'][section][db_engine]
         setup_commands[section].extend(commands)
 
@@ -57,10 +57,14 @@ def setupDatabase(db_config: dict):
         schema, setup['setup_commands']['excluded_columns'][db_engine]
     )
 
-    data_directory = os.path.join(os.path.dirname(__file__), f"datasets/bat/{database_name}/")
-    setup_commands['data_insertion'] = db_handler.create_insert_statements(data_directory)
+    if not no_data:
+        data_directory = os.path.join(os.path.dirname(__file__), f"datasets/bat/{database_name}/")
+        setup_commands['data_insertion'] = db_handler.create_insert_statements(data_directory)
+        setup_commands['post_data_insertion_checks'] = setup['setup_commands']['post_data_insertion_checks'][db_engine]
 
     for section in setup_commands:
+        if no_data and section in ["data_insertion", "post_data_insertion_checks"]:
+            continue
         logging.info(f"Executing setup commands for section: {section}")
         result, error = db_handler.execute(setup_commands[section])
         if error is not None:
