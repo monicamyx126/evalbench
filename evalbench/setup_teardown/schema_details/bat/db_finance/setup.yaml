@@ -70,6 +70,12 @@ setup_commands:
     - "ALTER TABLE ONLY public.tbl_user ALTER COLUMN user_id SET DEFAULT nextval('public.tbl_user_user_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.tbl_wallet ALTER COLUMN wallet_id SET DEFAULT nextval('public.tbl_wallet_wallet_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.tbl_watchlist ALTER COLUMN watchlist_id SET DEFAULT nextval('public.tbl_watchlist_watchlist_id_seq'::regclass);"
+    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dql') THEN EXECUTE 'CREATE USER tmp_dql'; END IF; END $$;"
+    - "GRANT USAGE ON SCHEMA public TO tmp_dql;"
+    - "GRANT SELECT ON ALL TABLES IN SCHEMA public TO tmp_dql;"
+    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dml') THEN EXECUTE 'CREATE USER tmp_dml'; END IF; END $$;"
+    - "GRANT USAGE ON SCHEMA public TO tmp_dml;"
+    - "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tmp_dml;"
     mysql:
     - "ALTER TABLE tbl_agent_user_association ADD PRIMARY KEY (`agent_id`,`user_id`)"
     - "ALTER TABLE tbl_agent ADD PRIMARY KEY (`agent_id`)"
@@ -104,6 +110,15 @@ setup_commands:
     - "ALTER TABLE tbl_user_settings ADD CONSTRAINT `tbl_user_settings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_user` (`user_id`)"
     - "ALTER TABLE tbl_wallet ADD CONSTRAINT `tbl_wallet_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_user` (`user_id`), ADD CONSTRAINT `tbl_wallet_ibfk_2` FOREIGN KEY (`currency_id`) REFERENCES `tbl_currency` (`currency_id`), ADD CONSTRAINT `tbl_wallet_ibfk_3` FOREIGN KEY (`asset_id`) REFERENCES `tbl_assets` (`asset_id`)"
     - "ALTER TABLE tbl_watchlist ADD CONSTRAINT `tbl_watchlist_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_user` (`user_id`), ADD CONSTRAINT `tbl_watchlist_ibfk_2` FOREIGN KEY (`asset_id`) REFERENCES `tbl_assets` (`asset_id`)"
+    # Create Users
+    - 'CREATE USER IF NOT EXISTS "tmp_dql"@"%";'
+    - 'GRANT USAGE ON *.* TO "tmp_dql"@"%";'
+    - 'GRANT SELECT ON `db_finance`.* TO "tmp_dql"@"%";'
+    - 'FLUSH PRIVILEGES;'
+    - 'CREATE USER IF NOT EXISTS "tmp_dml"@"%";'
+    - 'GRANT USAGE ON *.* TO "tmp_dml"@"%";'
+    - 'GRANT SELECT, INSERT, UPDATE, DELETE ON `db_finance`.* TO "tmp_dml"@"%";'
+    - 'FLUSH PRIVILEGES;'
   post_setup:
     postgres:
     - "SELECT pg_catalog.setval('public.tbl_comm_funds_fund_id_seq', 1, false);"

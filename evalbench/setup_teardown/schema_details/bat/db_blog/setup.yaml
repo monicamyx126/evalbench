@@ -117,6 +117,12 @@ setup_commands:
     - "ALTER TABLE ONLY public.tbl_tags_hierarchy ALTER COLUMN tag_hierarchy_id SET DEFAULT nextval('public.tbl_tags_hierarchy_tag_hierarchy_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.tbl_user_activity ALTER COLUMN activity_id SET DEFAULT nextval('public.tbl_user_activity_activity_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.tbl_user_roles ALTER COLUMN role_id SET DEFAULT nextval('public.tbl_user_roles_role_id_seq'::regclass);"
+    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dql') THEN EXECUTE 'CREATE USER tmp_dql'; END IF; END $$;"
+    - "GRANT USAGE ON SCHEMA public TO tmp_dql;"
+    - "GRANT SELECT ON ALL TABLES IN SCHEMA public TO tmp_dql;"
+    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dml') THEN EXECUTE 'CREATE USER tmp_dml'; END IF; END $$;"
+    - "GRANT USAGE ON SCHEMA public TO tmp_dml;"
+    - "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tmp_dml;"
     mysql:
     - "ALTER TABLE tbl_attachments ADD PRIMARY KEY (`attachment_id`), ADD KEY `fk_post_id` (`post_id`), ADD KEY `fk_user_id` (`user_id`), ADD KEY `fk_parent_attachment_id` (`parent_attachment_id`), ADD CONSTRAINT `fk_parent_attachment_id` FOREIGN KEY (`parent_attachment_id`) REFERENCES `tbl_attachments` (`attachment_id`)"
     - "ALTER TABLE tbl_categories_hierarchy ADD PRIMARY KEY (`category_hierarchy_id`), ADD KEY `category_id` (`category_id`), ADD KEY `created_by` (`created_by`), ADD KEY `updated_by` (`updated_by`)"
@@ -154,6 +160,15 @@ setup_commands:
     - "ALTER TABLE tbl_tags ADD CONSTRAINT `tbl_tags_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `tbl_users` (`user_id`), ADD CONSTRAINT `tbl_tags_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `tbl_categories` (`category_id`)"
     - "ALTER TABLE tbl_user_activity ADD CONSTRAINT `tbl_user_activity_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`user_id`), ADD CONSTRAINT `tbl_user_activity_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `tbl_posts` (`post_id`), ADD CONSTRAINT `tbl_user_activity_ibfk_3` FOREIGN KEY (`comment_id`) REFERENCES `tbl_comments` (`comment_id`)"
     - "ALTER TABLE tbl_user_roles ADD CONSTRAINT `tbl_user_roles_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `tbl_users` (`user_id`), ADD CONSTRAINT `tbl_user_roles_ibfk_2` FOREIGN KEY (`updated_by`) REFERENCES `tbl_users` (`user_id`)"
+    # Create users
+    - 'CREATE USER IF NOT EXISTS "tmp_dql"@"%";'
+    - 'GRANT USAGE ON *.* TO "tmp_dql"@"%";'
+    - 'GRANT SELECT ON `db_blog`.* TO "tmp_dql"@"%";'
+    - 'FLUSH PRIVILEGES;'
+    - 'CREATE USER IF NOT EXISTS "tmp_dml"@"%";'
+    - 'GRANT USAGE ON *.* TO "tmp_dml"@"%";'
+    - 'GRANT SELECT, INSERT, UPDATE, DELETE ON `db_blog`.* TO "tmp_dml"@"%";'
+    - 'FLUSH PRIVILEGES;'
   post_setup:
     postgres:
     - "SELECT pg_catalog.setval('public.tbl_attachments_attachment_id_seq', 1, false);"

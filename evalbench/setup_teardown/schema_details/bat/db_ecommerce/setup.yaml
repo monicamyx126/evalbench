@@ -105,6 +105,12 @@ setup_commands:
     - "ALTER TABLE ONLY public.tbl_shipping ALTER COLUMN shipping_id SET DEFAULT nextval('public.tbl_shipping_shipping_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.tbl_users ALTER COLUMN user_id SET DEFAULT nextval('public.tbl_users_user_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.tbl_wishlist ALTER COLUMN wishlist_id SET DEFAULT nextval('public.tbl_wishlist_wishlist_id_seq'::regclass);"
+    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dql') THEN EXECUTE 'CREATE USER tmp_dql'; END IF; END $$;"
+    - "GRANT USAGE ON SCHEMA public TO tmp_dql;"
+    - "GRANT SELECT ON ALL TABLES IN SCHEMA public TO tmp_dql;"
+    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dml') THEN EXECUTE 'CREATE USER tmp_dml'; END IF; END $$;"
+    - "GRANT USAGE ON SCHEMA public TO tmp_dml;"
+    - "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tmp_dml;"
     mysql:
     - "ALTER TABLE tbl_addresses ADD PRIMARY KEY (`address_id`)"
     - "ALTER TABLE tbl_brands ADD PRIMARY KEY (`brand_id`)"
@@ -150,6 +156,15 @@ setup_commands:
     - "ALTER TABLE tbl_settings ADD KEY `user_id` (`user_id`), ADD CONSTRAINT `tbl_settings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`user_id`)"
     - "ALTER TABLE tbl_shipping ADD KEY `order_id` (`order_id`), ADD KEY `shipping_address_id` (`shipping_address_id`), ADD KEY `user_id` (`user_id`), ADD CONSTRAINT `tbl_shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `tbl_orders` (`order_id`), ADD CONSTRAINT `tbl_shipping_ibfk_2` FOREIGN KEY (`shipping_address_id`) REFERENCES `tbl_addresses` (`address_id`), ADD CONSTRAINT `tbl_shipping_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`user_id`)"
     - "ALTER TABLE tbl_wishlist ADD KEY `user_id` (`user_id`), ADD KEY `product_id` (`product_id`), ADD CONSTRAINT `tbl_wishlist_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`user_id`), ADD CONSTRAINT `tbl_wishlist_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `tbl_products` (`product_id`)"
+    # Create Users
+    - 'CREATE USER IF NOT EXISTS "tmp_dql"@"%";'
+    - 'GRANT USAGE ON *.* TO "tmp_dql"@"%";'
+    - 'GRANT SELECT ON `db_ecommerce`.* TO "tmp_dql"@"%";'
+    - 'FLUSH PRIVILEGES;'
+    - 'CREATE USER IF NOT EXISTS "tmp_dml"@"%";'
+    - 'GRANT USAGE ON *.* TO "tmp_dml"@"%";'
+    - 'GRANT SELECT, INSERT, UPDATE, DELETE ON `db_ecommerce`.* TO "tmp_dml"@"%";'
+    - 'FLUSH PRIVILEGES;'
   post_setup:
     postgres:
     - "SELECT pg_catalog.setval('public.tbl_addresses_address_id_seq', 100, true);"
