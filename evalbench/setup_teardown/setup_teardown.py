@@ -29,52 +29,66 @@ def setupDatabase(db_config: dict, database: str, no_data: bool = False):
     if not is_bat_dataset(database):
         return
 
-    logging.info("Running setup-teardown...")
-    db_engine = db_config['db']
-    
-    setup_file = os.path.join(os.path.dirname(__file__), f"schema_details/bat/{database}/setup.yaml")
-    setup = util_config.load_yaml_config(setup_file)
-    if not setup:
-        logging.error("setup.yaml file not found.")
-        return
+    def run_setup():
+        logging.info("Running setup-teardown...")
+        db_engine = db_config['db']
+        
+        setup_file = os.path.join(os.path.dirname(__file__), f"schema_details/bat/{database}/setup.yaml")
+        setup = util_config.load_yaml_config(setup_file)
+        if not setup:
+            logging.error("setup.yaml file not found.")
+            return False
 
-    db_handler = databaseHandler.get_db_handler(db_config)
-    result, error = db_handler.drop_all_tables()
-    if error:
-        logging.error(f"Error while dropping tables: {error}")
-        return
+        db_handler = databaseHandler.get_db_handler(db_config)
 
-    setup_commands = {
-        "pre_setup": [],
-        "schema_creation": [],
-        "post_schema_creation": [],
-        "data_insertion": [],
-        "post_setup": [],
-        "post_data_insertion_checks": []
-    }
+        # Dropping tables
+        result, error = db_handler.drop_all_tables()
+        if error:
+            logging.error(f"Error while dropping tables: {error}")
+            return False
 
-    for section in ["pre_setup", "post_schema_creation", "post_setup"]:
-        commands = setup['setup_commands'][section][db_engine]
-        setup_commands[section].extend(commands)
+        setup_commands = {
+            "pre_setup": [],
+            "schema_creation": [],
+            "post_schema_creation": [],
+            "data_insertion": [],
+            "post_setup": [],
+            "post_data_insertion_checks": []
+        }
 
-    schema_file = os.path.join(os.path.dirname(__file__), f"schema_details/bat/{database}/{db_engine}.textproto")
-    schema = parse_textproto_file(schema_file)
-    setup_commands['schema_creation'] = db_handler.create_schema_statements(
-        schema, setup['setup_commands']['excluded_columns'][db_engine]
-    )
+        for section in ["pre_setup", "post_schema_creation", "post_setup"]:
+            commands = setup['setup_commands'][section][db_engine]
+            setup_commands[section].extend(commands)
 
-    if not no_data:
-        data_directory = os.path.join(os.path.dirname(__file__), f"datasets/bat/{database}/")
-        setup_commands['data_insertion'] = db_handler.create_insert_statements(data_directory)
-        setup_commands['post_data_insertion_checks'] = setup['setup_commands']['post_data_insertion_checks'][db_engine]
+        schema_file = os.path.join(os.path.dirname(__file__), f"schema_details/bat/{database}/{db_engine}.textproto")
+        schema = parse_textproto_file(schema_file)
+        setup_commands['schema_creation'] = db_handler.create_schema_statements(
+            schema, setup['setup_commands']['excluded_columns'][db_engine]
+        )
 
-    for section in setup_commands:
-        if no_data and section in ["data_insertion", "post_data_insertion_checks"]:
-            continue
-        logging.info(f"Executing setup commands for section: {section}")
-        result, error = db_handler.execute(setup_commands[section])
-        if error is not None:
-            logging.error(f"Error in section {section}: {error}")
-            return
+        if not no_data:
+            data_directory = os.path.join(os.path.dirname(__file__), f"datasets/bat/{database}/")
+            setup_commands['data_insertion'] = db_handler.create_insert_statements(data_directory)
+            setup_commands['post_data_insertion_checks'] = setup['setup_commands']['post_data_insertion_checks'][db_engine]
 
-    logging.info("Setup completed successfully.")
+        for section in setup_commands:
+            if no_data and section in ["data_insertion", "post_data_insertion_checks"]:
+                continue
+            result, error = db_handler.execute(setup_commands[section])
+            if error:
+                logging.error(f"Error in section {section}: {error}")
+                return False
+
+        logging.info("Setup completed successfully.")
+        return True
+
+    # Attempt the setup process and retry if it fails
+    max_retries = 1
+    for attempt in range(max_retries + 1):
+        success = run_setup()
+        if success:
+            break
+        if attempt < max_retries:
+            logging.info(f"Retrying setup process... (Attempt {attempt + 2})")
+        else:
+            raise Exception("Setup process failed after retrying.")
