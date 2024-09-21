@@ -12,6 +12,7 @@ import reporting.report as report
 import reporting.bqstore as bqstore
 import reporting.analyzer as analyzer
 import databases
+import setup_teardown
 import logging
 import json
 
@@ -49,8 +50,11 @@ def main(argv: Sequence[str]) -> None:
     db_config["database_name"] = database
     model_config["database_config"] = db_config
 
-    # Create the DB
+    setup_teardown.setupDatabase(db_config=db_config, database=database)
     db = databases.get_database(db_config)
+
+    query_types = experiment_config.get("query_types", ["dql", "dml", "ddl"])
+    dataset = {k: v for k, v in dataset.items() if k in query_types}
 
     # Load the Query Generator
     model_generator = models.get_generator(model_config)

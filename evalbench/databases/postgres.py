@@ -24,6 +24,7 @@ class PGDB(DB):
         db_pass_secret_path = db_config["password"]
         db_pass = get_db_secret(db_pass_secret_path)
         self.db_name = db_config["database_name"]
+        self.db_config = db_config
 
         # Initialize the Cloud SQL Connector object
         connector = Connector()
@@ -56,17 +57,26 @@ class PGDB(DB):
         headers, rows = self.generate_schema()
         return generate_ddl(rows, self.db_name)
 
-    def execute(self, query: str) -> Tuple[Any, float]:
+    def execute(self, query: str, rollback: bool = False, use_transaction: bool = True) -> Tuple[Any, Any]:
         result = []
         error = None
         try:
             with self.engine.connect() as connection:
-                with connection.begin():
-                    resultset = connection.execute(text(query))
-            if resultset.returns_rows:
-                rows = resultset.fetchall()
-                for r in rows:
-                    result.append(r._asdict())
+                if use_transaction:
+                    with connection.begin() as transaction:
+                        resultset = connection.execute(text(query))
+                        if resultset.returns_rows:
+                            rows = resultset.fetchall()
+                            for r in rows:
+                                result.append(r._asdict())
+                        if rollback:
+                            transaction.rollback()
+                else:
+                    resultset = connection.execution_options(isolation_level="AUTOCOMMIT").execute(text(query))
+                    if resultset.returns_rows:
+                        rows = resultset.fetchall()
+                        for r in rows:
+                            result.append(r._asdict())
         except Exception as e:
             error = str(e)
         return result, error

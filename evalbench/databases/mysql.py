@@ -14,6 +14,7 @@ class MySQLDB(DB):
         db_user = db_config["user_name"]
         db_pass = db_config["password"]
         self.db_name = db_config["database_name"]
+        self.db_config = db_config
 
         # Initialize the Cloud SQL Connector object
         connector = Connector()
@@ -45,18 +46,28 @@ class MySQLDB(DB):
         # To be implemented
         pass
 
-    def execute(self, query: str) -> Tuple[Any, float]:
+    def execute(self, query: str, rollback: bool = False, use_transaction: bool = True) -> Tuple[Any, Any]:
         result = []
         error = None
         try:
             with self.engine.connect() as connection:
-                with connection.begin():
+                if use_transaction:
+                    with connection.begin() as transaction:
+                        resultset = connection.execute(text(query))
+                        if resultset.returns_rows:
+                            column_names = resultset.keys()
+                            rows = resultset.fetchall()
+                            for row in rows:
+                                result.append(dict(zip(column_names, row)))
+                        if rollback:
+                            transaction.rollback()
+                else:
                     resultset = connection.execute(text(query))
-            if resultset.returns_rows:
-                column_names = resultset.keys()
-                rows = resultset.fetchall()
-                for row in rows:
-                    result.append(dict(zip(column_names, row)))
+                    if resultset.returns_rows:
+                        column_names = resultset.keys()
+                        rows = resultset.fetchall()
+                        for row in rows:
+                            result.append(dict(zip(column_names, row)))
         except Exception as e:
             error = str(e)
         return result, error

@@ -27,25 +27,26 @@ def load_json(json_file_path):
 def load_dataset_from_json(json_file_path, experiment_config):
     input_items = []
     all_items = load_json(json_file_path)
+
     if "db_id" in all_items[0].keys():
         logging.info("dataset in BIRD Format.")
         input_items = load_dataset_from_bird(all_items)
-        logging.info("Converted %d entries to EvalInput.", len(input_items))
     elif "nl_prompt" in all_items[0].keys():
         logging.info("dataset in new Evalbench Format")
         dialect = experiment_config["dialect"]
         input_items = load_dataset_from_newFormat(all_items, dialect)
-        logging.info("Converted %d entries to EvalInput", len(input_items))
     else:
         logging.info("dataset in regular Format.")
         input_items = load_dataset_from_regular(all_items)
-        logging.info("Converted %d entries to EvalInputRequest.", len(input_items))
 
-    return input_items, input_items[0].database
+    totalEntries = sum(len(input_items.get(q, [])) for q in ["dql", "dml", "ddl"])
+    logging.info(f"Converted {totalEntries} entries to EvalInput.")
+
+    return input_items, input_items['dql'][0].database
 
 
 def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
-    input_items = []
+    input_items = {"dql": [], "dml": [], "ddl": []}
     gen_id = 1
     for item in dataset:
         eval_input = EvalInputRequest(
@@ -62,12 +63,12 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
             other=item["other"]
         )
         gen_id += 1
-        input_items.append(eval_input)
+        input_items[item["query_type"]].append(eval_input)
     return input_items
 
 
 def load_dataset_from_regular(dataset: Sequence[dict]):
-    input_items = []
+    input_items = {"dql": [], "dml": [], "ddl": []}
     gen_id = 1
     for item in dataset:
         eval_input = EvalInputRequest(
@@ -84,17 +85,17 @@ def load_dataset_from_regular(dataset: Sequence[dict]):
             other={}
         )
         gen_id = gen_id + 1
-        input_items.append(eval_input)
+        input_items[item["query_type"]].append(eval_input)
     return input_items
 
 
 def load_dataset_from_bird(dataset: Sequence[dict]):
-    input_items = []
+    input_items = {"dql": [], "dml": [], "ddl": []}
     for item in dataset:
         if item["result_matched"]:
             eval_input = EvalInputRequest(
                 id=item["question_id"],
-                query_type="DQL",
+                query_type="dql",
                 database=item["db_id"],
                 nl_prompt=" ".join([item["question"], item["evidence"]]).replace("`", '"'),
                 dialects=["postgres"],
@@ -105,7 +106,7 @@ def load_dataset_from_bird(dataset: Sequence[dict]):
                 tags=[item["difficulty"]],
                 other={}
             )
-            input_items.append(eval_input)
+            input_items[item["query_type"]].append(eval_input)
     return input_items
 
 

@@ -2,6 +2,7 @@
 
 from typing import Any
 from work import Work
+import setup_teardown
 
 
 class SQLExecWork(Work):
@@ -25,6 +26,8 @@ class SQLExecWork(Work):
         golden_result = None
         golden_error = None
 
+        rollback = (self.eval_result["query_type"] == "dml")
+
         if self.eval_result["sql_generator_error"] is None:
             self.eval_result["sanitized_sql"] = (
                 self.eval_result["generated_sql"]
@@ -35,13 +38,22 @@ class SQLExecWork(Work):
                 .replace("  ", "")
                 .replace("`", "")
             )
-            generated_result, generated_error = self.db.execute(self.eval_result["sanitized_sql"])
+
+            # setup the db without data if the query is DDL
+            if self.eval_result["query_type"] == "ddl":
+                setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
+            generated_result, generated_error = self.db.execute(self.eval_result["sanitized_sql"], rollback=rollback)
+
             golden_sql = ""
             if isinstance(self.eval_result["golden_sql"], str):
                 golden_sql = self.eval_result["golden_sql"]
             elif isinstance(self.eval_result["golden_sql"], list) and len(self.eval_result["golden_sql"]) > 0:
                 golden_sql = self.eval_result["golden_sql"][0]
-            golden_result, golden_error = self.db.execute(golden_sql)
+
+            # setup the db without data if the query is DDL
+            if self.eval_result["query_type"] == "ddl":
+                setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
+            golden_result, golden_error = self.db.execute(golden_sql, rollback=rollback)
 
         self.eval_result["generated_result"] = generated_result
         self.eval_result["generated_error"] = generated_error
