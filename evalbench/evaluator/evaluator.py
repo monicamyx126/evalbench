@@ -22,8 +22,33 @@ class Evaluator:
         self.prompt_generator = prompt_generator
         self.model_generator = model_generator
         self.db = db
-        if "eval_ids" in experiment_config.keys() and len(experiment_config["eval_ids"]) > 0:
-            self.eval_ids = experiment_config["eval_ids"]
+        eval_ids = experiment_config.get("eval_ids", [])
+        self.eval_ids = self.expand_eval_ids(eval_ids)
+        self.tags = experiment_config.get("tags", [])
+    
+    def expand_eval_ids(self, eval_ids):
+        expanded_ids = set()
+        for item in eval_ids:
+            if isinstance(item, list) and len(item) == 2:
+                start, end = item
+                expanded_ids.update(range(start, end + 1))
+            elif isinstance(item, int):
+                expanded_ids.add(item)
+        return list(expanded_ids)
+
+    def filter_dataset(self, dataset):
+        filtered_dataset = {}
+        
+        for query_type, queries in dataset.items():
+            filtered_queries = []
+            for query in queries:
+                if len(self.eval_ids) > 0 and query.id not in self.eval_ids:
+                    continue
+                if len(self.tags) > 0 and not any(tag in query.tags for tag in self.tags):
+                    continue
+                filtered_queries.append(query)
+            filtered_dataset[query_type] = filtered_queries
+        return filtered_dataset
 
     def evaluate(self, dataset):
         eval_outputs = []
@@ -38,6 +63,8 @@ class Evaluator:
 
         dialect = self.db.db_config["db"]
         db_config = self.db.db_config
+
+        dataset = self.filter_dataset(dataset)
 
         for query_type in dataset:
             print(f"Processing {query_type} queries")
@@ -77,8 +104,6 @@ class Evaluator:
                 eval_output = EvalOutput(eval_input)
                 eval_output["job_id"] = job_id
                 eval_output["run_time"] = run_time
-                if self.eval_ids is not None and eval_input.id not in self.eval_ids:
-                    continue
                 work = promptgenwork.SQLPromptGenWork(self.prompt_generator, eval_output)
                 self.promptrunner.execute_work(work)
 
