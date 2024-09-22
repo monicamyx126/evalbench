@@ -12,6 +12,21 @@ class SQLExecWork(Work):
         self.db = db
         self.eval_result = eval_result
 
+    def execute_sql_flow(self, query, rollback=False):
+        if self.eval_result["query_type"] == "ddl":
+            setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
+
+        if self.eval_result["query_type"] in ["dml", "ddl"]:
+            self.db.execute(self.eval_result["setup_sql"])
+            if len(self.eval_result["eval_query"])>0:
+                query = query + " " + self.eval_result['eval_query'][0]
+            result, error = self.db.execute(query, rollback=rollback)
+            self.db.execute(self.eval_result["cleanup_sql"])
+        else:
+            result, error = self.db.execute(query, rollback=rollback)
+
+        return result, error
+
     def run(self, work_config: str = None) -> dict:
         """Runs the work item.
 
@@ -39,21 +54,13 @@ class SQLExecWork(Work):
                 .replace("`", "")
             )
 
-            # setup the db without data if the query is DDL
-            if self.eval_result["query_type"] == "ddl":
-                setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
-            generated_result, generated_error = self.db.execute(self.eval_result["sanitized_sql"], rollback=rollback)
+            generated_result, generated_error = self.execute_sql_flow(self.eval_result["sanitized_sql"], rollback=rollback)
 
-            golden_sql = ""
-            if isinstance(self.eval_result["golden_sql"], str):
-                golden_sql = self.eval_result["golden_sql"]
-            elif isinstance(self.eval_result["golden_sql"], list) and len(self.eval_result["golden_sql"]) > 0:
-                golden_sql = self.eval_result["golden_sql"][0]
+            golden_sql = self.eval_result["golden_sql"]
+            if isinstance(golden_sql, list) and len(golden_sql) > 0:
+                golden_sql = golden_sql[0]
 
-            # setup the db without data if the query is DDL
-            if self.eval_result["query_type"] == "ddl":
-                setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
-            golden_result, golden_error = self.db.execute(golden_sql, rollback=rollback)
+            golden_result, golden_error = self.execute_sql_flow(golden_sql, rollback=rollback)
 
         self.eval_result["generated_result"] = generated_result
         self.eval_result["generated_error"] = generated_error

@@ -19,7 +19,7 @@ class LockTable:
 
         return results
 
-    def get_available_databases(self, dialect, num_required_databases, timeout_minutes=1):
+    def get_available_databases(self, dialect, num_required_databases, timeout_minutes=20):
         client = self.client
         wait_time = min(5, timeout_minutes) * 60
         
