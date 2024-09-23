@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import text
+from sqlalchemy import text, MetaData
 from google.cloud.sql.connector import Connector
 from .db import DB
 from .util import generate_ddl
@@ -37,6 +37,22 @@ class MySQLDB(DB):
                 "connect_timeout": 60,
             },
         )
+    
+    def get_metadata(self) -> dict:
+        metadata = MetaData()
+        metadata.reflect(bind=self.engine, schema=self.db_name)
+        
+        db_metadata = {}
+        for table in metadata.tables.values():
+            columns = []
+            for column in table.columns:
+                columns.append({
+                    'name': column.name,
+                    'type': str(column.type)
+                })
+            db_metadata[table.name] = columns
+        
+        return db_metadata
 
     def generate_schema(self):
         # To be implemented

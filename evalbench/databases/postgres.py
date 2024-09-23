@@ -1,6 +1,6 @@
 
 import sqlalchemy
-from sqlalchemy import text
+from sqlalchemy import text, MetaData
 
 from .db import DB
 from google.cloud.sql.connector import Connector
@@ -45,6 +45,22 @@ class PGDB(DB):
             pool_size=50,
             connect_args={"command_timeout": 60},
         )
+    
+    def get_metadata(self) -> dict:
+        metadata = MetaData()
+        metadata.reflect(bind=self.engine, schema='public')
+        
+        db_metadata = {}
+        for table in metadata.tables.values():
+            columns = []
+            for column in table.columns:
+                columns.append({
+                    'name': column.name,
+                    'type': str(column.type)
+                })
+            db_metadata[table.name] = columns
+        
+        return db_metadata
 
     def generate_schema(self):
         with self.engine.connect() as conn:
