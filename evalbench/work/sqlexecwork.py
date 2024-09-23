@@ -15,7 +15,9 @@ class SQLExecWork(Work):
     def execute_sql_flow(self, query, rollback=False):
         if self.eval_result["query_type"] == "ddl":
             setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
-
+        
+        if query is None:
+            query = ""
         if self.eval_result["query_type"] in ["dml", "ddl"]:
             self.db.execute(self.eval_result["setup_sql"])
             if len(self.eval_result["eval_query"])>0:
