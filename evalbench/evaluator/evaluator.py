@@ -26,7 +26,7 @@ class Evaluator:
         eval_ids = experiment_config.get("eval_ids", [])
         self.eval_ids = self.expand_eval_ids(eval_ids)
         self.tags = experiment_config.get("tags", [])
-    
+
     def expand_eval_ids(self, eval_ids):
         expanded_ids = set()
         for item in eval_ids:
@@ -39,7 +39,7 @@ class Evaluator:
 
     def filter_dataset(self, dataset):
         filtered_dataset = {}
-        
+
         for query_type, queries in dataset.items():
             filtered_queries = []
             for query in queries:
@@ -95,13 +95,14 @@ class Evaluator:
                 db = databases.get_database(config)
             elif query_type == "ddl":
                 db_queue = queue.Queue()
-                available_database = lock_table.get_available_databases(dialect=dialect, num_required_databases=min(dataset_len, 10))
+                available_database = lock_table.get_available_databases(dialect=dialect,
+                                                                        num_required_databases=min(dataset_len, 10))
                 for database_name in available_database:
                     config = db_config.copy()
                     config["database_name"] = database_name
                     db = databases.get_database(config)
                     db_queue.put(db)
-                
+
             for eval_input in dataset_by_type:
                 eval_output = EvalOutput(eval_input)
                 eval_output["job_id"] = job_id

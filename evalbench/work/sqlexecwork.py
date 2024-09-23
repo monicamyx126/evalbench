@@ -15,12 +15,12 @@ class SQLExecWork(Work):
     def execute_sql_flow(self, query, rollback=False):
         if self.eval_result["query_type"] == "ddl":
             setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
-        
+
         if query is None:
             query = ""
         if self.eval_result["query_type"] in ["dml", "ddl"]:
             self.db.execute(self.eval_result["setup_sql"])
-            if len(self.eval_result["eval_query"])>0:
+            if len(self.eval_result["eval_query"]) > 0:
                 query = query + " " + self.eval_result['eval_query'][0]
             result, error = self.db.execute(query, rollback=rollback)
             self.db.execute(self.eval_result["cleanup_sql"])
@@ -56,7 +56,8 @@ class SQLExecWork(Work):
                 .replace("`", "")
             )
 
-            generated_result, generated_error = self.execute_sql_flow(self.eval_result["sanitized_sql"], rollback=rollback)
+            generated_result, generated_error = self.execute_sql_flow(self.eval_result["sanitized_sql"],
+                                                                      rollback=rollback)
             if self.eval_result["query_type"] == "ddl":
                 self.eval_result["generated_metadata"] = self.db.get_metadata()
 

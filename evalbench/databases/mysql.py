@@ -37,11 +37,11 @@ class MySQLDB(DB):
                 "connect_timeout": 60,
             },
         )
-    
+
     def get_metadata(self) -> dict:
         metadata = MetaData()
         metadata.reflect(bind=self.engine, schema=self.db_name)
-        
+
         db_metadata = {}
         for table in metadata.tables.values():
             columns = []
@@ -51,7 +51,7 @@ class MySQLDB(DB):
                     'type': str(column.type)
                 })
             db_metadata[table.name] = columns
-        
+
         return db_metadata
 
     def generate_schema(self):

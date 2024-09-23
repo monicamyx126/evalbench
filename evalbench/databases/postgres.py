@@ -45,11 +45,11 @@ class PGDB(DB):
             pool_size=50,
             connect_args={"command_timeout": 60},
         )
-    
+
     def get_metadata(self) -> dict:
         metadata = MetaData()
         metadata.reflect(bind=self.engine, schema='public')
-        
+
         db_metadata = {}
         for table in metadata.tables.values():
             columns = []
@@ -59,7 +59,7 @@ class PGDB(DB):
                     'type': str(column.type)
                 })
             db_metadata[table.name] = columns
-        
+
         return db_metadata
 
     def generate_schema(self):

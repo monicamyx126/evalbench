@@ -16,6 +16,7 @@ databaseHandler = importlib.import_module("databaseHandler")
 
 logging.getLogger().setLevel(logging.INFO)
 
+
 def parse_textproto_file(textproto_path):
     schema_details = SchemaDetails()
     with open(textproto_path, 'r') as file:
@@ -96,7 +97,7 @@ def setupDatabase(db_config: dict, database: str, no_data: bool = False):
     def run_setup():
         logging.info("Running setup-teardown...")
         db_engine = db_config['db']
-        
+
         setup_file = os.path.join(os.path.dirname(__file__), f"schema_details/bat/{database}/setup.yaml")
         setup = util_config.load_yaml_config(setup_file)
         if not setup:
@@ -133,7 +134,9 @@ def setupDatabase(db_config: dict, database: str, no_data: bool = False):
         if not no_data:
             data_directory = os.path.join(os.path.dirname(__file__), f"datasets/bat/{database}/")
             setup_commands['data_insertion'] = db_handler.create_insert_statements(data_directory)
-            setup_commands['post_data_insertion_checks'] = setup['setup_commands']['post_data_insertion_checks'][db_engine]
+            setup_commands['post_data_insertion_checks'] = (
+                setup['setup_commands']['post_data_insertion_checks'][db_engine]
+            )
 
         for section in setup_commands:
             if no_data and section in ["data_insertion", "post_data_insertion_checks"]:
@@ -143,8 +146,7 @@ def setupDatabase(db_config: dict, database: str, no_data: bool = False):
                 logging.error(f"Error in section {section}: {error}")
                 return False
             if section == "post_data_insertion_checks":
-                expected_checksum_csv = os.path.join(os.path.dirname(__file__),
-                                                    f"checksum/{database}_{db_engine}.csv")
+                expected_checksum_csv = os.path.join(os.path.dirname(__file__), f"checksum/{database}_{db_engine}.csv")
                 with open(expected_checksum_csv, 'r') as file:
                     csv_reader = csv.DictReader(file)
                     csv_data_set = set((row['table_name'], row['checksum'] or None) for row in csv_reader)

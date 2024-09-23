@@ -3,7 +3,9 @@ from datetime import datetime, timezone
 import time
 import logging
 
+
 class LockTable:
+
     def __init__(self):
         self.client = bigquery.Client()
 
@@ -22,7 +24,7 @@ class LockTable:
     def get_available_databases(self, dialect, num_required_databases, timeout_minutes=20):
         client = self.client
         wait_time = min(5, timeout_minutes) * 60
-        
+
         while True:
             now = datetime.now(timezone.utc).replace(microsecond=0)
 
@@ -104,7 +106,7 @@ class LockTable:
         WHERE db_name IN UNNEST(@databases)
         AND dialect = @dialect
         """
-        
+
         client = self.client
         job_config = bigquery.QueryJobConfig(
             query_parameters=[
