@@ -66,24 +66,27 @@ class MySQLDB(DB):
         result = []
         error = None
         try:
+            queries = [q.strip() for q in query.split(';') if q.strip()]
             with self.engine.connect() as connection:
                 if use_transaction:
                     with connection.begin() as transaction:
+                        for query in queries:
+                            resultset = connection.execute(text(query))
+                            if resultset.returns_rows:
+                                column_names = resultset.keys()
+                                rows = resultset.fetchall()
+                                for row in rows:
+                                    result.append(dict(zip(column_names, row)))
+                        if rollback:
+                            transaction.rollback()
+                else:
+                    for query in queries:
                         resultset = connection.execute(text(query))
                         if resultset.returns_rows:
                             column_names = resultset.keys()
                             rows = resultset.fetchall()
                             for row in rows:
                                 result.append(dict(zip(column_names, row)))
-                        if rollback:
-                            transaction.rollback()
-                else:
-                    resultset = connection.execute(text(query))
-                    if resultset.returns_rows:
-                        column_names = resultset.keys()
-                        rows = resultset.fetchall()
-                        for row in rows:
-                            result.append(dict(zip(column_names, row)))
         except Exception as e:
             error = str(e)
         return result, error
