@@ -47,3 +47,8 @@ def generate_ddl(data, db_name, comments_data=None):
         ddl_statements.append(");\n")  # End the last table statement
 
     return "".join(ddl_statements)
+
+
+def is_bat_dataset(database_name):
+    bat_datasets = {"db_hr", "db_blog", "db_chat", "db_ecommerce", "db_finance"}
+    return database_name in bat_datasets

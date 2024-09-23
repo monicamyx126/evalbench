@@ -53,7 +53,10 @@ def main(argv: Sequence[str]) -> None:
     setup_teardown.setupDatabase(db_config=db_config, database=database)
     db = databases.get_database(db_config)
 
-    query_types = experiment_config.get("query_types", ["dql", "dml", "ddl"])
+    query_types = experiment_config.get("query_types", [])
+    if not query_types:
+        query_types = ["dql", "dml", "ddl"]
+
     dataset = {k: v for k, v in dataset.items() if k in query_types}
 
     # Load the Query Generator

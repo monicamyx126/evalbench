@@ -63,7 +63,7 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
             other=item["other"]
         )
         gen_id += 1
-        input_items[item["query_type"]].append(eval_input)
+        input_items[eval_input.query_type].append(eval_input)
     return input_items
 
 
@@ -85,7 +85,7 @@ def load_dataset_from_regular(dataset: Sequence[dict]):
             other={}
         )
         gen_id = gen_id + 1
-        input_items[item["query_type"]].append(eval_input)
+        input_items[eval_input.query_type].append(eval_input)
     return input_items
 
 
@@ -106,7 +106,7 @@ def load_dataset_from_bird(dataset: Sequence[dict]):
                 tags=[item["difficulty"]],
                 other={}
             )
-            input_items[item["query_type"]].append(eval_input)
+            input_items[eval_input.query_type].append(eval_input)
     return input_items
 
 

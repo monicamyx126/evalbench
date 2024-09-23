@@ -4,6 +4,7 @@ import importlib
 import logging
 from google.protobuf import text_format
 from .schema_details.schema_detail_pb2 import SchemaDetails
+from databases.util import is_bat_dataset
 
 sys.path.append('..')
 sys.path.append('setup_teardown')
@@ -12,11 +13,6 @@ util_config = importlib.import_module("util.config")
 databaseHandler = importlib.import_module("databaseHandler")
 
 logging.getLogger().setLevel(logging.INFO)
-
-def is_bat_dataset(database_name):
-    bat_datasets = {"db_hr", "db_blog", "db_chat", "db_ecommerce", "db_finance"}
-    return database_name in bat_datasets
-
 
 def parse_textproto_file(textproto_path):
     schema_details = SchemaDetails()

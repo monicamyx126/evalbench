@@ -4,6 +4,7 @@ import datetime
 import queue
 import databases
 from databases.lock_table import LockTable
+from databases.util import is_bat_dataset
 from util import printProgressBar
 from work import promptgenwork
 from work import sqlgenwork
@@ -83,11 +84,12 @@ class Evaluator:
 
             lock_table = LockTable()
 
-            if query_type == "dql":
+            db = self.db
+            if query_type == "dql" and is_bat_dataset(db_config["database_name"]):
                 config = db_config.copy()
                 config["user_name"] = "tmp_dql"
                 db = databases.get_database(config)
-            elif query_type == "dml":
+            elif query_type == "dml" and is_bat_dataset(db_config["database_name"]):
                 config = db_config.copy()
                 config["user_name"] = "tmp_dml"
                 db = databases.get_database(config)
