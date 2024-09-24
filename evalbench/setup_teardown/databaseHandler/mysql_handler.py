@@ -15,6 +15,7 @@ CREATE_USER_QUERY = [
     'FLUSH PRIVILEGES;',
 ]
 
+
 class MYSQLHandler(DBHandler):
 
     def __init__(self, db_config: dict):
@@ -27,7 +28,7 @@ class MYSQLHandler(DBHandler):
             f"CREATE DATABASE {self.db_config['database_name']};"
         ]
         return self.execute(drop_all_tables_query)
-    
+
     def create_user(self, db_config: dict):
         for query in CREATE_USER_QUERY:
             query = query.format(database=db_config['database_name'])

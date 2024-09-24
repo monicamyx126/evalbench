@@ -114,7 +114,7 @@ def setupDatabase(db_config: dict, create_user=False):
                 if not csv_data_set == result_set:
                     logging.error("Checksums do not match.")
                     return
-    
+
     if create_user:
         logging.info("Creating user...")
         error = db_handler.create_user(db_config)
