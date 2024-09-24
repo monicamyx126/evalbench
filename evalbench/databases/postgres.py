@@ -1,4 +1,3 @@
-
 import sqlalchemy
 from sqlalchemy import text
 
@@ -31,7 +30,7 @@ class PGDB(DB):
         def getconn():
             conn = connector.connect(
                 instance_connection_name,
-                'pg8000',
+                "pg8000",
                 user=db_user,
                 password=db_pass,
                 db=self.db_name,
