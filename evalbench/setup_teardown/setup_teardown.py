@@ -21,7 +21,7 @@ def parse_textproto_file(textproto_path):
     return schema_details
 
 
-def setupDatabase(db_config: dict):
+def setupDatabase(db_config: dict, create_user=False):
     logging.info("Running setup-teardown...")
     db_engine = db_config['db']
     database_name = db_config['database_name']
@@ -65,6 +65,13 @@ def setupDatabase(db_config: dict):
         result, error = db_handler.execute(setup_commands[section])
         if error is not None:
             logging.error(f"Error in section {section}: {error}")
+            return
+    
+    if create_user:
+        logging.info("Creating user...")
+        error = db_handler.create_user(db_config)
+        if error:
+            logging.error(f"Error while creating user: {error}")
             return
 
     logging.info("Setup completed successfully.")

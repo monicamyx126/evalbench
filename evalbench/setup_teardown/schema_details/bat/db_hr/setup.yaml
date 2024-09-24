@@ -133,22 +133,7 @@ setup_commands:
     - "ALTER TABLE ONLY public.salary ALTER COLUMN salary_id SET DEFAULT nextval('public.salary_salary_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.timesheet ALTER COLUMN timesheet_id SET DEFAULT nextval('public.timesheet_timesheet_id_seq'::regclass);"
     - "ALTER TABLE ONLY public.training ALTER COLUMN training_id SET DEFAULT nextval('public.training_training_id_seq'::regclass);"
-    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dql') THEN EXECUTE 'CREATE USER tmp_dql'; END IF; END $$;"
-    - "GRANT USAGE ON SCHEMA public TO tmp_dql;"
-    - "GRANT SELECT ON ALL TABLES IN SCHEMA public TO tmp_dql;"
-    - "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dml') THEN EXECUTE 'CREATE USER tmp_dml'; END IF; END $$;"
-    - "GRANT USAGE ON SCHEMA public TO tmp_dml;"
-    - "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tmp_dml;"
-    mysql:
-    - 'CREATE USER IF NOT EXISTS "tmp_dql"@"%";'
-    - 'GRANT USAGE ON *.* TO "tmp_dql"@"%";'
-    - 'GRANT SELECT ON `db_hr`.* TO "tmp_dql"@"%";'
-    - 'FLUSH PRIVILEGES;'
-    - 'CREATE USER IF NOT EXISTS "tmp_dml"@"%";'
-    - 'GRANT USAGE ON *.* TO "tmp_dml"@"%";'
-    - 'GRANT SELECT, INSERT, UPDATE, DELETE ON `db_hr`.* TO "tmp_dml"@"%";'
-    - 'FLUSH PRIVILEGES;'
-
+    mysql: []
   post_setup:
     postgres:
     - "SELECT pg_catalog.setval('public.allowances_allowance_id_seq', 1, false);"

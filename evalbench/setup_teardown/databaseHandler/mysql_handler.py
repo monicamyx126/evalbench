@@ -4,6 +4,16 @@ from typing import Any, Tuple, List
 from .db_handler import DBHandler
 from databases import get_database
 
+CREATE_USER_QUERY = [
+    'CREATE USER IF NOT EXISTS "tmp_dql"@"%" IDENTIFIED BY "nl2sql";',
+    'GRANT USAGE ON *.* TO "tmp_dql"@"%";',
+    'GRANT SELECT ON `{database}`.* TO "tmp_dql"@"%";',
+    'FLUSH PRIVILEGES;',
+    'CREATE USER IF NOT EXISTS "tmp_dml"@"%" IDENTIFIED BY "nl2sql";',
+    'GRANT USAGE ON *.* TO "tmp_dml"@"%";',
+    'GRANT SELECT, INSERT, UPDATE, DELETE ON `{database}`.* TO "tmp_dml"@"%";',
+    'FLUSH PRIVILEGES;',
+]
 
 class MYSQLHandler(DBHandler):
 
@@ -17,6 +27,13 @@ class MYSQLHandler(DBHandler):
             f"CREATE DATABASE {self.db_config['database_name']};"
         ]
         return self.execute(drop_all_tables_query)
+    
+    def create_user(self, db_config: dict):
+        for query in CREATE_USER_QUERY:
+            query = query.format(database=db_config['database_name'])
+            result, error = self.execute([query])
+            if error:
+                return error
 
     def create_schema_statements(self, schema, excluded_columns):
         excluded_columns = excluded_columns or set()
