@@ -2,8 +2,9 @@ import json
 import uuid
 import datetime
 import queue
+import logging
 import databases
-from databases.lock_table import LockTable
+import setup_teardown
 from databases.util import is_bat_dataset
 from util import printProgressBar
 from work import promptgenwork
@@ -77,12 +78,13 @@ class Evaluator:
             dataset_len = len(dataset[query_type])
             dataset_by_type = dataset[query_type]
 
+            if dataset_len == 0:
+                continue
+
             self.promptrunner.futures.clear()
             self.genrunner.futures.clear()
             self.sqlrunner.futures.clear()
             self.scoringrunner.futures.clear()
-
-            lock_table = LockTable()
 
             db = self.db
             if query_type == "dql" and is_bat_dataset(db_config["database_name"]):
@@ -95,9 +97,8 @@ class Evaluator:
                 db = databases.get_database(config)
             elif query_type == "ddl":
                 db_queue = queue.Queue()
-                available_database = lock_table.get_available_databases(dialect=dialect,
-                                                                        num_required_databases=min(dataset_len, 10))
-                for database_name in available_database:
+                temp_databases = setup_teardown.create_temp_databases(db_config, min(10, dataset_len))
+                for database_name in temp_databases:
                     config = db_config.copy()
                     config["database_name"] = database_name
                     db = databases.get_database(config)
@@ -154,7 +155,9 @@ class Evaluator:
                 eval_outputs.append(eval_output)
 
             if query_type == "ddl":
-                lock_table.release_databases(databases=available_database, dialect=dialect)
+                logging.info("Dropping temp databases")
+                setup_teardown.drop_temp_databases(db_config, temp_databases)
+                logging.info("Dropped")
 
         with open(f"/tmp/eval_output_{job_id}.json", "w") as f:
             json.dump(eval_outputs, f, sort_keys=True, indent=4, default=str)
