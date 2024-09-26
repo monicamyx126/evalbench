@@ -1,5 +1,8 @@
 """EvalBench is a framework to measure the quality of a generative AI (GenAI) workflow."""
 
+import os
+import shutil
+from git import Repo
 from collections.abc import Sequence
 from absl import app
 from absl import flags
@@ -23,6 +26,13 @@ _EXPERIMENT_CONFIG = flags.DEFINE_string(
     "Path to the eval execution configuration file.",
 )
 
+def clone(repo_dir, repo_url):
+    if os.path.exists(repo_dir):
+        logging.info(f"Repository directory '{repo_dir}' exists. Deleting it...")
+        shutil.rmtree(repo_dir)
+    logging.info(f"Cloning '{repo_url}' to '{repo_dir}'...")
+    Repo.clone_from(repo_url, repo_dir)
+
 
 # evalbench.py
 def main(argv: Sequence[str]) -> None:
@@ -33,6 +43,10 @@ def main(argv: Sequence[str]) -> None:
         return
 
     logging.info("Loaded %s", _EXPERIMENT_CONFIG.value)
+
+    repo_dir = experiment_config["repo_dir"]
+    repo_url = experiment_config["repo_url"]
+    clone(repo_dir, repo_url)
 
     db_config_yaml = experiment_config["database_config"]
     model_config_yaml = experiment_config["model_config"]
