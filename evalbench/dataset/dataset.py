@@ -30,7 +30,8 @@ def load_dataset_from_json(json_file_path, experiment_config):
 
     if "db_id" in all_items[0].keys():
         logging.info("dataset in BIRD Format.")
-        input_items = load_dataset_from_bird(all_items)
+        dialect = experiment_config["dialect"]
+        input_items = load_dataset_from_bird(all_items, dialect)
     elif "nl_prompt" in all_items[0].keys():
         logging.info("dataset in new Evalbench Format")
         dialect = experiment_config["dialect"]
@@ -89,17 +90,23 @@ def load_dataset_from_regular(dataset: Sequence[dict]):
     return input_items
 
 
-def load_dataset_from_bird(dataset: Sequence[dict]):
+def load_dataset_from_bird(dataset: Sequence[dict], dialect: str):
     input_items = {"dql": [], "dml": [], "ddl": []}
     for item in dataset:
         if item["result_matched"]:
+            if dialect == "postgres":
+                golden_sql = item["Postgres_query"]
+            elif dialect == "sqlserver":
+                golden_sql = item["SQLite_query"]
+            else:
+                golden_sql = item["Postgres_query"]
             eval_input = EvalInputRequest(
                 id=item["question_id"],
                 query_type="dql",
                 database=item["db_id"],
                 nl_prompt=" ".join([item["question"], item["evidence"]]).replace("`", '"'),
-                dialects=["postgres"],
-                golden_sql=item["Postgres_query"],
+                dialects=[dialect],
+                golden_sql=golden_sql,
                 eval_query="",
                 setup_sql="",
                 cleanup_sql="",
