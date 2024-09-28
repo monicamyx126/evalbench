@@ -80,7 +80,7 @@ class PostgresHandler(DBHandler):
             create_db_query = f"CREATE DATABASE {temp_db_name};"
             commands.append(create_db_query)
             db_names.append(temp_db_name)
-        
+
         for query in commands:
             self.execute([query], use_transaction=False)
         return db_names
