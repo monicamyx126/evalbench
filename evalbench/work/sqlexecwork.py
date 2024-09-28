@@ -8,7 +8,7 @@ import setup_teardown
 class SQLExecWork(Work):
     """SQLExecWork Generates SQL from the generator."""
 
-    def __init__(self, db: Any,  eval_result: dict):
+    def __init__(self, db: Any, eval_result: dict):
         self.db = db
         self.eval_result = eval_result
 
@@ -49,7 +49,7 @@ class SQLExecWork(Work):
             self.eval_result["sanitized_sql"] = (
                 self.eval_result["generated_sql"]
                 .replace('sql: "', "")
-                .replace('\\n', " ")
+                .replace("\\n", " ")
                 .replace("\\n", " ")
                 .replace("\\", "")
                 .replace("  ", "")

@@ -22,7 +22,7 @@ class MySQLDB(DB):
         def getconn():
             conn = connector.connect(
                 instance_connection_name,
-                'pymysql',
+                "pymysql",
                 user=db_user,
                 password=db_pass,
                 database=self.db_name,

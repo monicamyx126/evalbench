@@ -6,6 +6,17 @@ from typing import Any, Tuple, List
 from .db_handler import DBHandler
 from databases import get_database
 
+CREATE_USER_QUERY = [
+    'CREATE USER IF NOT EXISTS "tmp_dql"@"%" IDENTIFIED BY "nl2sql";',
+    'GRANT USAGE ON *.* TO "tmp_dql"@"%";',
+    'GRANT SELECT ON `{database}`.* TO "tmp_dql"@"%";',
+    'FLUSH PRIVILEGES;',
+    'CREATE USER IF NOT EXISTS "tmp_dml"@"%" IDENTIFIED BY "nl2sql";',
+    'GRANT USAGE ON *.* TO "tmp_dml"@"%";',
+    'GRANT SELECT, INSERT, UPDATE, DELETE ON `{database}`.* TO "tmp_dml"@"%";',
+    'FLUSH PRIVILEGES;',
+]
+
 
 class MYSQLHandler(DBHandler):
 
@@ -20,19 +31,34 @@ class MYSQLHandler(DBHandler):
         ]
         return self.execute(drop_all_tables_query)
 
+    def create_user(self, db_config: dict):
+        for query in CREATE_USER_QUERY:
+            query = query.format(database=db_config['database_name'])
+            result, error = self.execute([query])
+            if error:
+                return error
+
     def create_schema_statements(self, schema, excluded_columns):
         excluded_columns = excluded_columns or set()
         create_statements = []
 
         for table in schema.tables:
             table_name = table.table
-            columns = [
-                f"{column.column} {column.data_type}"
-                for column in table.columns
-                if column.column not in excluded_columns
-            ]
+            primary_key = None
+            columns = []
+
+            for column in table.columns:
+                column_def = f"`{column.column}` {column.data_type}"
+                if "AUTO_INCREMENT" in column.data_type.upper():
+                    primary_key = column.column
+                if column.column not in excluded_columns:
+                    columns.append(column_def)
 
             columns_str = ",\n    ".join(columns)
+
+            if primary_key:
+                columns_str += f",\n    PRIMARY KEY (`{primary_key}`)"
+
             create_statement = f"CREATE TABLE {table_name} (\n    {columns_str}\n);"
             create_statements.append(create_statement)
 

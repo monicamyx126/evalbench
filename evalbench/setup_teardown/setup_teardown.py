@@ -67,7 +67,7 @@ def drop_temp_databases(db_config: dict, temp_databases: list):
     return db_handler.drop_temp_databases(temp_databases)
 
 
-def setupDatabase(db_config: dict, database: str, no_data: bool = False):
+def setupDatabase(db_config: dict, database: str, no_data: bool = False, create_user: bool = False):
     if not is_bat_dataset(database):
         return
 
@@ -135,6 +135,13 @@ def setupDatabase(db_config: dict, database: str, no_data: bool = False):
                     if not csv_data_set == result_set:
                         logging.error("Checksums do not match.")
                         return False
+
+            if create_user:
+                logging.info("Creating user...")
+                error = db_handler.create_user(db_config)
+                if error:
+                    logging.error(f"Error while creating user: {error}")
+                    return False
 
         logging.info("Setup completed successfully.")
         return True
