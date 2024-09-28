@@ -136,12 +136,12 @@ def setupDatabase(db_config: dict, database: str, no_data: bool = False, create_
                         logging.error("Checksums do not match.")
                         return False
 
-            if create_user:
-                logging.info("Creating user...")
-                error = db_handler.create_user(db_config)
-                if error:
-                    logging.error(f"Error while creating user: {error}")
-                    return False
+        if create_user:
+            logging.info("Creating user...")
+            error = db_handler.create_user(db_config)
+            if error:
+                logging.error(f"Error while creating user: {error}")
+                return False
 
         logging.info("Setup completed successfully.")
         return True
