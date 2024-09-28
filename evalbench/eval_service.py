@@ -118,14 +118,11 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
             dataset_config_json, experiment_config
         )
         session["db_config"]["database_name"] = database
-        dataset, database = load_dataset_from_json(
-            dataset_config_json, experiment_config
-        )
-        session["db_config"]["database_name"] = database
+
         for eval_input in dataset:
             if self.eval_ids is not None and eval_input.id not in self.eval_ids:
                 continue
-            yield eval_request_pb2.EvalInputRequest(
+            eval_input_request = eval_request_pb2.EvalInputRequest(
                 id=eval_input.id,
                 query_type=eval_input.query_type,
                 database=eval_input.database,
@@ -136,8 +133,9 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
                 setup_sql=eval_input.setup_sql,
                 cleanup_sql=eval_input.cleanup_sql,
                 tags=eval_input.tags,
-                other=eval_input.other,
             )
+            eval_input_request.other.update(eval_input.other)
+            yield eval_input_request
 
     async def Eval(
         self,
