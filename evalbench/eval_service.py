@@ -145,23 +145,7 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
 
         dataset = []
         async for request in request_iterator:
-            input = evalinput.EvalInputRequest(
-                id=request.id,
-                query_type=request.query_type,
-                database=request.database,
-                nl_prompt=request.nl_prompt,
-                dialects=request.dialects,
-                golden_sql=request.golden_sql,
-                eval_query=request.eval_query,
-                setup_sql=request.setup_sql,
-                cleanup_sql=request.cleanup_sql,
-                tags=request.tags,
-                other=request.other,
-                sql_generator_error=request.sql_generator_error,
-                sql_generator_time=request.sql_generator_time,
-                generated_sql=request.generated_sql,
-                job_id=request.job_id,
-            )
+            input = evalinput.EvalInputRequest.init_from_proto(request)
             dataset.append(input)
 
         session = SESSIONMANAGER.get_session(rpc_id_var.get())
