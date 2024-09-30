@@ -96,8 +96,16 @@ class MySQLDB(DB):
             error = str(e)
         return result, error
 
-    def execute(self, query: str) -> Tuple[Any, float]:
+    def execute(self, query: str, rollback: bool = False, use_transaction: bool = True) -> Tuple[Any, float]:
         if isinstance(self.execs_per_minute, int):
-            return rate_limited_execute(query, self._execute, self.execs_per_minute, self.semaphore, self.max_attempts)
+            return rate_limited_execute(
+                query,
+                rollback,
+                use_transaction,
+                self._execute,
+                self.execs_per_minute,
+                self.semaphore,
+                self.max_attempts,
+            )
         else:
-            return self._execute(query)
+            return self._execute(query, rollback, use_transaction)
