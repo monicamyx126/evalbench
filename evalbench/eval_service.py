@@ -108,7 +108,7 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         experiment_config = session["config"]
 
         if "repo_dir" in experiment_config and "repo_url" in experiment_config \
-        and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
+                and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
             repo_dir = experiment_config["repo_dir"]
             repo_url = experiment_config["repo_url"]
             clone(repo_dir, repo_url)

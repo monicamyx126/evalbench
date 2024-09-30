@@ -1,8 +1,5 @@
 """EvalBench is a framework to measure the quality of a generative AI (GenAI) workflow."""
 
-import os
-import shutil
-from git import Repo
 from collections.abc import Sequence
 from absl import app
 from absl import flags
@@ -39,7 +36,7 @@ def main(argv: Sequence[str]) -> None:
     logging.info("Loaded %s", _EXPERIMENT_CONFIG.value)
 
     if "repo_dir" in experiment_config and "repo_url" in experiment_config \
-        and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
+            and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
         repo_dir = experiment_config["repo_dir"]
         repo_url = experiment_config["repo_url"]
         clone(repo_dir, repo_url)
