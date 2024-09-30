@@ -1,4 +1,12 @@
+import time
+
+from threading import Semaphore
 from google.cloud import secretmanager_v1
+from typing import Any, Tuple
+
+
+class DBResourceExhaustedError(Exception):
+    pass
 
 
 def get_db_secret(secret_path):
@@ -52,3 +60,25 @@ def generate_ddl(data, db_name, comments_data=None):
 def is_bat_dataset(database_name):
     bat_datasets = {"db_hr", "db_blog", "db_chat", "db_ecommerce", "db_finance"}
     return database_name in bat_datasets
+
+
+def rate_limited_execute(
+    query: str,
+    execution_method,
+    execs_per_minute: int,
+    semaphore: Semaphore,
+    max_attempts: int,
+) -> Tuple[Any, float]:
+    semaphore.acquire()
+    attempt = 1
+    while attempt <= max_attempts:
+        try:
+            result, error = execution_method(query)
+            break
+        except DBResourceExhaustedError as e:
+            # exponentially backoff starting at 5 seconds
+            time.sleep(5 * (2 ** (attempt)))
+            attempt += 1
+    time.sleep(60 / execs_per_minute)
+    semaphore.release()
+    return result, error

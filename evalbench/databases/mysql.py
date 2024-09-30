@@ -1,9 +1,11 @@
 import sqlalchemy
+
 from sqlalchemy import text, MetaData
 from google.cloud.sql.connector import Connector
 from .db import DB
-from .util import generate_ddl
+from .util import rate_limited_execute
 from typing import Any, Tuple
+from threading import Semaphore
 
 
 class MySQLDB(DB):
@@ -14,6 +16,9 @@ class MySQLDB(DB):
         db_user = db_config["user_name"]
         db_pass = db_config["password"]
         self.db_name = db_config["database_name"]
+        self.execs_per_minute = db_config["max_executions_per_minute"]
+        self.semaphore = Semaphore(self.execs_per_minute)
+        self.max_attempts = 3
         self.db_config = db_config
 
         # Initialize the Cloud SQL Connector object
@@ -62,7 +67,7 @@ class MySQLDB(DB):
         # To be implemented
         pass
 
-    def execute(self, query: str, rollback: bool = False, use_transaction: bool = True) -> Tuple[Any, Any]:
+    def _execute(self, query: str, rollback: bool = False, use_transaction: bool = True) -> Tuple[Any, Any]:
         result = []
         error = None
         try:
@@ -90,3 +95,9 @@ class MySQLDB(DB):
         except Exception as e:
             error = str(e)
         return result, error
+
+    def execute(self, query: str) -> Tuple[Any, float]:
+        if isinstance(self.execs_per_minute, int):
+            return rate_limited_execute(query, self._execute, self.execs_per_minute, self.semaphore, self.max_attempts)
+        else:
+            return self._execute(query)

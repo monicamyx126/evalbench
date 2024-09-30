@@ -1,5 +1,6 @@
 """Process datasets."""
 
+from typing import Any
 from absl import app
 from absl import flags
 import json
@@ -61,11 +62,15 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
             setup_sql=item["setup_sql"].get(dialect, []),
             cleanup_sql=item["cleanup_sql"].get(dialect, []),
             tags=item["tags"],
-            other=item["other"]
+            other=build_normalized_other(item["other"])
         )
         gen_id += 1
         input_items[eval_input.query_type].append(eval_input)
     return input_items
+
+
+def build_normalized_other(other: dict[str, Any]):
+    return {key: json.dumps(value) for key, value in other.items()}
 
 
 def load_dataset_from_regular(dataset: Sequence[dict]):

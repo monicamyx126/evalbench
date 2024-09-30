@@ -45,7 +45,10 @@ class SQLExecWork(Work):
 
         rollback = (self.eval_result["query_type"] == "dml")
 
-        if self.eval_result["sql_generator_error"] is None:
+        if (
+            self.eval_result["sql_generator_error"] is None
+            and self.eval_result["generated_sql"]
+        ):
             self.eval_result["sanitized_sql"] = (
                 self.eval_result["generated_sql"]
                 .replace('sql: "', "")
@@ -61,9 +64,14 @@ class SQLExecWork(Work):
             if self.eval_result["query_type"] == "ddl":
                 self.eval_result["generated_metadata"] = self.db.get_metadata()
 
-            golden_sql = self.eval_result["golden_sql"]
-            if isinstance(golden_sql, list) and len(golden_sql) > 0:
-                golden_sql = golden_sql[0]
+            golden_sql = ""
+            if isinstance(self.eval_result["golden_sql"], str):
+                golden_sql = self.eval_result["golden_sql"]
+            elif (
+                isinstance(self.eval_result["golden_sql"], list)
+                and len(self.eval_result["golden_sql"]) > 0
+            ):
+                golden_sql = self.eval_result["golden_sql"][0]
 
             golden_result, golden_error = self.execute_sql_flow(golden_sql, rollback=rollback)
             if self.eval_result["query_type"] == "ddl":
