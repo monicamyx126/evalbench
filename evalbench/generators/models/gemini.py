@@ -19,6 +19,7 @@ class GeminiGenerator(QueryGenerator):
         self.vertex_model = querygenerator_config["vertex_model"]
         self.base_prompt = querygenerator_config["base_prompt"]
         self.generation_config = None
+        self.name = "gemini"
 
         vertexai.init(project=self.project_id, location=self.location)
         self.model = GenerativeModel(self.vertex_model)

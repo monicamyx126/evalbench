@@ -118,14 +118,11 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
             dataset_config_json, experiment_config
         )
         session["db_config"]["database_name"] = database
-        dataset, database = load_dataset_from_json(
-            dataset_config_json, experiment_config
-        )
-        session["db_config"]["database_name"] = database
+
         for eval_input in dataset:
             if self.eval_ids is not None and eval_input.id not in self.eval_ids:
                 continue
-            yield eval_request_pb2.EvalInputRequest(
+            eval_input_request = eval_request_pb2.EvalInputRequest(
                 id=eval_input.id,
                 query_type=eval_input.query_type,
                 database=eval_input.database,
@@ -136,8 +133,9 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
                 setup_sql=eval_input.setup_sql,
                 cleanup_sql=eval_input.cleanup_sql,
                 tags=eval_input.tags,
-                other=eval_input.other,
             )
+            eval_input_request.other.update(eval_input.other)
+            yield eval_input_request
 
     async def Eval(
         self,
@@ -147,23 +145,7 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
 
         dataset = []
         async for request in request_iterator:
-            input = evalinput.EvalInputRequest(
-                id=request.id,
-                query_type=request.query_type,
-                database=request.database,
-                nl_prompt=request.nl_prompt,
-                dialects=request.dialects,
-                golden_sql=request.golden_sql,
-                eval_query=request.eval_query,
-                setup_sql=request.setup_sql,
-                cleanup_sql=request.cleanup_sql,
-                tags=request.tags,
-                other=request.other,
-                sql_generator_error=request.sql_generator_error,
-                sql_generator_time=request.sql_generator_time,
-                generated_sql=request.generated_sql,
-                job_id=request.job_id,
-            )
+            input = evalinput.EvalInputRequest.init_from_proto(request)
             dataset.append(input)
 
         session = SESSIONMANAGER.get_session(rpc_id_var.get())

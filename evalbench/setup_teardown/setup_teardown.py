@@ -56,7 +56,7 @@ def calculate_checksum(db_config):
     save_checksums_to_csv(result, output_file)
 
 
-def setupDatabase(db_config: dict):
+def setupDatabase(db_config: dict, create_user=False):
     logging.info("Running setup-teardown...")
     db_engine = db_config['db']
     database_name = db_config['database_name']
@@ -114,5 +114,12 @@ def setupDatabase(db_config: dict):
                 if not csv_data_set == result_set:
                     logging.error("Checksums do not match.")
                     return
+
+    if create_user:
+        logging.info("Creating user...")
+        error = db_handler.create_user(db_config)
+        if error:
+            logging.error(f"Error while creating user: {error}")
+            return
 
     logging.info("Setup completed successfully.")

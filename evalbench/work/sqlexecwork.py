@@ -25,7 +25,10 @@ class SQLExecWork(Work):
         golden_result = None
         golden_error = None
 
-        if self.eval_result["sql_generator_error"] is None:
+        if (
+            self.eval_result["sql_generator_error"] is None
+            and self.eval_result["generated_sql"]
+        ):
             self.eval_result["sanitized_sql"] = (
                 self.eval_result["generated_sql"]
                 .replace('sql: "', "")
@@ -42,7 +45,8 @@ class SQLExecWork(Work):
             if isinstance(self.eval_result["golden_sql"], str):
                 golden_sql = self.eval_result["golden_sql"]
             elif (
-                isinstance(self.eval_result["golden_sql"], list) and len(self.eval_result["golden_sql"]) > 0
+                isinstance(self.eval_result["golden_sql"], list)
+                and len(self.eval_result["golden_sql"]) > 0
             ):
                 golden_sql = self.eval_result["golden_sql"][0]
             golden_result, golden_error = self.db.execute(golden_sql)

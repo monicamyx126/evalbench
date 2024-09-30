@@ -4,9 +4,20 @@ from typing import Any, Tuple, List
 from .db_handler import DBHandler
 from databases import get_database
 
-drop_all_tables_query = [
+DROP_ALL_TABLE_QUERY = [
     "DROP SCHEMA public CASCADE;",
     "CREATE SCHEMA public;",
+]
+
+CREATE_USER_QUERY = [
+    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dql') \
+        THEN EXECUTE 'CREATE USER tmp_dql WITH PASSWORD ''pantheon'''; END IF; END $$;",
+    "GRANT USAGE ON SCHEMA public TO tmp_dql;",
+    "GRANT SELECT ON ALL TABLES IN SCHEMA public TO tmp_dql;",
+    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'tmp_dml') \
+        THEN EXECUTE 'CREATE USER tmp_dml WITH PASSWORD ''pantheon'''; END IF; END $$;",
+    "GRANT USAGE ON SCHEMA public TO tmp_dml;",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tmp_dml;",
 ]
 
 
@@ -17,7 +28,12 @@ class PostgresHandler(DBHandler):
         self.db_config = db_config
 
     def drop_all_tables(self):
-        return self.execute(drop_all_tables_query)
+        return self.execute(DROP_ALL_TABLE_QUERY)
+
+    def create_user(self, db_config: dict):
+        result, error = self.execute(CREATE_USER_QUERY)
+        if error:
+            return error
 
     def create_schema_statements(self, schema, excluded_columns):
         excluded_columns = excluded_columns or set()
