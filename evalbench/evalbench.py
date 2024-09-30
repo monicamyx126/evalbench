@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from absl import app
 from absl import flags
 from util.config import load_yaml_config, config_to_df
+from util.util import clone
 from dataset.dataset import load_json, load_dataset_from_json
 import generators.models as models
 import generators.prompts as prompts
@@ -27,14 +28,6 @@ _EXPERIMENT_CONFIG = flags.DEFINE_string(
 )
 
 
-def clone(repo_dir, repo_url):
-    if os.path.exists(repo_dir):
-        logging.info(f"Repository directory '{repo_dir}' exists. Deleting it...")
-        shutil.rmtree(repo_dir)
-    logging.info(f"Cloning '{repo_url}' to '{repo_dir}'...")
-    Repo.clone_from(repo_url, repo_dir)
-
-
 # evalbench.py
 def main(argv: Sequence[str]) -> None:
     logging.info("EvalBench v1.0.0")
@@ -45,9 +38,11 @@ def main(argv: Sequence[str]) -> None:
 
     logging.info("Loaded %s", _EXPERIMENT_CONFIG.value)
 
-    repo_dir = experiment_config["repo_dir"]
-    repo_url = experiment_config["repo_url"]
-    clone(repo_dir, repo_url)
+    if "repo_dir" in experiment_config and "repo_url" in experiment_config \
+        and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
+        repo_dir = experiment_config["repo_dir"]
+        repo_url = experiment_config["repo_url"]
+        clone(repo_dir, repo_url)
 
     db_config_yaml = experiment_config["database_config"]
     model_config_yaml = experiment_config["model_config"]
