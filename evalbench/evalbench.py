@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from absl import app
 from absl import flags
 from util.config import load_yaml_config, config_to_df
-from util.util import clone
+from setup_teardown import clone
 from dataset.dataset import load_json, load_dataset_from_json
 import generators.models as models
 import generators.prompts as prompts
@@ -35,8 +35,7 @@ def main(argv: Sequence[str]) -> None:
 
     logging.info("Loaded %s", _EXPERIMENT_CONFIG.value)
 
-    if "repo_dir" in experiment_config and "repo_url" in experiment_config \
-            and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
+    if "repo_dir" in experiment_config and "repo_url" in experiment_config:
         repo_dir = experiment_config["repo_dir"]
         repo_url = experiment_config["repo_url"]
         clone(repo_dir, repo_url)

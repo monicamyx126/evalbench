@@ -9,7 +9,7 @@ import contextvars
 import yaml
 import grpc
 from util.config import load_yaml_config, config_to_df
-from util.util import clone
+from setup_teardown import clone
 from util import get_SessionManager
 from dataset.dataset import load_json, load_dataset_from_json
 from dataset import evalinput
@@ -107,8 +107,7 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         logging.info("Retrieve: %s.", rpc_id_var.get())
         experiment_config = session["config"]
 
-        if "repo_dir" in experiment_config and "repo_url" in experiment_config \
-                and experiment_config["repo_url"].startswith("persistent-https://dar-internal.git.corp.google.com/"):
+        if "repo_dir" in experiment_config and "repo_url" in experiment_config:
             repo_dir = experiment_config["repo_dir"]
             repo_url = experiment_config["repo_url"]
             clone(repo_dir, repo_url)
