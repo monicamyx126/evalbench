@@ -11,7 +11,7 @@ from typing import Any, Tuple
 from threading import Semaphore
 
 
-class MySQLDB(DB):
+class SQLServerDB(DB):
 
     def __init__(self, db_config):
         super().__init__(db_config)
@@ -30,15 +30,15 @@ class MySQLDB(DB):
         def getconn():
             conn = connector.connect(
                 instance_connection_name,
-                "pymysql",
+                "pytds",
                 user=db_user,
                 password=db_pass,
-                database=self.db_name,
+                db=self.db_name,
             )
             return conn
 
         self.engine = sqlalchemy.create_engine(
-            "mysql+pymysql://",
+            "mssql+pytds://",
             creator=getconn,
             pool_size=50,
             connect_args={
@@ -61,17 +61,21 @@ class MySQLDB(DB):
             with self.engine.connect() as connection:
                 with connection.begin():
                     resultset = connection.execute(text(query))
-            if resultset.returns_rows:
-                column_names = resultset.keys()
-                rows = resultset.fetchall()
-                for row in rows:
-                    result.append(dict(zip(column_names, row)))
+                    rows = resultset.fetchall()
+                    for r in rows:
+                        result.append(r._asdict())
         except Exception as e:
             error = str(e)
         return result, error
 
     def execute(self, query: str) -> Tuple[Any, float]:
         if isinstance(self.execs_per_minute, int):
-            return rate_limited_execute(query, self._execute, self.execs_per_minute, self.semaphore, self.max_attempts)
+            return rate_limited_execute(
+                query,
+                self._execute,
+                self.execs_per_minute,
+                self.semaphore,
+                self.max_attempts,
+            )
         else:
             return self._execute(query)
