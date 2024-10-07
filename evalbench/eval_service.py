@@ -1,6 +1,7 @@
 """A gRPC servicer that handles EvalService requests."""
 
 from collections.abc import AsyncIterator
+import pathlib
 
 from absl import flags
 from absl import logging
@@ -8,7 +9,7 @@ from typing import Awaitable, Callable, Optional
 import contextvars
 import yaml
 import grpc
-from util.config import load_yaml_config, config_to_df
+from util.config import load_yaml_config, config_to_df, update_google3_relative_paths
 from util import get_SessionManager
 from dataset.dataset import load_json, load_dataset_from_json
 from dataset import evalinput
@@ -90,9 +91,10 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
     ) -> eval_response_pb2.EvalResponse:
         experiment_config = yaml.safe_load(request.yaml_config.decode("utf-8"))
         session = SESSIONMANAGER.get_session(rpc_id_var.get())
-        session["config"] = experiment_config
+        SESSIONMANAGER.write_resource_files(rpc_id_var.get(), request.resources)
+        update_google3_relative_paths(experiment_config, rpc_id_var.get())
 
-        # Create the DB
+        session["config"] = experiment_config
         session["db_config"] = load_yaml_config(experiment_config["database_config"])
         session["model_config"] = load_yaml_config(experiment_config["model_config"])
         return eval_response_pb2.EvalResponse(response=f"ack")
@@ -191,4 +193,9 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         summary_scores_df["run_time"] = run_time
         report.store(scores_df, bqstore.STORETYPE.SCORES)
         report.store(summary_scores_df, bqstore.STORETYPE.SUMMARY)
+
+        # k8s emptyDir /tmp does not auto cleanup, so we explicitly delete
+        pathlib.Path(f"/tmp/eval_output_{job_id}.json").unlink()
+        pathlib.Path(f"/tmp/score_result_{job_id}.json").unlink()
+
         return eval_response_pb2.EvalResponse(response=f"{job_id}")

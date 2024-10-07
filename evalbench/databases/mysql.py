@@ -3,7 +3,10 @@ import sqlalchemy
 from sqlalchemy import text, MetaData
 from google.cloud.sql.connector import Connector
 from .db import DB
-from .util import rate_limited_execute
+from .util import (
+    get_db_secret,
+    rate_limited_execute,
+)
 from typing import Any, Tuple
 from threading import Semaphore
 
@@ -14,7 +17,8 @@ class MySQLDB(DB):
         super().__init__(db_config)
         instance_connection_name = f"{db_config['project_id']}:{db_config['region']}:{db_config['instance_name']}"
         db_user = db_config["user_name"]
-        db_pass = db_config["password"]
+        db_pass_secret_path = db_config["password"]
+        db_pass = get_db_secret(db_pass_secret_path)
         self.db_name = db_config["database_name"]
         self.execs_per_minute = db_config["max_executions_per_minute"]
         self.semaphore = Semaphore(self.execs_per_minute)
