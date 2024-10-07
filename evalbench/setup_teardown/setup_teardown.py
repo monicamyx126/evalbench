@@ -4,8 +4,6 @@ import importlib
 import logging
 import csv
 import pandas as pd
-import shutil
-from git import Repo
 from google.protobuf import text_format
 from .schema_details.schema_detail_pb2 import SchemaDetails
 
@@ -16,14 +14,6 @@ util_config = importlib.import_module("util.config")
 databaseHandler = importlib.import_module("databaseHandler")
 
 logging.getLogger().setLevel(logging.INFO)
-
-
-def clone(repo_dir, repo_url):
-    if os.path.exists(repo_dir):
-        logging.info(f"Repository directory '{repo_dir}' exists. Deleting it...")
-        shutil.rmtree(repo_dir)
-    logging.info(f"Cloning '{repo_url}' to '{repo_dir}'...")
-    Repo.clone_from(repo_url, repo_dir)
 
 
 def parse_textproto_file(textproto_path):
