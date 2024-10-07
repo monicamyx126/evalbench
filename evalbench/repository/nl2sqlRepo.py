@@ -4,6 +4,7 @@ import logging
 from git import Repo
 from .base import Repository
 
+
 class NL2SQLRepo(Repository):
     def __init__(self, repo_config):
         self.config = repo_config
