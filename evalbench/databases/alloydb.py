@@ -63,7 +63,6 @@ class AlloyDB(DB):
     def generate_ddl(self):
         headers, rows = self.generate_schema()
         return generate_ddl(rows, self.db_name)
-    
 
     def get_metadata(self) -> dict:
         pass
