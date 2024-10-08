@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from absl import app
 from absl import flags
 from util.config import load_yaml_config, config_to_df
+from repository import get_repository
 from dataset.dataset import load_json, load_dataset_from_json
 import generators.models as models
 import generators.prompts as prompts
@@ -33,6 +34,9 @@ def main(argv: Sequence[str]) -> None:
         return
 
     logging.info("Loaded %s", _EXPERIMENT_CONFIG.value)
+
+    repo = get_repository(experiment_config)
+    repo.clone()
 
     db_config_yaml = experiment_config["database_config"]
     model_config_yaml = experiment_config["model_config"]
