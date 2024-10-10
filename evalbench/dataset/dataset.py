@@ -48,10 +48,9 @@ def load_dataset_from_json(json_file_path, experiment_config):
 
 def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
     input_items = []
-    gen_id = 1
     for item in dataset:
         eval_input = EvalInputRequest(
-            id=gen_id,
+            id=item["id"],
             nl_prompt=item["nl_prompt"],
             query_type=item["query_type"],
             database=item["database"],
@@ -63,7 +62,6 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
             tags=item["tags"],
             other=build_normalized_other(item["other"])
         )
-        gen_id += 1
         input_items.append(eval_input)
     return input_items
 
