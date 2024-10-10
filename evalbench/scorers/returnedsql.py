@@ -1,9 +1,10 @@
 from scorers import comparator
 from typing import Tuple
 
+
 class ReturnedSQL(comparator.Comparator):
     """ReturnedSQL scorer checks if the generated SQL query contains anything except comments.
-    
+
     It assigns a score of 100 if there are non-comment lines, otherwise a score of 0.
     """
 
@@ -19,7 +20,7 @@ class ReturnedSQL(comparator.Comparator):
         generated_query: str,
         generated_execution_result: str,
     ) -> Tuple[float, str]:
-        
+
         if generated_query == "":
             return 100, None
 
