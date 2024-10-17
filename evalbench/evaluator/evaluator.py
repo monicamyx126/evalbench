@@ -129,7 +129,7 @@ class Evaluator:
                 if query_type == "ddl":
                     db = db_queue.get()
 
-                work = sqlexecwork.SQLExecWork(db, eval_output)
+                work = sqlexecwork.SQLExecWork(db, self.experiment_config, eval_output)
                 self.sqlrunner.execute_work(work)
 
                 if query_type == "ddl":
