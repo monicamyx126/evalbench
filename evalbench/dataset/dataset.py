@@ -53,7 +53,7 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
         eval_input = EvalInputRequest(
             id=item["id"],
             nl_prompt=item["nl_prompt"],
-            query_type=item["query_type"],
+            query_type=item["query_type"].lower(),
             database=item["database"],
             dialects=[dialect],
             golden_sql=item["golden_sql"].get(dialect, []),
