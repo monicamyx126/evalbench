@@ -106,8 +106,6 @@ class MYSQLHandler(DBHandler):
     def drop_temp_databases(self, temp_databases: List[str]):
         if len(temp_databases) == 0:
             return
-        column_name = next(iter(temp_databases[0].keys()))
-        temp_databases = [db[column_name] for db in temp_databases]
         drop_commands = [f"DROP DATABASE `{db}`;" for db in temp_databases]
         return self.execute(drop_commands)
 
