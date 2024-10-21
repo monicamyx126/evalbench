@@ -8,13 +8,15 @@ import setup_teardown
 class SQLExecWork(Work):
     """SQLExecWork Generates SQL from the generator."""
 
-    def __init__(self, db: Any, eval_result: dict):
+    def __init__(self, db: Any, experiment_config: dict, eval_result: dict):
         self.db = db
+        self.experiment_config = experiment_config
         self.eval_result = eval_result
 
     def execute_sql_flow(self, query, rollback=False):
         if self.eval_result["query_type"] == "ddl":
-            setup_teardown.setupDatabase(self.db.db_config, no_data=True, database=self.eval_result["database"])
+            setup_teardown.setupDatabase(db_config=self.db.db_config, experiment_config=self.experiment_config,
+                                         no_data=True, database=self.eval_result["database"])
 
         if query is None:
             query = ""
