@@ -4,15 +4,14 @@ generated sql execution results. It returns a score of 100 for concrete
 positive cases, where either there is a Mismatch of Columns names or Extra Relevant
 Columns in Generated SQL exists.
 """
-
+from typing import Tuple
 import logging
 import backoff
-from typing import Tuple
-
-from ratelimit import limits, sleep_and_retry, exception
-from scorers import comparator
 import vertexai
 from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
+
+from ratelimit import limits
+from scorers import comparator
 
 
 class LLMRater(comparator.Comparator):
@@ -37,6 +36,22 @@ class LLMRater(comparator.Comparator):
         self.generation_config = GenerationConfig(temperature=0)
         self.model = GenerativeModel(self.config["model"])
 
+    @staticmethod
+    def remove_duplicates(output_list: list) -> list:
+        """Remove duplicates from the output list.
+
+        Args:
+          output_list: The execution output result set.
+
+        Returns:
+          The execution output result set without duplicates.
+        """
+        final_output = []
+        for item in output_list:
+            if item not in final_output:
+                final_output.append(item)
+        return final_output
+
     @backoff.on_exception(backoff.constant, exception=Exception,
                           max_tries=8, interval=80, jitter=backoff.full_jitter)
     @limits(calls=30, period=60)
@@ -49,6 +64,9 @@ class LLMRater(comparator.Comparator):
         generated_execution_result: str,
     ) -> Tuple[float, str]:
         only_first_n = 50
+        golden_execution_result = self.remove_duplicates(golden_execution_result)
+        generated_execution_result = self.remove_duplicates(generated_execution_result)
+
         if len(golden_execution_result) > only_first_n:
             golden_execution_result = golden_execution_result[:only_first_n]
         if len(generated_execution_result) > only_first_n:
@@ -76,23 +94,23 @@ class LLMRater(comparator.Comparator):
         Thinking step by step, compare the two outputs and look for differences in data presentation.
         Here are steps to follow:
 
-        1. Map all columns in OUTPUT #1 to the same columns in OUTPUT #2. Column names might differ as
-           long as the data they contain represents the same information.
+        1. Ensure that every column in OUTPUT #1 has a corresponding column in OUTPUT #2 that represents
+           the same information, even if the column names are different.
         2. All columns present in OUTPUT #1 must also be present in OUTPUT #2. OUTPUT #2 is allowed to
            have additional columns relevant to the query.
-        3. Compare the data in the mapped columns between OUTPUT #1 and OUTPUT #2. The data should be
-           an exact match; there should be no extra or missing data in OUTPUT #2.
+        3. Compare the data within each mapped column pair between OUTPUT #1 and OUTPUT #2.
+           Ensure that OUTPUT #2 contains all the data from OUTPUT #1, with no missing or extra rows.
         4. Minor string transformations are allowed (e.g., concatenating first and last name), but the
            underlying information must be preserved.
-        5. Only compare the result sets; do not make any assumptions beyond the data presented.
-
 
         RULES - These MUST be strictly followed, to answer the FINAL QUESTION:
 
         1. Assume OUTPUT #1 is the gold standard and is ALWAYS correct.
         2. The order of columns in OUTPUT #2 does not matter.
-        3. Numbers, dates, timestamps, measurements, and metrics MUST match EXACTLY between the two outputs.
-
+        3. Allow slight variations due to differences in rounding or precision, for calculated values.
+           Otherwise ensure exact matches for numbers, dates, timestamps, measurements, and metrics
+           between the two outputs.
+        4. The mapped column names might differ, do not make any assumptions based on them.
 
         FINAL QUESTION: Does OUTPUT #2 provide the same information as OUTPUT #1?
         FINAL ANSWER: Choose ONLY ONE
