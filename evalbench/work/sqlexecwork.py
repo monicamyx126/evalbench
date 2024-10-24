@@ -22,7 +22,7 @@ class SQLExecWork(Work):
             query = ""
         if self.eval_result["query_type"] in ["dml", "ddl"]:
             self.db.execute(self.eval_result["setup_sql"])
-            if len(self.eval_result["eval_query"]) > 0:
+            if self.eval_result["eval_query"] and len(self.eval_result["eval_query"]) > 0:
                 query = query + " " + self.eval_result['eval_query'][0]
             result, error = self.db.execute(query, rollback=rollback)
             self.db.execute(self.eval_result["cleanup_sql"])
