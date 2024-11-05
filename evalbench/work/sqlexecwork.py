@@ -27,7 +27,7 @@ class SQLExecWork(Work):
         else:
             result, error = self.db.execute(query)
         return result, error
-    
+
     def _execute_with_eval(self, query, is_golden=False):
         eval_result = None
         result = None
