@@ -33,8 +33,8 @@ class SQLExecWork(Work):
         result = None
         error = None
         if self.eval_result["query_type"] == "ddl":
-            eval_result = self.db.get_metadata()
             result, error = self.db.execute(query)
+            eval_result = self.db.get_metadata()
         else:
             if self.eval_result["eval_query"] and len(self.eval_result["eval_query"]) > 0:
                 result, eval_result, error = self.db.execute_dml(query, self.eval_result["eval_query"][0])

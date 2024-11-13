@@ -35,9 +35,12 @@ class VertexMatcher(comparator.Comparator):
         self,
         nl_prompt: str,
         golden_query: str,
+        query_type: str,
         golden_execution_result: str,
+        golden_eval_result: str,
         generated_query: str,
         generated_execution_result: str,
+        generated_eval_result: str,
     ) -> Tuple[float, str]:
         only_first_n = 50
         if len(golden_execution_result) > only_first_n:
