@@ -70,8 +70,10 @@ class SQLExecWork(Work):
                 .replace("\\n", " ")
                 .replace("\\", "")
                 .replace("  ", "")
-                .replace("`", "")
             )
+
+            if not self.db.db_config["db"] == "mysql":
+                self.eval_result["sanitized_sql"] = self.eval_result["sanitized_sql"].replace("`", "")
 
             generated_result, generated_error = self._execute_sql_flow(self.eval_result["sanitized_sql"],
                                                                        is_golden=False)
@@ -92,6 +94,9 @@ class SQLExecWork(Work):
 
         self.eval_result["golden_result"] = golden_result
         self.eval_result["golden_error"] = golden_error
+
+        if generated_error:
+            print("Sql: ", self.eval_result["sanitized_sql"])
 
         # Release the database
         if self.eval_result["query_type"] == "ddl" and self.db_queue is not None:
