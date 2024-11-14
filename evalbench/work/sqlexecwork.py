@@ -63,18 +63,18 @@ class SQLExecWork(Work):
             self.eval_result["sql_generator_error"] is None
             and self.eval_result["generated_sql"]
         ):
-            self.eval_result["sanitized_sql"] = (
-                self.eval_result["generated_sql"]
-                .replace('sql: "', "")
-                .replace("\\n", " ")
-                .replace("\\n", " ")
-                .replace("\\", "")
-                .replace("  ", "")
-            )
-
-            if not self.db.db_config["db"] == "mysql":
-                self.eval_result["sanitized_sql"] = self.eval_result["sanitized_sql"].replace("`", "")
-
+            if self.experiment_config["prompt_generator"] == "NOOPGenerator":
+                self.eval_result["sanitized_sql"] = self.eval_result["generated_sql"]
+            else:
+                self.eval_result["sanitized_sql"] = (
+                    self.eval_result["generated_sql"]
+                    .replace('sql: "', "")
+                    .replace("\\n", " ")
+                    .replace("\\n", " ")
+                    .replace("\\", "")
+                    .replace("  ", "")
+                    .replace("`", "")
+                )
             generated_result, generated_error = self._execute_sql_flow(self.eval_result["sanitized_sql"],
                                                                        is_golden=False)
 
