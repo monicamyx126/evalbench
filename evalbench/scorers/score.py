@@ -45,10 +45,10 @@ def compare(eval_output_item: EvalOutput, experiment_config: dict[str, str], sco
                     eval_output_item["golden_sql"],
                     eval_output_item["query_type"],
                     eval_output_item["golden_result"],
-                    eval_output_item["golden_eval_results"],
+                    eval_output_item.get("golden_eval_results", ""),
                     eval_output_item["generated_sql"],
                     eval_output_item["generated_result"],
-                    eval_output_item["eval_results"],
+                    eval_output_item.get("eval_results", ""),
                 )
                 comparison_result.score = score
                 comparison_result.comparison_logs = logs
