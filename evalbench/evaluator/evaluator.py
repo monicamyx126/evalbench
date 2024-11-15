@@ -6,7 +6,7 @@ import logging
 import databases
 import setup_teardown
 from databases.util import is_bat_dataset
-from util import printProgressBar
+from util import printProgressBar, truncateExecutionOutputs
 from work import promptgenwork
 from work import sqlgenwork
 from work import sqlexecwork
@@ -151,8 +151,17 @@ class Evaluator:
             for future in concurrent.futures.as_completed(self.scoringrunner.futures):
                 eval_output = future.result()
                 score_i = score_i + 1
+                if "truncate_execution_outputs" in self.experiment_config:
+                    truncateExecutionOutputs(
+                        eval_output,
+                        self.experiment_config["truncate_execution_outputs"],
+                    )
                 printProgressBar(
-                    score_i, dataset_len, prefix="Scoring:", suffix="Complete", length=50
+                    score_i,
+                    dataset_len,
+                    prefix="Scoring:",
+                    suffix="Complete",
+                    length=50,
                 )
                 eval_outputs.append(eval_output)
 
