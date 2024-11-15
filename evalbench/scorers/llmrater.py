@@ -5,13 +5,13 @@ positive cases, where either there is a Mismatch of Columns names or Extra Relev
 Columns in Generated SQL exists.
 """
 from typing import Tuple
+from threading import Semaphore
 import logging
-import backoff
 import vertexai
 from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
 
-from ratelimit import limits
 from scorers import comparator
+from .util import rate_limited_execute
 
 
 class LLMRater(comparator.Comparator):
@@ -35,6 +35,9 @@ class LLMRater(comparator.Comparator):
         )
         self.generation_config = GenerationConfig(temperature=0)
         self.model = GenerativeModel(self.config["model"])
+        self.execs_per_minute = self.config.get("max_executions_per_minute", 60)
+        self.semaphore = Semaphore(self.execs_per_minute)
+        self.max_attempts = 4
 
     @staticmethod
     def remove_duplicates(output_list: list) -> list:
@@ -52,9 +55,6 @@ class LLMRater(comparator.Comparator):
                 final_output.append(item)
         return final_output
 
-    @backoff.on_exception(backoff.constant, exception=Exception,
-                          max_tries=8, interval=80, jitter=backoff.full_jitter)
-    @limits(calls=30, period=60)
     def compare(
         self,
         nl_prompt: str,
@@ -122,14 +122,21 @@ class LLMRater(comparator.Comparator):
         """
 
         logging.debug("\n --------- prompt:   --------- \n %s ", prompt)
-        response = self.model.generate_content(
-            prompt, generation_config=self.generation_config
+        print(self.execs_per_minute)
+        response = rate_limited_execute(
+            prompt=prompt,
+            generation_config=self.generation_config,
+            execution_method=self.model.generate_content,
+            semaphore=self.semaphore,
+            execs_per_minute=self.execs_per_minute,
+            max_attempts=self.max_attempts
         ).text
 
         logging.debug("\n --------- llm_rater_output:   --------- \n %s ", response)
         score = (
             100
-            if ("INFORMATION_MATCHES" in response or "EXTRA_INFORMATION" in response)
+            if ("INFORMATION_MATCHES" in response
+                or "EXTRA_INFORMATION" in response)
             else 0
         )
         return score, response
