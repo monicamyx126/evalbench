@@ -74,21 +74,25 @@ class LLMRater(comparator.Comparator):
         Returns:
           The execution output result set without duplicates.
         """
-        final_output = []
-        for item in output_list:
-            if item not in final_output:
-                final_output.append(item)
-        return final_output
+        seen_dicts = set()
+        new_list = []
+        for d in output_list:
+            # Convert the dictionary to a hashable frozenset for efficient lookup
+            t = frozenset(d.items())
+            if t not in seen_dicts:
+                seen_dicts.add(t)
+                new_list.append(d)
+        return new_list
 
     def compare(
         self,
         nl_prompt: str,
         golden_query: str,
         query_type: str,
-        golden_execution_result: str,
+        golden_execution_result: list,
         golden_eval_result: str,
         generated_query: str,
-        generated_execution_result: str,
+        generated_execution_result: list,
         generated_eval_result: str,
     ) -> Tuple[float, str]:
         if self._is_exact_match(
@@ -104,6 +108,7 @@ class LLMRater(comparator.Comparator):
             return 100, "Skipped. Exact Match was found."
 
         only_first_n = 50
+
         golden_execution_result = self.remove_duplicates(golden_execution_result)
         generated_execution_result = self.remove_duplicates(generated_execution_result)
 
@@ -162,7 +167,6 @@ class LLMRater(comparator.Comparator):
         """
 
         logging.debug("\n --------- prompt:   --------- \n %s ", prompt)
-        print(self.execs_per_minute)
         response = rate_limited_execute(
             prompt=prompt,
             generation_config=self.generation_config,
