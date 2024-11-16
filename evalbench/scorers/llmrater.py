@@ -5,6 +5,7 @@ positive cases, where either there is a Mismatch of Columns names or Extra Relev
 Columns in Generated SQL exists.
 """
 from typing import Tuple
+from scorers import exactmatcher
 from threading import Semaphore
 import logging
 import vertexai
@@ -38,6 +39,30 @@ class LLMRater(comparator.Comparator):
         self.execs_per_minute = self.config.get("max_executions_per_minute", 60)
         self.semaphore = Semaphore(self.execs_per_minute)
         self.max_attempts = 4
+        self.exact_match_checker = exactmatcher.ExactMatcher(None)
+
+    def _is_exact_match(
+        self,
+        nl_prompt: str,
+        golden_query: str,
+        query_type: str,
+        golden_execution_result: str,
+        golden_eval_result: str,
+        generated_query: str,
+        generated_execution_result: str,
+        generated_eval_result: str,
+    ):
+        score, _ = self.exact_match_checker.compare(
+            nl_prompt,
+            golden_query,
+            query_type,
+            golden_execution_result,
+            golden_eval_result,
+            generated_query,
+            generated_execution_result,
+            generated_eval_result,
+        )
+        return score == 100
 
     @staticmethod
     def remove_duplicates(output_list: list) -> list:
@@ -66,6 +91,18 @@ class LLMRater(comparator.Comparator):
         generated_execution_result: str,
         generated_eval_result: str,
     ) -> Tuple[float, str]:
+        if self._is_exact_match(
+            nl_prompt,
+            golden_query,
+            query_type,
+            golden_execution_result,
+            golden_eval_result,
+            generated_query,
+            generated_execution_result,
+            generated_eval_result,
+        ):
+            return 100, "Skipped. Exact Match was found."
+
         only_first_n = 50
         golden_execution_result = self.remove_duplicates(golden_execution_result)
         generated_execution_result = self.remove_duplicates(generated_execution_result)
