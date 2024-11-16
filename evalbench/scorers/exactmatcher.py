@@ -28,7 +28,7 @@ class ExactMatcher(comparator.Comparator):
         generated_eval_result: str,
     ) -> Tuple[float, str]:
         """Simple comparison strategy that checks if the two execution results are exactly the same."""
-        if self.config.get("use_eval_sql"):
+        if self.config and "use_eval_sql" in self.config:
             score = 100 if golden_eval_result == generated_eval_result else 0
             return score, None
         else:
