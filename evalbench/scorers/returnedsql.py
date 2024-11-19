@@ -19,9 +19,11 @@ class ReturnedSQL(comparator.Comparator):
         query_type: str,
         golden_execution_result: str,
         golden_eval_result: str,
+        golden_error: str,
         generated_query: str,
         generated_execution_result: str,
         generated_eval_result: str,
+        generated_error: str,
     ) -> Tuple[float, str]:
 
         if generated_query == "":

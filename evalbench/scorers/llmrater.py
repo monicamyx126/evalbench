@@ -48,9 +48,11 @@ class LLMRater(comparator.Comparator):
         query_type: str,
         golden_execution_result: str,
         golden_eval_result: str,
+        golden_error: str,
         generated_query: str,
         generated_execution_result: str,
         generated_eval_result: str,
+        generated_error: str,
     ):
         score, _ = self.exact_match_checker.compare(
             nl_prompt,
@@ -58,9 +60,11 @@ class LLMRater(comparator.Comparator):
             query_type,
             golden_execution_result,
             golden_eval_result,
+            golden_error,
             generated_query,
             generated_execution_result,
             generated_eval_result,
+            generated_error,
         )
         return score == 100
 
@@ -91,9 +95,11 @@ class LLMRater(comparator.Comparator):
         query_type: str,
         golden_execution_result: list,
         golden_eval_result: str,
+        golden_error: str,
         generated_query: str,
         generated_execution_result: list,
         generated_eval_result: str,
+        generated_error: str,
     ) -> Tuple[float, str]:
         if self._is_exact_match(
             nl_prompt,
@@ -101,11 +107,18 @@ class LLMRater(comparator.Comparator):
             query_type,
             golden_execution_result,
             golden_eval_result,
+            golden_error,
             generated_query,
             generated_execution_result,
             generated_eval_result,
+            generated_error,
         ):
             return 100, "Skipped. Exact Match was found."
+
+        if golden_error:
+            return 0, "Golden query failed to execute."
+        if generated_error:
+            return 0, "Generated query failed to execute."
 
         only_first_n = 50
 
