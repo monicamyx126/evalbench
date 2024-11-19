@@ -114,7 +114,7 @@ class LLMRater(comparator.Comparator):
             generated_error,
         ):
             return 100, "Skipped. Exact Match was found."
-        
+
         if golden_error:
             return 0, "Golden query failed to execute."
         if generated_error:
