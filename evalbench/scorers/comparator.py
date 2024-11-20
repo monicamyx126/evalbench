@@ -29,9 +29,11 @@ class Comparator(abc.ABC):
         query_type: Any,
         golden_execution_result: Any,
         golden_eval_result: Any,
+        golden_error: Any,
         generated_query: Any,
         generated_execution_result: Any,
-        generated_eval_result: Any
+        generated_eval_result: Any,
+        generated_error: Any,
     ) -> Tuple[float, str]:
         """Abstract method to compare two execution results.
 
