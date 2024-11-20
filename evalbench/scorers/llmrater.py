@@ -46,11 +46,11 @@ class LLMRater(comparator.Comparator):
         nl_prompt: str,
         golden_query: str,
         query_type: str,
-        golden_execution_result: str,
+        golden_execution_result: list,
         golden_eval_result: str,
         golden_error: str,
         generated_query: str,
-        generated_execution_result: str,
+        generated_execution_result: list,
         generated_eval_result: str,
         generated_error: str,
     ):
