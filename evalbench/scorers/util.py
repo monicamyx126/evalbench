@@ -34,3 +34,10 @@ def rate_limited_execute(
     time.sleep(60 / execs_per_minute)
     semaphore.release()
     return result
+
+def make_hashable(value):
+    if isinstance(value, list):
+        return tuple(value)
+    elif isinstance(value, dict):
+        return frozenset((k, make_hashable(v)) for k, v in value.items())
+    return value
