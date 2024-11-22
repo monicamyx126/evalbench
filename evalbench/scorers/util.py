@@ -35,6 +35,7 @@ def rate_limited_execute(
     semaphore.release()
     return result
 
+
 def make_hashable(value):
     if isinstance(value, list):
         return tuple(value)
