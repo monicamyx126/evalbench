@@ -12,7 +12,7 @@ import vertexai
 from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
 
 from scorers import comparator
-from .util import rate_limited_execute
+from .util import rate_limited_execute, make_hashable
 
 
 class LLMRater(comparator.Comparator):
@@ -83,7 +83,7 @@ class LLMRater(comparator.Comparator):
         new_list = []
         for d in output_list:
             # Convert the dictionary to a hashable frozenset for efficient lookup
-            t = frozenset(d.items())
+            t = frozenset((k, make_hashable(v)) for k, v in d.items())
             if t not in seen_dicts:
                 seen_dicts.add(t)
                 new_list.append(d)
