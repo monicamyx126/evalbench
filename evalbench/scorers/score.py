@@ -4,6 +4,7 @@ from scorers import comparator
 from scorers import exactmatcher
 from scorers import generatedqueryregexpmatcher
 from scorers import recallmatcher
+from scorers import setmatcher
 from scorers import vertextmatcher
 from scorers import llmrater
 from scorers import returnedsql
@@ -24,6 +25,8 @@ def compare(eval_output_item: EvalOutput, experiment_config: dict[str, str], sco
         comparators.append(exactmatcher.ExactMatcher(scorers["exact_match"]))
     if "recall_match" in scorers:
         comparators.append(recallmatcher.RecallMatcher(scorers["recall_match"]))
+    if "set_match" in scorers:
+        comparators.append(setmatcher.SetMatcher(scorers["set_match"]))
     if "vertexmatcher" in scorers:
         comparators.append(vertextmatcher.VertexMatcher(scorers["vertexmatcher"]))
     if "llmrater" in scorers:
