@@ -7,6 +7,8 @@ from .util import (
     generate_ddl,
     get_db_secret,
     rate_limited_execute,
+    with_cache_execute,
+    get_cache_client,
     DBResourceExhaustedError,
 )
 from typing import Any, Tuple
@@ -53,6 +55,8 @@ class PGDB(DB):
             pool_size=50,
             connect_args={"command_timeout": 60},
         )
+
+        self.cache_client = get_cache_client(db_config)
 
     def get_metadata(self) -> dict:
         metadata = MetaData()
@@ -142,7 +146,7 @@ class PGDB(DB):
             error = str(e)
         return result, eval_result, error
 
-    def execute(self, query: str) -> Tuple[Any, float]:
+    def _execute_with_no_caching(self, query: str) -> Tuple[Any, Any]:
         if isinstance(self.execs_per_minute, int):
             return rate_limited_execute(
                 query,
@@ -153,3 +157,24 @@ class PGDB(DB):
             )
         else:
             return self._execute(query)
+
+    def execute(self, query: str, use_cache=False) -> Tuple[Any, Any]:
+        """
+        Execute a query with optional caching. Falls back to the original logic if caching is not provided.
+
+        Args:
+            query (str): The SQL query to execute.
+            cache_client: An optional caching client (e.g., Redis).
+
+        Returns:
+            Tuple[Any, Any]: The query results and any error message (None if successful).
+        """
+        if not use_cache or not self.cache_client:
+            return self._execute_with_no_caching(query)
+
+        return with_cache_execute(
+            query,
+            self.engine.url,
+            self._execute_with_no_caching,
+            self.cache_client,
+        )
