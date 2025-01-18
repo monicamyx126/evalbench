@@ -1,7 +1,8 @@
 db: postgres
-project_id: google.com:astana-team
+project_id: astana-evaluation
 region: us-central1
 instance_name: nl2code
 database_name: cymbalShop
 user_name: app
-password: "projects/545589951893/secrets/cymbalshop-app-password/versions/1"
+password: "projects/393137573/secrets/cymbalshop-app-password/versions/1"
+max_executions_per_minute: 180
