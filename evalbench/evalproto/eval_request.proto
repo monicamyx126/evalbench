@@ -1,6 +1,8 @@
 edition = "2023";
 
-package cloud_databases_nl2sql_eval_sqlgen_proto;
+package cloud_databases_eval_proto;
+
+import "google/protobuf/duration.proto";
 
 option java_multiple_files = true;
 
@@ -25,4 +27,31 @@ message EvalInputRequest {
   string generated_sql = 14;
   string job_id = 15;
   string trace_id = 16;
+}
+
+message UserAction {
+  string action_type = 1;
+  string prompt = 2;
+  string file_path = 3;
+  int64 cursor_start = 4;
+  int64 cursor_end = 5;
+}
+
+message EvalCodeInputRequest {
+  string id = 1;
+  string patch = 2;
+  UserAction user_action = 3;
+  string verification_command = 4;
+  string description = 5;
+  // TODO: Add database_context if required in future
+
+  // TODO: Modify this as per GCA RAG
+  string application_context = 6;
+  string current_file_content = 7;
+  string generated_code = 8;
+  google.protobuf.Duration dbcodegen_time = 9;
+  string dbcodegen_error = 10;
+  string job_id = 11; 
+  string golden_code = 12;
+  string build_command = 13;
 }
