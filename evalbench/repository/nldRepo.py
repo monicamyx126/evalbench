@@ -35,4 +35,3 @@ class NLDRepo(Repository):
             shutil.rmtree(repo_dir)
         logging.info(f"Cloning '{repo_url}' to '{repo_dir}'...")
         Repo.clone_from(repo_url, repo_dir)
-        
