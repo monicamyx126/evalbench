@@ -194,7 +194,7 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
                 "There were no matching evals in this run. Returning empty set."
             )
             return eval_response_pb2.EvalResponse(response=f"{job_id}")
-        
+
         report.quick_summary(results_df)
         report.store(results_df, bqstore.STORETYPE.EVALS)
 
