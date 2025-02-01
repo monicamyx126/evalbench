@@ -25,13 +25,23 @@ service EvalService {
     // option deadline = 1800;
   }
 
-  // ListEvalInputs.
+  // ListEvalInputs for NL2SQL.
   rpc ListEvalInputs(EvalInputRequest) returns (stream EvalInputRequest) {
     // option deadline = 1800;
   }
 
-  // Evaluate.
+  // Evaluate for NL2SQL.
   rpc Eval(stream EvalInputRequest) returns (EvalResponse) {
+    // option deadline = 1800;
+  }
+
+  // PrepareCodeEvalInputs for NL2Code Evaluation
+  rpc PrepareCodeEvalInputs(EvalCodeInputRequest) returns (stream EvalCodeInputRequest) {
+    // option deadline = 1800;
+  }
+
+  // Evaluation for Code
+  rpc EvalGenCode(stream EvalCodeInputRequest)  returns (EvalResponse) {
     // option deadline = 1800;
   }
 }
