@@ -188,7 +188,14 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         report.store(config_df, bqstore.STORETYPE.CONFIGS)
 
         results = load_json(f"/tmp/eval_output_{job_id}.json")
-        results_df = report.quick_summary(results)
+        results_df = report.get_dataframe(results)
+        if results_df.empty:
+            logging.warning(
+                "There were no matching evals in this run. Returning empty set."
+            )
+            return eval_response_pb2.EvalResponse(response=f"{job_id}")
+
+        report.quick_summary(results_df)
         report.store(results_df, bqstore.STORETYPE.EVALS)
 
         scores = load_json(f"/tmp/score_result_{job_id}.json")
