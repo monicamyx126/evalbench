@@ -30,10 +30,10 @@ class SQLServerDB(DB):
         logging.getLogger("pytds").setLevel(logging.ERROR)
 
         # Initialize the Cloud SQL Connector object
-        connector = Connector()
+        self.connector = Connector()
 
         def getconn():
-            conn = connector.connect(
+            conn = self.connector.connect(
                 instance_connection_name,
                 "pytds",
                 user=db_user,
@@ -54,6 +54,18 @@ class SQLServerDB(DB):
         )
 
         self.cache_client = get_cache_client(db_config)
+
+    def __del__(self):
+        self.close_connections()
+
+    def close_connections(self):
+        try:
+            self.engine.dispose()
+            self.connector.close()
+        except Exception:
+            logging.warning(
+                f"Failed to close connections. This may result in idle unused connections."
+            )
 
     def generate_schema(self):
         # To be implemented

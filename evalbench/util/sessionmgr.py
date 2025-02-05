@@ -14,7 +14,7 @@ class SessionManager:
     ):
         self.running = True
         self.sessions = {}
-        self.ttl = 36000
+        self.ttl = 3600
         logging.debug("Starting reaper...")
         reaper = Thread(target=self.reaper, args=[])
         reaper.start()
@@ -62,6 +62,8 @@ class SessionManager:
         return self.sessions
 
     def delete_session(self, session_id):
+        if "db" in self.sessions[session_id]:
+            self.sessions[session_id]["db"].close_connections()
         del self.sessions[session_id]
 
     def shutdown(self):

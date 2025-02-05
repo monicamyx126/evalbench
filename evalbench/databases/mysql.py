@@ -1,4 +1,5 @@
 import sqlalchemy
+import logging
 
 from sqlalchemy import text, MetaData
 from google.cloud.sql.connector import Connector
@@ -29,10 +30,10 @@ class MySQLDB(DB):
         self.db_config = db_config
 
         # Initialize the Cloud SQL Connector object
-        connector = Connector()
+        self.connector = Connector()
 
         def getconn():
-            conn = connector.connect(
+            conn = self.connector.connect(
                 instance_connection_name,
                 "pymysql",
                 user=db_user,
@@ -51,6 +52,18 @@ class MySQLDB(DB):
         )
 
         self.cache_client = get_cache_client(db_config)
+
+    def __del__(self):
+        self.close_connections()
+
+    def close_connections(self):
+        try:
+            self.engine.dispose()
+            self.connector.close()
+        except Exception:
+            logging.warning(
+                f"Failed to close connections. This may result in idle unused connections."
+            )
 
     def get_metadata(self) -> dict:
         metadata = MetaData()
