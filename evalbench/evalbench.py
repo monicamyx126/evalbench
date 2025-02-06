@@ -73,7 +73,8 @@ def main(argv: Sequence[str]) -> None:
     report.store(config_df, bqstore.STORETYPE.CONFIGS)
 
     results = load_json(f"/tmp/eval_output_{job_id}.json")
-    results_df = report.quick_summary(results)
+    results_df = report.get_dataframe(results)
+    report.quick_summary(results_df)
     report.store(results_df, bqstore.STORETYPE.EVALS)
 
     scores = load_json(f"/tmp/score_result_{job_id}.json")
