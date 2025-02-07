@@ -54,6 +54,8 @@ class PGDB(DB):
             "postgresql+pg8000://",
             creator=getconn,
             pool_size=50,
+            pool_recycle=3600,
+            pool_pre_ping=True,
             connect_args={"command_timeout": 60},
         )
 
