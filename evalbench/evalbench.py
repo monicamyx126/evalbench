@@ -94,12 +94,12 @@ def main(argv: Sequence[str]) -> None:
 
     output_type = _OUTPUT_TYPE.value
     if (output_type == CSV_OUTPUT):
-      logging.info("Storing output as CSV")
-      results_df.to_csv("output.csv", index=False)
+        logging.info("Storing output as CSV")
+        results_df.to_csv("output.csv", index=False)
     else:
-      report.store(scores_df, bqstore.STORETYPE.SCORES)
-      report.store(summary_scores_df, bqstore.STORETYPE.SUMMARY)
+        report.store(scores_df, bqstore.STORETYPE.SCORES)
+        report.store(summary_scores_df, bqstore.STORETYPE.SUMMARY)
+
 
 if __name__ == "__main__":
     app.run(main)
-
