@@ -35,12 +35,13 @@ _OUTPUT_TYPE = flags.DEFINE_string(
     "Specifies the output type: 'csv' for a CSV file, 'big_query' to store results in BigQuery"
 )
 
+
 def store_data(output_type, data_df, csv_file_name, bigquery_store_type):
     if (output_type == CSV_OUTPUT):
-      logging.info(f"Storing {csv_file_name} as CSV")
-      data_df.to_csv(csv_file_name, index=False)
+        logging.info(f"Storing {csv_file_name} as CSV")
+        data_df.to_csv(csv_file_name, index=False)
     else:
-      report.store(data_df, bigquery_store_type)
+        report.store(data_df, bigquery_store_type)
 
 
 # evalbench.py
