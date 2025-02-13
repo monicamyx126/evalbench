@@ -91,7 +91,7 @@ def main(argv: Sequence[str]) -> None:
 
     output_type = _OUTPUT_TYPE.value
 
-    store_data(output_type, config_df, 'configs_csv', bqstore.STORETYPE.CONFIGS, job_id)
+    store_data(output_type, config_df, 'configs', bqstore.STORETYPE.CONFIGS, job_id)
 
     results = load_json(f"/tmp/eval_output_{job_id}.json")
     results_df = report.get_dataframe(results)
