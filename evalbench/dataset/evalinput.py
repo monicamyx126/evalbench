@@ -76,3 +76,4 @@ class EvalInputRequest:
         @classmethod
         def init_from_proto(cls, proto):
             raise ImportError("protobuf module not available")
+        
