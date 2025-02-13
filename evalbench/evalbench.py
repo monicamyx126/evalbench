@@ -36,10 +36,10 @@ _OUTPUT_TYPE = flags.DEFINE_string(
 )
 
 
-def store_data(output_type, data_df, csv_file_name, bigquery_store_type):
+def store_data(output_type, data_df, csv_file_name, bigquery_store_type, job_id):
     if (output_type == CSV_OUTPUT):
         logging.info(f"Storing {csv_file_name}")
-        data_df.to_csv(csv_file_name, index=False)
+        data_df.to_csv(f'{csv_file_name}_{job_id}.csv', index=False)
     else:
         report.store(data_df, bigquery_store_type)
 
@@ -91,20 +91,20 @@ def main(argv: Sequence[str]) -> None:
 
     output_type = _OUTPUT_TYPE.value
 
-    store_data(output_type, config_df, 'configs_csv', bqstore.STORETYPE.CONFIGS)
+    store_data(output_type, config_df, 'configs', bqstore.STORETYPE.CONFIGS, job_id)
 
     results = load_json(f"/tmp/eval_output_{job_id}.json")
     results_df = report.get_dataframe(results)
     report.quick_summary(results_df)
-    store_data(output_type, results_df, 'results_csv', bqstore.STORETYPE.EVALS)
+    store_data(output_type, results_df, 'results', bqstore.STORETYPE.EVALS, job_id)
 
     scores = load_json(f"/tmp/score_result_{job_id}.json")
     scores_df, summary_scores_df = analyzer.analyze_result(scores, experiment_config)
     summary_scores_df["job_id"] = job_id
     summary_scores_df["run_time"] = run_time
 
-    store_data(output_type, scores_df, 'scores_csv', bqstore.STORETYPE.SCORES)
-    store_data(output_type, summary_scores_df, 'summary_csv', bqstore.STORETYPE.SUMMARY)
+    store_data(output_type, scores_df, 'scores', bqstore.STORETYPE.SCORES, job_id)
+    store_data(output_type, summary_scores_df, 'summary', bqstore.STORETYPE.SUMMARY, job_id)
 
 
 if __name__ == "__main__":
