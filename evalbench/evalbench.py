@@ -16,14 +16,32 @@ import databases
 import setup_teardown
 import logging
 import json
+import pandas as pd
 
 logging.getLogger().setLevel(logging.INFO)
+
+CSV_OUTPUT = "csv"
+BIG_QUERY_OUTPUT = "big_query"
 
 _EXPERIMENT_CONFIG = flags.DEFINE_string(
     "experiment_config",
     "configs/experiment_config.yaml",
     "Path to the eval execution configuration file.",
 )
+
+_OUTPUT_TYPE = flags.DEFINE_string(
+    "output_type",
+    BIG_QUERY_OUTPUT,
+    "Specifies the output type: 'csv' for a CSV file, 'big_query' to store results in BigQuery"
+)
+
+
+def store_data(output_type, data_df, csv_file_name, bigquery_store_type):
+    if (output_type == CSV_OUTPUT):
+        logging.info(f"Storing {csv_file_name}")
+        data_df.to_csv(csv_file_name, index=False)
+    else:
+        report.store(data_df, bigquery_store_type)
 
 
 # evalbench.py
@@ -70,20 +88,23 @@ def main(argv: Sequence[str]) -> None:
     job_id, run_time = eval.evaluate(dataset)
 
     config_df = config_to_df(job_id, run_time, experiment_config, model_config, db_config)
-    report.store(config_df, bqstore.STORETYPE.CONFIGS)
+
+    output_type = _OUTPUT_TYPE.value
+
+    store_data(output_type, config_df, 'configs_csv', bqstore.STORETYPE.CONFIGS)
 
     results = load_json(f"/tmp/eval_output_{job_id}.json")
     results_df = report.get_dataframe(results)
     report.quick_summary(results_df)
-    report.store(results_df, bqstore.STORETYPE.EVALS)
+    store_data(output_type, results_df, 'results_csv', bqstore.STORETYPE.EVALS)
 
     scores = load_json(f"/tmp/score_result_{job_id}.json")
     scores_df, summary_scores_df = analyzer.analyze_result(scores, experiment_config)
     summary_scores_df["job_id"] = job_id
     summary_scores_df["run_time"] = run_time
 
-    report.store(scores_df, bqstore.STORETYPE.SCORES)
-    report.store(summary_scores_df, bqstore.STORETYPE.SUMMARY)
+    store_data(output_type, scores_df, 'scores_csv', bqstore.STORETYPE.SCORES)
+    store_data(output_type, summary_scores_df, 'summary_csv', bqstore.STORETYPE.SUMMARY)
 
 
 if __name__ == "__main__":
