@@ -39,7 +39,7 @@ _OUTPUT_TYPE = flags.DEFINE_string(
 def store_data(output_type, data_df, csv_file_name, bigquery_store_type, job_id):
     if (output_type == CSV_OUTPUT):
         logging.info(f"Storing {csv_file_name}")
-        data_df.to_csv(f'{csv_file_name}_{str(job_id)}.csv', index=False)
+        data_df.to_csv(f'{csv_file_name}_{job_id}.csv', index=False)
     else:
         report.store(data_df, bigquery_store_type)
 
