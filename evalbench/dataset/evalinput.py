@@ -6,6 +6,7 @@ try:
 except ImportError:
     PROTO_IMPORTED = False
 
+
 class EvalInputRequest:
 
     def __init__(
@@ -76,4 +77,3 @@ class EvalInputRequest:
         @classmethod
         def init_from_proto(cls, proto):
             raise ImportError("protobuf module not available")
-        
