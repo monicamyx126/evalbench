@@ -13,6 +13,33 @@ from .util import (
 )
 from typing import Any, List, Optional, Tuple
 
+LIST_ALL_TABLES_QUERY = """
+SELECT TABLE_SCHEMA, TABLE_NAME 
+FROM INFORMATION_SCHEMA.TABLES 
+WHERE TABLE_TYPE = 'BASE TABLE';
+"""
+
+DROP_TABLE_COMMAND = """
+DROP TABLE [{SCHEMA}].[{TABLE_NAME}];
+"""
+
+DELETE_USER_QUERY = """
+IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '{USERNAME}')
+    DROP USER [{USERNAME}];
+
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = '{USERNAME}')
+    DROP LOGIN [{USERNAME}];
+"""
+
+CREATE_USERS_QUERY = """
+CREATE LOGIN [{DQL_USERNAME}] WITH PASSWORD = '{PASSWORD}';
+CREATE USER [{DQL_USERNAME}] FOR LOGIN [{DQL_USERNAME}];
+GRANT SELECT ON DATABASE::{DATABASE} TO [{DQL_USERNAME}];
+
+CREATE LOGIN [{DML_USERNAME}] WITH PASSWORD = '{PASSWORD}';
+CREATE USER [{DML_USERNAME}] FOR LOGIN [{DML_USERNAME}];
+GRANT SELECT, INSERT, UPDATE, DELETE ON DATABASE::{DATABASE} TO [{DML_USERNAME}];
+"""
 
 class SQLServerDB(DB):
 
@@ -158,19 +185,58 @@ class SQLServerDB(DB):
         self,
         schema: DatabaseSchema,
     ) -> list[str]:
-        raise RuntimeError("Not yet supported.")
+        create_statements = []
+        for table in schema.tables:
+            table_name = table.table
+            columns = ", ".join(
+                [f"{column.column} {column.data_type}" for column in table.columns]
+            )
+            create_statements.append(f"CREATE TABLE `{table_name}` ({columns});")
+        return create_statements
+
 
     def create_tmp_database(self, database_name: str):
-        raise RuntimeError("Not yet supported.")
+        _,  error = self._execute_autocommit(f"CREATE DATABASE {database_name};")
+        if error:
+            raise RuntimeError(f"Could not create database: {error}")
+        self.tmp_dbs.append(database_name)
 
     def drop_tmp_database(self, database_name: str):
-        raise RuntimeError("Not yet supported.")
+        if database_name in self.tmp_dbs:
+            self.tmp_dbs.remove(database_name)
+        _, error = self._execute_autocommit(f"DROP DATABASE {database_name};")
+        if error:
+            logging.info(f"Could not delete database: {error}")
 
     def drop_all_tables(self):
-        raise RuntimeError("Not yet supported.")
+        results, _, error = self.execute(LIST_ALL_TABLES_QUERY)
+        if error:
+            raise RuntimeError(error)
+        
+        drop_all_tables_commands = [
+            DROP_TABLE_COMMAND.format(SCHEMA=table["TABLE_SCHEMA"], TABLE_NAME=table["TABLE_NAME"])
+            for table in results
+        ]
+        self.batch_execute(drop_all_tables_commands)
 
     def insert_data(self, data: dict[str, List[str]]):
-        raise RuntimeError("Not yet supported.")
+        if not data:
+            return
+        
+        insertion_statements = []
+        
+        for table_name in data:
+            for row in data[table_name]:
+                formatted_values = ", ".join(
+                    [f"'{value.replace('\'', '\'\'')}'" if isinstance(value, str) else str(value) for value in row]
+                )
+                insertion_statements.append(
+                    f"INSERT INTO [{table_name}] VALUES ({formatted_values});"
+                )
+        try:
+            self.batch_execute(insertion_statements)
+        except RuntimeError as error:
+            raise RuntimeError(f"Could not insert data into database: {error}")
 
     #####################################################
     #####################################################
@@ -179,7 +245,48 @@ class SQLServerDB(DB):
     #####################################################
 
     def create_tmp_users(self, dql_user: str, dml_user: str, tmp_password: str):
-        raise RuntimeError("Not yet supported.")
+        try:
+            self.batch_execute(
+                CREATE_USERS_QUERY.format(
+                    DQL_USERNAME=dql_user,
+                    DML_USERNAME=dml_user,
+                    PASSWORD=tmp_password,
+                    DATABASE=self.db_name,
+                ).split(";")
+            )
+        except RuntimeError as error:
+            raise RuntimeError(f"Could not setup users. {error}")
 
     def delete_tmp_user(self, username: str):
-        raise RuntimeError("Not yet supported.")
+        if username in self.tmp_users:
+            self.tmp_users.remove(username)
+        _, _, error = self.execute(DELETE_USER_QUERY.format(USERNAME=username))
+        if error:
+            logging.info(f"Could not delete tmp user due to {error}")
+
+    #####################################################
+    #####################################################
+    # Internal helpers
+    #####################################################
+    #####################################################
+  
+    def _execute_autocommit(self, query: str):
+        error = None
+        raw_conn = None
+        cursor = None
+        try:
+            raw_conn = self.engine.raw_connection()
+            raw_conn.connection.autocommit = True  
+            cursor = raw_conn.cursor()
+            cursor.execute(query)
+
+        except Exception as e:
+            error = str(e)
+
+        finally:
+            if cursor:
+                cursor.close()
+            if raw_conn:
+                raw_conn.close()
+
+        return error is None, error
