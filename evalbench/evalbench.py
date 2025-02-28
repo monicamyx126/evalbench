@@ -69,22 +69,21 @@ def main(argv: Sequence[str]):
 
         # Run evaluations
         evaluator.evaluate(flatten_dataset(dataset))
-        job_id, run_time = evaluator.process()
+        job_id, run_time, results_tf, scores_tf = evaluator.process()
         core_db.clean_tmp_creations()
         core_db.close_connections()
 
-        config_df = config_to_df(job_id, run_time, config, model_config, db_config)
-
+        # Store the results
         output_type = _OUTPUT_TYPE.value
-
+        config_df = config_to_df(job_id, run_time, config, model_config, db_config)
         store_data(output_type, config_df, "configs", bqstore.STORETYPE.CONFIGS, job_id)
 
-        results = load_json(f"/tmp/eval_output_{job_id}.json")
+        results = load_json(results_tf)
         results_df = report.get_dataframe(results)
         report.quick_summary(results_df)
         store_data(output_type, results_df, "results", bqstore.STORETYPE.EVALS, job_id)
 
-        scores = load_json(f"/tmp/score_result_{job_id}.json")
+        scores = load_json(scores_tf)
         scores_df, summary_scores_df = analyzer.analyze_result(scores, config)
         summary_scores_df["job_id"] = job_id
         summary_scores_df["run_time"] = run_time

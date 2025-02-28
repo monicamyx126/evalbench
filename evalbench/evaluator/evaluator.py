@@ -3,6 +3,7 @@ import uuid
 import json
 import datetime
 import logging
+import tempfile
 from evaluator.db_manager import build_db_queue
 from util import printProgressBar, truncateExecutionOutputs
 from work import promptgenwork
@@ -180,10 +181,17 @@ class Evaluator:
                     db.close_connections()
 
     def process(self):
-        with open(f"/tmp/eval_output_{self.job_id}.json", "w") as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(self.total_eval_outputs, f, sort_keys=True, indent=4, default=str)
-        with open(f"/tmp/score_result_{self.job_id}.json", "w") as f:
+            results_tf = f.name
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(
                 self.total_scoring_results, f, sort_keys=True, indent=4, default=str
             )
-        return self.job_id, self.run_time
+            scores_tf = f.name
+        return (
+            self.job_id,
+            self.run_time,
+            results_tf,
+            scores_tf,
+        )

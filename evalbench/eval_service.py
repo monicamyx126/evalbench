@@ -134,15 +134,19 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         )
         evaluator.evaluate(dataset)
 
-        job_id, run_time = evaluator.process()
-        _process_results(job_id, run_time, config, model_config, db_config)
+        job_id, run_time, results_tf, scores_tf = evaluator.process()
+        _process_results(
+            job_id, run_time, results_tf, scores_tf, config, model_config, db_config
+        )
         core_db.clean_tmp_creations()
         core_db.close_connections()
 
         return eval_response_pb2.EvalResponse(response=f"{job_id}")
 
 
-def _process_results(job_id, run_time, config, model_config, db_config):
+def _process_results(
+    job_id, run_time, results_tf, scores_tf, config, model_config, db_config
+):
     config_df = config_to_df(
         job_id,
         run_time,
@@ -152,7 +156,7 @@ def _process_results(job_id, run_time, config, model_config, db_config):
     )
     report.store(config_df, bqstore.STORETYPE.CONFIGS)
 
-    results = load_json(f"/tmp/eval_output_{job_id}.json")
+    results = load_json(results_tf)
     results_df = report.get_dataframe(results)
     if results_df.empty:
         logging.warning(
@@ -162,7 +166,7 @@ def _process_results(job_id, run_time, config, model_config, db_config):
     report.quick_summary(results_df)
     report.store(results_df, bqstore.STORETYPE.EVALS)
 
-    scores = load_json(f"/tmp/score_result_{job_id}.json")
+    scores = load_json(scores_tf)
     scores_df, summary_scores_df = analyzer.analyze_result(scores, config)
     summary_scores_df["job_id"] = job_id
     summary_scores_df["run_time"] = run_time
@@ -170,5 +174,5 @@ def _process_results(job_id, run_time, config, model_config, db_config):
     report.store(summary_scores_df, bqstore.STORETYPE.SUMMARY)
 
     # k8s emptyDir /tmp does not auto cleanup, so we explicitly delete
-    pathlib.Path(f"/tmp/eval_output_{job_id}.json").unlink()
-    pathlib.Path(f"/tmp/score_result_{job_id}.json").unlink()
+    pathlib.Path(results_tf).unlink()
+    pathlib.Path(scores_tf).unlink()
