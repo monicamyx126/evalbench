@@ -31,6 +31,7 @@ import re
 from typing import Tuple
 from scorers import comparator
 
+
 def clean_sql_query(query: str):
     # Remove any backticks from front and back
     query = query.strip("`")
@@ -41,6 +42,7 @@ def clean_sql_query(query: str):
     # Remove extra whitespaces from front and back
     query = query.strip()
     return query
+
 
 class GeneratedQueryRegexpMatcher(comparator.Comparator):
     """
@@ -83,7 +85,7 @@ class GeneratedQueryRegexpMatcher(comparator.Comparator):
         generated_eval_result: str,
         generated_error: str,
     ) -> Tuple[float, str]:
-        
+
         """compare function implements the comparison logic for GeneratedQueryRegexpMatcher comparator."""
 
         cleaned_query = clean_sql_query(generated_query)
