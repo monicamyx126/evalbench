@@ -22,13 +22,13 @@ Due to proto conflict between google-cloud-alloydb-connector and googleapis-comm
 ```
 pip install --force-reinstall googleapis-common-protos==1.64.0
 ```
-Configure your DB password:
+
+Configure your EVAL_CONFIG, using db_blog on postgres at example:
 ```
-export EVAL_DB_PASSWORD=#######
+export EVAL_CONFIG=datasets/bat/db_blog/run_configs/postgres/run_dml.yaml
 ```
 Then run eval:
 
 ```
-cd evalbench
-./run.sh
+./evalbench/run.sh
 ```

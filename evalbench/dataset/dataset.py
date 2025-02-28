@@ -8,6 +8,7 @@ import logging
 from collections.abc import Sequence
 from dataset.evalinput import EvalInputRequest
 from dataset.evaloutput import EvalOutput
+from itertools import chain
 
 
 _SOURCE_DATASET_PATH = flags.DEFINE_string(
@@ -44,7 +45,7 @@ def load_dataset_from_json(json_file_path, experiment_config):
     totalEntries = sum(len(input_items.get(q, [])) for q in ["dql", "dml", "ddl"])
     logging.info(f"Converted {totalEntries} entries to EvalInput.")
 
-    return input_items, input_items['dql'][0].database
+    return input_items
 
 
 def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
@@ -61,7 +62,7 @@ def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
             setup_sql=item["setup_sql"].get(dialect, []),
             cleanup_sql=item["cleanup_sql"].get(dialect, []),
             tags=item["tags"],
-            other=build_normalized_other(item["other"])
+            other=build_normalized_other(item["other"]),
         )
         input_items[eval_input.query_type].append(eval_input)
     return input_items
@@ -86,7 +87,7 @@ def load_dataset_from_regular(dataset: Sequence[dict]):
             setup_sql=item["setup_sql"],
             cleanup_sql=item["cleanup_sql"],
             tags=item["tags"],
-            other={}
+            other={},
         )
         gen_id = gen_id + 1
         input_items[eval_input.query_type].append(eval_input)
@@ -107,17 +108,36 @@ def load_dataset_from_bird(dataset: Sequence[dict], dialect: str):
                 id=item["question_id"],
                 query_type="dql",
                 database=item["db_id"],
-                nl_prompt=" ".join([item["question"], item["evidence"]]).replace("`", '"'),
+                nl_prompt=" ".join([item["question"], item["evidence"]]).replace(
+                    "`", '"'
+                ),
                 dialects=[dialect],
                 golden_sql=golden_sql,
                 eval_query="",
                 setup_sql="",
                 cleanup_sql="",
                 tags=[item["difficulty"]],
-                other={}
+                other={},
             )
             input_items[eval_input.query_type].append(eval_input)
     return input_items
+
+
+def breakdown_datasets_by_query_type(total_dataset: list[EvalInputRequest]):
+    total_dataset_len = 0
+    dataset: dict[str, list[EvalInputRequest]] = {
+        "dql": [],
+        "dml": [],
+        "ddl": [],
+    }
+    for input in total_dataset:
+        dataset[input.query_type].append(input)
+        total_dataset_len += 1
+    return dataset, total_dataset_len
+
+
+def flatten_dataset(dataset: dict[str, list]):
+    return list(chain.from_iterable(dataset.values()))
 
 
 def main(argv: Sequence[str]) -> None:

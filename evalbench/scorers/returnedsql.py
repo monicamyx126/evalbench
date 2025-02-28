@@ -30,7 +30,9 @@ class ReturnedSQL(comparator.Comparator):
             return 100, None
 
         query_lines = [line.strip() for line in generated_query.splitlines()]
-        has_non_comment_line = any(line and not line.startswith("--") for line in query_lines)
+        has_non_comment_line = any(
+            line and not line.startswith("--") for line in query_lines
+        )
 
         score = 100 if has_non_comment_line else 0
         return score, None

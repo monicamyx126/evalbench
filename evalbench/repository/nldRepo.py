@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import uuid
 from git import Repo
 from .base import Repository
 
@@ -10,18 +11,18 @@ class NLDRepo(Repository):
         self.config = repo_config
 
     def clone(self):
-        if 'repo_dir' not in self.config or 'repo_url' not in self.config:
+        if "repo_dir" not in self.config or "repo_url" not in self.config:
             return
-        repo_dir = self.config['repo_dir']
-        repo_url = self.config['repo_url']
+        repo_dir = self.config["repo_dir"]
+        repo_url = self.config["repo_url"]
         self.clone_from_dir(repo_dir, repo_url)
 
     def clone_dataset(self):
         job_id = f"{uuid.uuid4()}"
-        if 'repo_url' not in self.config:
+        if "repo_url" not in self.config:
             return
-        repo_dir = os.path.join('/evalbench/datasets/nl2code', job_id)
-        repo_url = self.config['repo_url']
+        repo_dir = os.path.join("/evalbench/datasets/nl2code", job_id)
+        repo_url = self.config["repo_url"]
         self.clone_from_dir(repo_dir, repo_url)
         return job_id
 

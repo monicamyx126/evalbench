@@ -25,9 +25,7 @@ class EvalFormatVerifierTest(unittest.TestCase):
             efv.validate_json_format(
                 json_data,
             )
-        json_data = mock_dataset.get_default_single_json(
-            {"dialects": "not a string"}
-        )
+        json_data = mock_dataset.get_default_single_json({"dialects": "not a string"})
         with self.assertRaises(ValueError):
             efv.validate_json_format(
                 json_data,

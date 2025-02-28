@@ -109,9 +109,7 @@ def transform_json_row(
             "setup": {
                 "default_setup": data["database"],
                 "ddl": list(
-                    filter(
-                        is_ddl, get_dialect_based_sql(data, "setup_sql", dialect)
-                    )
+                    filter(is_ddl, get_dialect_based_sql(data, "setup_sql", dialect))
                 ),
                 "dml": list(
                     filter(
@@ -122,9 +120,7 @@ def transform_json_row(
             },
             "cleanup": {
                 "ddl": list(
-                    filter(
-                        is_ddl, get_dialect_based_sql(data, "cleanup_sql", dialect)
-                    )
+                    filter(is_ddl, get_dialect_based_sql(data, "cleanup_sql", dialect))
                 ),
                 "dml": list(
                     filter(
@@ -138,7 +134,6 @@ def transform_json_row(
             "cuj_name": next(
                 (tag for tag in data["tags"] if tag.startswith("cuj:")), ""
             ),
-
             "eval_query": get_dialect_based_sql(data, "eval_query", dialect),
             "expected": get_dialect_based_sql(data, "golden_sql", dialect),
         }

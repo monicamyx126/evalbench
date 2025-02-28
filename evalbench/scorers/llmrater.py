@@ -4,6 +4,7 @@ generated sql execution results. It returns a score of 100 for concrete
 positive cases, where either there is a Mismatch of Columns names or Extra Relevant
 Columns in Generated SQL exists.
 """
+
 from typing import Tuple
 from scorers import exactmatcher
 from threading import Semaphore
@@ -78,7 +79,7 @@ class LLMRater(comparator.Comparator):
             execution_method=self.model.generate_content,
             semaphore=self.semaphore,
             execs_per_minute=self.execs_per_minute,
-            max_attempts=self.max_attempts
+            max_attempts=self.max_attempts,
         ).text
         return response
 
@@ -211,14 +212,13 @@ class LLMRater(comparator.Comparator):
                 execution_method=self.model.generate_content,
                 semaphore=self.semaphore,
                 execs_per_minute=self.execs_per_minute,
-                max_attempts=self.max_attempts
+                max_attempts=self.max_attempts,
             ).text
 
         logging.debug("\n --------- llm_rater_output:   --------- \n %s ", response)
         score = (
             100
-            if ("INFORMATION_MATCHES" in response
-                or "EXTRA_INFORMATION" in response)
+            if ("INFORMATION_MATCHES" in response or "EXTRA_INFORMATION" in response)
             else 0
         )
         return score, response

@@ -8,13 +8,50 @@ import logging
 import hashlib
 import pickle
 import redis
+import re
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Column:
+    name: str
+    type: str
+    is_nullable: bool = True
+    description: str = ""
+
+
+@dataclass
+class Table:
+    name: str
+    columns: list[Column] = field(default_factory=list)
+    constraints: list[str] = field(default_factory=list)
+
+
+@dataclass
+class View:
+    columns: list[Column] = field(default_factory=list)
+
+
+@dataclass
+class DatabaseSchema:
+    name: str
+    tables: list[Table] = field(default_factory=list)
+    views: list[View] = field(default_factory=list)
 
 
 class DBResourceExhaustedError(Exception):
     pass
 
 
-def get_db_secret(secret_path):
+def is_db_secret_path(secret: str) -> bool:
+    pattern = r"^projects/[^/]+/secrets/[^/]+/versions/\d+$"
+    return bool(re.match(pattern, secret))
+
+
+def get_db_secret(secret):
+    if not is_db_secret_path(secret):
+        return secret
+    secret_path = secret
     # Create a client
     client = secretmanager_v1.SecretManagerServiceClient()
     # Initialize request argument(s)
@@ -62,23 +99,25 @@ def generate_ddl(data, db_name, comments_data=None):
     return "".join(ddl_statements)
 
 
-def is_bat_dataset(database_name):
-    bat_datasets = {"db_hr", "db_blog", "db_chat", "db_ecommerce", "db_finance"}
-    return database_name in bat_datasets
-
-
 def rate_limited_execute(
-    query: str,
+    query: Tuple,
     execution_method,
     execs_per_minute: int,
     semaphore: Semaphore,
     max_attempts: int,
-) -> Tuple[Any, float]:
+) -> Tuple[Any, Any, Any]:
+    # If no limit is specified, run immediately.
+    if not isinstance(execs_per_minute, int):
+        return execution_method(*query)
+
+    result = None
+    eval_result = None
+    error = None
     semaphore.acquire()
     attempt = 1
     while attempt <= max_attempts:
         try:
-            result, error = execution_method(query)
+            result, eval_result, error = execution_method(*query)
             break
         except DBResourceExhaustedError as e:
             # exponentially backoff starting at 5 seconds
@@ -86,15 +125,15 @@ def rate_limited_execute(
             attempt += 1
     time.sleep(60 / execs_per_minute)
     semaphore.release()
-    return result, error
+    return result, eval_result, error
 
 
 def with_cache_execute(
     query: str,
-    engine_url: str,
+    engine_url,
     execution_method,
     cache_client: Any,
-) -> Tuple[Any, Any]:
+) -> Tuple[Any, Any, Any]:
     try:
         # Format the query for consistency
         query = sqlparse.format(query, reindent=True, keyword_case="upper")
@@ -109,12 +148,12 @@ def with_cache_execute(
         cached_result = cache_client.get(query_hash)
         if cached_result:
             logging.debug(f"Using cached result for query: {query}")
-            return pickle.loads(cached_result), None
+            return pickle.loads(cached_result), None, None
     except Exception as e:
         logging.warning(f"Failed to retrieve query from cache: {e}")
 
     # Execute the query using the internal execute method
-    result, error = execution_method(query)
+    result, _, error = execution_method(query)
 
     # If successful, store the result in the cache
     if not error:
@@ -124,7 +163,7 @@ def with_cache_execute(
         except Exception as e:
             logging.warning(f"Failed to cache query result: {e}")
 
-    return result, error
+    return result, None, error
 
 
 def get_cache_client(config):
@@ -134,11 +173,14 @@ def get_cache_client(config):
             redis_host = config["redis_host"]
             redis_port = config.get("redis_port", 6379)
             redis_db_id = config.get("redis_db_id", 0)
-            logging.info(f"Found Redis config in db_config. redis_host: {redis_host} redis_port: {redis_port} redis_db_id: {redis_db_id}")
+            logging.info(
+                f"Found Redis config in db_config. redis_host: {redis_host} redis_port: {redis_port} redis_db_id: {redis_db_id}"
+            )
             cache_client = redis.StrictRedis(
-                host=redis_host,
-                port=redis_port,
-                db=redis_db_id)
+                host=redis_host, port=redis_port, db=redis_db_id
+            )
         except Exception as e:
-            logging.warning(f"redis_host is found in db_config but failed to connect: {e}")
+            logging.warning(
+                f"redis_host is found in db_config but failed to connect: {e}"
+            )
     return cache_client

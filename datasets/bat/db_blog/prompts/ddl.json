@@ -1,0 +1,220 @@
+[
+  {
+    "id": 43,
+    "nl_prompt": "Update the labels table to include a json field called comments_description.",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+      ],
+      "mysql": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: simple",
+      "ALTER",
+      "ADD_COLUMN",
+      "JSON"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "Update the labels table to include a json type field called comments_description.",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 185,
+    "nl_prompt": "Rename the content column in the tbl_posts table to post_content",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT post_content FROM tbl_posts;"
+      ],
+      "mysql": [
+        "SELECT post_content FROM tbl_posts;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: simple",
+      "ALTER",
+      "RENAME"
+    ],
+    "other": {
+      "comment": "LGTM",
+      "nl_prompt_base": "Rename the content column in the tbl_posts table to post_content",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 255,
+    "nl_prompt": "Create an Enumerated Type for Access Levels",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum VARCHAR(10) CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum ENUM('Public', 'Private', 'Restricted');"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+      ],
+      "mysql": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: simple",
+      "CREATE",
+      "ENUM",
+      "ALTER",
+      "ADD_COLUMN"
+    ],
+    "other": {
+      "nl_prompt_base": "Create an Enumerated Type for Access Levels",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 256,
+    "nl_prompt": "Add a Generated Column full_name to tbl_users. -- Store first name and last name concatenated",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (CONCAT(first_name, ' ', last_name)) STORED;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+      ],
+      "mysql": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: moderate",
+      "ALTER",
+      "ADD_COLUMN",
+      "CONCAT",
+      "SORT"
+    ],
+    "other": {
+      "nl_prompt_base": "Add a Generated Column full_name to tbl_users",
+      "nl_prompt_extra_context": "Store first name and last name concatenated",
+      "public": true
+    }
+  }
+]

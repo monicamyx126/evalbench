@@ -1,0 +1,159 @@
+[
+  {
+    "id": 42,
+    "nl_prompt": "Can you update my username to 'magic_one' -- user_id = 9;",
+    "query_type": "dml",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
+      ],
+      "mysql": [
+        "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
+      ],
+      "mysql": [
+        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [],
+      "mysql": []
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+      ],
+      "mysql": [
+        "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+      ]
+    },
+    "tags": [
+      "DML",
+      "difficulty: moderate",
+      "UPDATE"
+    ],
+    "other": {
+      "Comment": "LGTM. Instructions do not include updated_at, but that is implied.",
+      "nl_prompt_base": "Can you update my username to 'magic_one'",
+      "nl_prompt_extra_context": "user_id = 9;",
+      "public": true
+    }
+  },
+  {
+    "id": 184,
+    "nl_prompt": "Update the post content in tbl_posts -- post_id = 3, new content should be 'Updated content'",
+    "query_type": "dml",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT content FROM tbl_posts WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "Select COUNT(1) = 1 from tbl_posts where post_id = 3 and content = 'Updated Content'"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ]
+    },
+    "tags": [
+      "DML",
+      "difficulty: simple",
+      "UPDATE"
+    ],
+    "other": {
+      "nl_prompt_base": "Update the post content in tbl_posts",
+      "nl_prompt_extra_context": "post_id = 3, new content should be 'Updated content'",
+      "public": true
+    }
+  },
+  {
+    "id": 200,
+    "nl_prompt": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata -- attachment_id =1,2",
+    "query_type": "dml",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;"
+      ],
+      "mysql": [
+        "UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_security'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_privacy'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'security'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'privacy'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1; UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'user_data'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'customer_information'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'personal_data'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'client_data'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains user data and customer information for analysis purposes.') WHERE attachment_id = 2;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "Select * from tbl_attachments;"
+      ],
+      "mysql": [
+        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1; SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+      ],
+      "mysql": [
+        "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"\"database\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"programming\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"\"marketing\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"digital\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "delete from tbl_attachments where attachment_id = 1;"
+      ],
+      "mysql": [
+        "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"database\\\", \\\"attachment\\\"]', '[\\\"programming\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"marketing\\\", \\\"attachment\\\"]', '[\\\"digital\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
+      ]
+    },
+    "tags": [
+      "DML",
+      "difficulty: challenging",
+      "UPDATE",
+      "COALESCE",
+      "JSON_SET",
+      "JSON",
+      "JSON_ARRAY"
+    ],
+    "other": {
+      "nl_prompt_base": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata",
+      "nl_prompt_extra_context": "attachment_id =1,2",
+      "public": true
+    }
+  }
+]

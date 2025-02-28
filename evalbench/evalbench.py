@@ -4,19 +4,15 @@ from collections.abc import Sequence
 from absl import app
 from absl import flags
 from util.config import load_yaml_config, config_to_df
-from repository import get_repository
-from dataset.dataset import load_json, load_dataset_from_json
-import generators.models as models
-import generators.prompts as prompts
-import evaluator.evaluator as evaluator
+from dataset.dataset import load_json, load_dataset_from_json, flatten_dataset
+from evaluator.evaluator import Evaluator
 import reporting.report as report
 import reporting.bqstore as bqstore
 import reporting.analyzer as analyzer
-import databases
-import setup_teardown
 import logging
-import json
-import pandas as pd
+from util.config import set_session_configs
+from util.service import load_session_configs, create_eval_instances
+import os
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -32,79 +28,76 @@ _EXPERIMENT_CONFIG = flags.DEFINE_string(
 _OUTPUT_TYPE = flags.DEFINE_string(
     "output_type",
     BIG_QUERY_OUTPUT,
-    "Specifies the output type: 'csv' for a CSV file, 'big_query' to store results in BigQuery"
+    "Specifies the output type: 'csv' for a CSV file, 'big_query' to store results in BigQuery",
 )
 
 
 def store_data(output_type, data_df, csv_file_name, bigquery_store_type, job_id):
-    if (output_type == CSV_OUTPUT):
+    if output_type == CSV_OUTPUT:
         logging.info(f"Storing {csv_file_name}")
-        data_df.to_csv(f'{csv_file_name}_{job_id}.csv', index=False)
+        data_df.to_csv(f"{csv_file_name}_{job_id}.csv", index=False)
     else:
         report.store(data_df, bigquery_store_type)
 
 
-# evalbench.py
-def main(argv: Sequence[str]) -> None:
-    logging.info("EvalBench v1.0.0")
+def main(argv: Sequence[str]):
+    try:
+        logging.info("EvalBench v1.0.0")
+        session: dict = {}
 
-    experiment_config = load_yaml_config(_EXPERIMENT_CONFIG.value)
-    if experiment_config == "":
-        return
+        parsed_config = load_yaml_config(_EXPERIMENT_CONFIG.value)
+        if parsed_config == "":
+            logging.error("No Eval Config Found.")
+            return
+        set_session_configs(session, parsed_config)
+        # Load the configs
+        config, db_config, model_config, setup_config = load_session_configs(session)
+        logging.info("Loaded Configurations in %s", _EXPERIMENT_CONFIG.value)
 
-    logging.info("Loaded %s", _EXPERIMENT_CONFIG.value)
+        # Load the dataset
+        dataset = load_dataset_from_json(session["dataset_config"], config)
 
-    repo = get_repository(experiment_config)
-    repo.clone()
+        # Load the instances for eval
+        core_db, model_generator, prompt_generator = create_eval_instances(
+            config, db_config, model_config
+        )
 
-    db_config_yaml = experiment_config["database_config"]
-    model_config_yaml = experiment_config["model_config"]
-    dataset_config_json = experiment_config["dataset_config"]
+        # Load the evaluator
+        evaluator = Evaluator(
+            config, prompt_generator, model_generator, db_config, core_db, setup_config
+        )
 
-    # Load the dataset
-    dataset, database = load_dataset_from_json(dataset_config_json, experiment_config)
+        # Run evaluations
+        evaluator.evaluate(flatten_dataset(dataset))
+        job_id, run_time = evaluator.process()
+        core_db.clean_tmp_creations()
+        core_db.close_connections()
 
-    # Load the model config
-    model_config = load_yaml_config(model_config_yaml)
+        config_df = config_to_df(job_id, run_time, config, model_config, db_config)
 
-    # Load the DB config DB name comes from the dataset
-    db_config = load_yaml_config(db_config_yaml)
-    db_config["database_name"] = database
-    model_config["database_config"] = db_config
+        output_type = _OUTPUT_TYPE.value
 
-    if "setup_config" in experiment_config:
-        setup_teardown.setupDatabase(db_config=db_config, experiment_config=experiment_config,
-                                     database=database, create_user=True)
-    db = databases.get_database(db_config)
+        store_data(output_type, config_df, "configs", bqstore.STORETYPE.CONFIGS, job_id)
 
-    # Load the Query Generator
-    model_generator = models.get_generator(model_config)
+        results = load_json(f"/tmp/eval_output_{job_id}.json")
+        results_df = report.get_dataframe(results)
+        report.quick_summary(results_df)
+        store_data(output_type, results_df, "results", bqstore.STORETYPE.EVALS, job_id)
 
-    # Load the Prompt Generator
-    prompt_generator = prompts.get_generator(db, experiment_config)
+        scores = load_json(f"/tmp/score_result_{job_id}.json")
+        scores_df, summary_scores_df = analyzer.analyze_result(scores, config)
+        summary_scores_df["job_id"] = job_id
+        summary_scores_df["run_time"] = run_time
 
-    # Load the evaluator
-    eval = evaluator.Evaluator(experiment_config, prompt_generator, model_generator, db)
-    job_id, run_time = eval.evaluate(dataset)
-
-    config_df = config_to_df(job_id, run_time, experiment_config, model_config, db_config)
-
-    output_type = _OUTPUT_TYPE.value
-
-    store_data(output_type, config_df, 'configs', bqstore.STORETYPE.CONFIGS, job_id)
-
-    results = load_json(f"/tmp/eval_output_{job_id}.json")
-    results_df = report.get_dataframe(results)
-    report.quick_summary(results_df)
-    store_data(output_type, results_df, 'results', bqstore.STORETYPE.EVALS, job_id)
-
-    scores = load_json(f"/tmp/score_result_{job_id}.json")
-    scores_df, summary_scores_df = analyzer.analyze_result(scores, experiment_config)
-    summary_scores_df["job_id"] = job_id
-    summary_scores_df["run_time"] = run_time
-
-    store_data(output_type, scores_df, 'scores', bqstore.STORETYPE.SCORES, job_id)
-    store_data(output_type, summary_scores_df, 'summary', bqstore.STORETYPE.SUMMARY, job_id)
+        store_data(output_type, scores_df, "scores", bqstore.STORETYPE.SCORES, job_id)
+        store_data(
+            output_type, summary_scores_df, "summary", bqstore.STORETYPE.SUMMARY, job_id
+        )
+        print(f"Finished Job ID {job_id}")
+        return os._exit(0)
+    except Exception as e:
+        logging.error(e)
+        return os._exit(1)
 
 
 if __name__ == "__main__":

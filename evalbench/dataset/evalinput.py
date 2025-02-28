@@ -1,7 +1,8 @@
 from google.protobuf.json_format import MessageToDict
 
 try:
-    import eval_request_pb2
+    from evalproto import eval_request_pb2
+
     PROTO_IMPORTED = True
 except ImportError:
     PROTO_IMPORTED = False
@@ -50,6 +51,7 @@ class EvalInputRequest:
         self.trace_id = trace_id
 
     if PROTO_IMPORTED:
+
         @classmethod
         def init_from_proto(self, proto: eval_request_pb2.EvalInputRequest):
             """Initializes an EvalInputRequest from eval_request_pb2 proto."""
@@ -71,9 +73,11 @@ class EvalInputRequest:
                 sql_generator_time=request.get("sqlGeneratorTime"),
                 generated_sql=request.get("generatedSql"),
                 job_id=request.get("jobId"),
-                trace_id=request.get('traceId'),
+                trace_id=request.get("traceId"),
             )
+
     else:
+
         @classmethod
         def init_from_proto(cls, proto):
             raise ImportError("protobuf module not available")
