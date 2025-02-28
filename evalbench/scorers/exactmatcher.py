@@ -1,5 +1,5 @@
 """
-ExactMatcher 
+ExactMatcher
 
 It is a simple comparison strategy which checks if expected and generated results are exactly the same.
 
