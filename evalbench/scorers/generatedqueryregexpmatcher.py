@@ -67,7 +67,7 @@ class GeneratedQueryRegexpMatcher(comparator.Comparator):
 
         if "invert_results" in config:
             self.invert_results = config["invert_results"]
-        if "match_all" in config:
+        if "match_all_patterns" in config:
             self.match_all_patterns = config["match_all_patterns"]
         if "match_whole_query" in config:
             self.match_whole_query = config["match_whole_query"]
