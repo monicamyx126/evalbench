@@ -7,7 +7,7 @@ Run Configuration Options:
     1. use_eval_sql: Optional
         - Allowed values: True, False
         - Default value: False
-        - When use_eval_sql is set to True, it compares the results of eval queries which are used to verify DDL queries
+        - When use_eval_sql is set to True, it compares the results of eval queries which are used to verify DDL and DML queries
 """
 
 from typing import Tuple
