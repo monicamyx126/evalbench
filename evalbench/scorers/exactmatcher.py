@@ -1,4 +1,14 @@
-"""Simple comparison strategy that checks if the two execution results are exactly the same."""
+"""
+ExactMatcher 
+
+It is a simple comparison strategy which checks if expected and generated results are exactly the same.
+
+Run Configuration Options:
+    1. use_eval_sql: Optional
+        - Allowed values: True, False
+        - Default value: False
+        - When use_eval_sql is set to True, it compares the results of eval queries which are used to verify DDL queries
+"""
 
 from typing import Tuple
 
@@ -6,10 +16,12 @@ from scorers import comparator
 
 
 class ExactMatcher(comparator.Comparator):
-    """ExactMatcher.
+    """
+    ExactMatcher class implements the Comparator base class with exact match logic.
 
     Attributes:
-      name:
+      1. name: Name of the comparator. Set to "exact match"
+      2. config: the scorer config defined in the run config yaml file
     """
 
     def __init__(self, config: dict):
@@ -29,7 +41,8 @@ class ExactMatcher(comparator.Comparator):
         generated_eval_result: str,
         generated_error: str,
     ) -> Tuple[float, str]:
-        """Simple comparison strategy that checks if the two execution results are exactly the same."""
+        """compare function implements the comparison logic for ExactMatcher comparator."""
+
         if golden_error or generated_error:
             return 0, None
         if self.config and "use_eval_sql" in self.config:
