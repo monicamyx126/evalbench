@@ -83,7 +83,7 @@ class ComparisonResult:
             "comparator": self.comparator.name,
             "score": self.score,
             "comparison_error": self.comparison_error,
-            "comparison_logs": self.comparison_logs
+            "comparison_logs": self.comparison_logs,
         }
 
 
@@ -139,7 +139,7 @@ def convert_to_set(results: list[Any]) -> list[Any] | None:
         # results set are too large specially for air_travel.
         results = list(set(results))
     except TypeError:
-        print(f'Error converting results to set {traceback.format_exc()}')
+        print(f"Error converting results to set {traceback.format_exc()}")
         logging.exception('Call to "list" resulted in an error')
         # Convert to hashable items as we cannot create set out of non-hashable
         # values, remove duplicates & sort.

@@ -1,0 +1,678 @@
+[
+  {
+    "id": 3,
+    "nl_prompt": "How many bloggers who have posted at least 1 blog in 2024 and have linked twitter account",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= DATE('2024-01-01') AND p.created_at <= DATE('2024-12-31') AND u.social_media_links ->> 'twitter' IS NOT NULL;"
+      ],
+      "mysql": [
+        "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= DATE('2024-01-01') AND p.created_at <= DATE_ADD(DATE('2024-01-01'), INTERVAL 1 YEAR) AND JSON_EXTRACT(u.social_media_links, '$.twitter') IS NOT NULL;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: moderate",
+      "SELECT",
+      "JOIN",
+      "JSON",
+      "JSON_EXTRACT",
+      "datalinking"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "How many bloggers who have posted at least 1 blog in 2024 and have linked twitter account",
+      "nl_prompt_extra_context": "",
+      "public": true
+    }
+  },
+  {
+    "id": 5,
+    "nl_prompt": "What is the number of comments per post for each user? -- Use user_id to identify users and post_id to identify posts.",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT u.user_id, p.post_id, COUNT(c.comment_id) comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+      ],
+      "mysql": [
+        "SELECT u.user_id, p.post_id, COUNT(c.comment_id) comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: simple",
+      "SELECT",
+      "JOIN",
+      "AGGREGATE",
+      "CASE",
+      "LEFT_JOIN",
+      "IS_NULL"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "What is the number of comments per post for each user?",
+      "nl_prompt_extra_context": "Use user_id to identify users and post_id to identify posts.",
+      "public": true
+    }
+  },
+  {
+    "id": 9,
+    "nl_prompt": "Can you find all the users who have not made any posts?",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+      ],
+      "mysql": [
+        "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: simple",
+      "SELECT",
+      "LEFT_JOIN"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "Can you find all the users who have not made any posts?",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 13,
+    "nl_prompt": "Retrieve the top 5 posts based on the number of likes, among users who created the post's category. -- Include the post id and the count of number of likes",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT p.post_id, p.likes_count as total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
+      ],
+      "mysql": [
+        "SELECT p.post_id, p.likes_count as total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: simple",
+      "SELECT",
+      "JOIN"
+    ],
+    "other": {
+      "Comment": "LGTM.",
+      "nl_prompt_base": "Retrieve the top 5 posts based on the number of likes, among users who created the post's category.",
+      "nl_prompt_extra_context": "Include the post id and the count of number of likes",
+      "public": true
+    }
+  },
+  {
+    "id": 16,
+    "nl_prompt": "How many followers does each user have?",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
+      ],
+      "mysql": [
+        "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: simple",
+      "SELECT",
+      "JOIN",
+      "AGGREGATE",
+      "LEFT_JOIN"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "How many followers does each user have?",
+      "nl_prompt_extra_context": "Include user id to identify users",
+      "public": true
+    }
+  },
+  {
+    "id": 18,
+    "nl_prompt": "What posts have been reported and are pending review? What is the reason for the review? -- Identify posts by including post_id",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
+      ],
+      "mysql": [
+        "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: simple",
+      "SELECT",
+      "JOIN"
+    ],
+    "other": {
+      "Comment": "LGTM. 'Pending review' is unspecified, but is_resolved=FALSE is a reasonable interpretation.",
+      "nl_prompt_base": "What posts have been reported and are pending review? What is the reason for the review?",
+      "nl_prompt_extra_context": "Identify posts by including post_id",
+      "public": true
+    }
+  },
+  {
+    "id": 19,
+    "nl_prompt": "What is the most common reason for reporting a post, and what is the average time to resolve the report in minutes?",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc)"
+      ],
+      "mysql": [
+        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc)"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: moderate",
+      "SELECT",
+      "AGGREGATE",
+      "DATE",
+      "time"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "What is the most common reason for reporting a post, and what is the average time to resolve the report in minutes?",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 23,
+    "nl_prompt": "What is the average number of posts per day and per category? -- Include the category name",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT TO_CHAR(p.created_at, 'YYYY-MM-DD') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT DATE_TRUNC('day', created_at) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
+      ],
+      "mysql": [
+        "SELECT DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY created_at, c.name ORDER BY created_at, name ASC;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: challenging",
+      "SELECT",
+      "AGGREGATE",
+      "JOIN",
+      "DATE",
+      "time"
+    ],
+    "other": {
+      "Comment": "LGTM. Ordering is not well defined but seems reasonable to expect ordering by date.",
+      "nl_prompt_base": "What is the average number of posts per day and per category?",
+      "nl_prompt_extra_context": "Include the category name",
+      "public": true
+    }
+  },
+  {
+    "id": 99,
+    "nl_prompt": "How many succesfull login activities have been performed? -- Include the total, number of successes and the percentage",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
+      ],
+      "mysql": [
+        "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: moderate",
+      "SELECT",
+      "AGGREGATE",
+      "CONDITIONS",
+      "datalinking"
+    ],
+    "other": {
+      "Comment": "LGTM. Data needs more examples to test -- there are no unsucceful logins",
+      "nl_prompt_base": "How many succesfull login activities have been performed?",
+      "nl_prompt_extra_context": "Include the total, number of successes and the percentage",
+      "public": true
+    }
+  },
+  {
+    "id": 100,
+    "nl_prompt": "Identify which is the most active hour of the day across all users",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
+      ],
+      "mysql": [
+        "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: moderate",
+      "SELECT",
+      "EXTRACT",
+      "AGGREGATE",
+      "SORT",
+      "LIMIT",
+      "HOUR",
+      "time"
+    ],
+    "other": {
+      "comment": "LGTM",
+      "nl_prompt_base": "Identify which is the most active hour of the day across all users",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 133,
+    "nl_prompt": "Identify the attachments that are tagged as 'database' and have read-only access",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT * FROM tbl_attachments WHERE tags_file @> '[\"database\"]' AND (access_permissions ->> 'read_only')::boolean;"
+      ],
+      "mysql": [
+        "SELECT a.* FROM tbl_attachments a WHERE JSON_CONTAINS(a.tags_file, '\"database\"') AND JSON_UNQUOTE(JSON_EXTRACT(a.access_permissions, '$.read_only')) = 'true';"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: Moderate",
+      "SELECT",
+      "JSON",
+      "JOIN",
+      "datalinking"
+    ],
+    "other": {
+      "comment": "LGTM",
+      "nl_prompt_base": "Identify the attachments that are tagged as 'database' and have read-only access",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 156,
+    "nl_prompt": "List the latest uploaded media file for each user -- include user_id, user name and media url",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+      ],
+      "mysql": [
+        "SELECT m1.uploader_id, u.username, m1.url.description FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "SELECT",
+      "AGGREGATE",
+      "JOIN",
+      "difficulty: moderate"
+    ],
+    "other": {
+      "comment": "LGTM",
+      "nl_prompt_base": "List the latest uploaded media file for each user",
+      "nl_prompt_extra_context": "include user_id, user name and media url",
+      "public": true
+    }
+  },
+  {
+    "id": 180,
+    "nl_prompt": "Which posts have tags related to both 'programming' and 'database' ?",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT * FROM tbl_posts WHERE tags::jsonb @> '[ \"programming\", \"database\" ]'::jsonb;"
+      ],
+      "mysql": [
+        "SELECT * FROM tbl_posts WHERE JSON_CONTAINS(tags, '\"programming\"') AND JSON_CONTAINS(tags, '\"database\"');"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: simple",
+      "SELECT",
+      "JSON",
+      "difficulty: moderate",
+      "JSON_CONTAINS"
+    ],
+    "other": {
+      "nl_prompt_base": "Which posts have tags related to both 'programming' and 'database' ?",
+      "nl_prompt_extra_context": "",
+      "public": true
+    }
+  },
+  {
+    "id": 299,
+    "nl_prompt": "Total number of likes on comments reported by popular users on programming posts where the report is not resolved yet -- Popular users have more than 4 unique followers.",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE NOT is_resolved AND user_id IN (SELECT following_id user_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
+      ],
+      "mysql": [
+        "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE NOT is_resolved AND user_id IN (SELECT following_id user_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: challenging",
+      "SELECT",
+      "AGGREGATE",
+      "JOIN",
+      "HAVING",
+      "COUNT",
+      "datalinking"
+    ],
+    "other": {
+      "public": true,
+      "Comment": "LGTM",
+      "nl_prompt_base": "Total number of likes on comments reported by popular users on programming posts where the report is not resolved yet.",
+      "nl_prompt_extra_context": "Popular users have more than 4 unique followers."
+    }
+  },
+  {
+    "id": 300,
+    "nl_prompt": "Number of messages per day for conversations that span multiple days and have no read messages.",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "WITH conversations AS (SELECT conversation_id, MAX(sending_time) - MIN(sending_time) conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ESLE 0 END) = 0) SELECT pm.conversation_id, DATE(sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > INTERVAL '1 day' GROUP BY pm.conversation_id, DATE(sending_time)"
+      ],
+      "mysql": [
+        "SELECT pm.conversation_id, DATE(pm.sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN (SELECT conversation_id, TIMESTAMPDIFF(SECOND, MIN(sending_time), MAX(sending_time)) AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) AS conversations ON pm.conversation_id = conversations.conversation_id WHERE conversations.conv_length > 86400 GROUP BY pm.conversation_id, DATE(pm.sending_time);"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: challenging",
+      "SELECT",
+      "AGGREGATE",
+      "JOIN",
+      "HAVING",
+      "COUNT",
+      "DATE",
+      "time"
+    ],
+    "other": {
+      "public": true,
+      "Comment": "LGTM",
+      "nl_prompt_base": "Number of messages per day for conversations that span multiple days and have no read messages.",
+      "nl_prompt_extra_context": ""
+    }
+  },
+  {
+    "id": 301,
+    "nl_prompt": "Show average comment length by browser for users who exclusively use a specific browser",
+    "query_type": "dql",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser"
+      ],
+      "mysql": [
+        "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        null
+      ],
+      "mysql": [
+        null
+      ]
+    },
+    "setup_sql": {},
+    "cleanup_sql": {},
+    "tags": [
+      "DQL",
+      "difficulty: challenging",
+      "SELECT",
+      "AGGREGATE",
+      "JOIN",
+      "HAVING"
+    ],
+    "other": {
+      "public": true,
+      "Comment": "LGTM",
+      "nl_prompt_base": "Show average comment length by browser for users who exclusively use a specific browser",
+      "nl_prompt_extra_context": ""
+    }
+  }
+]

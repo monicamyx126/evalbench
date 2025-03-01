@@ -16,7 +16,7 @@ def analyze_one_metric(
     original_df_size = int(len(df) / num_scorers)
     df = df[df["generated_sql"].notna()]
     if execution:
-        if 'returned_sql' in df['comparator'].values:
+        if "returned_sql" in df["comparator"].values:
             correct_results_count = len(
                 df[
                     (df["generated_error"].isna())
@@ -26,9 +26,7 @@ def analyze_one_metric(
             )
         else:
             correct_results_count = len(
-                df[
-                    (df["generated_error"].isna())
-                ]["id"].drop_duplicates()
+                df[(df["generated_error"].isna())]["id"].drop_duplicates()
             )
     else:
         df = df[df["comparator"] == metric_name]
@@ -66,13 +64,21 @@ def analyze_result(scores, experiment_config: dict[str, str]):
         summary_scores.append(summary)
 
     summary = analyze_one_metric(
-        df=df, metric_name="executable", metric_score=1, execution=True, num_scorers=num_scorers
+        df=df,
+        metric_name="executable",
+        metric_score=1,
+        execution=True,
+        num_scorers=num_scorers,
     )
 
     summary_scores.append(summary)
     summary_scores_df = pd.DataFrame.from_dict(summary_scores)
-    df[["generated_error", "comparator", "comparison_error", "generated_sql", "job_id"]] = df[
+    df[
         ["generated_error", "comparator", "comparison_error", "generated_sql", "job_id"]
-    ].astype("string")
+    ] = df[
+        ["generated_error", "comparator", "comparison_error", "generated_sql", "job_id"]
+    ].astype(
+        "string"
+    )
     df[["id"]] = df[["id"]].astype("int64")
     return df, summary_scores_df

@@ -37,7 +37,7 @@ def clean_sql_query(query: str):
     query = query.strip("`")
 
     # Replace any whitespaces with a single space
-    query = re.sub(r'\s+', ' ', query)
+    query = re.sub(r"\s+", " ", query)
 
     # Remove extra whitespaces from front and back
     query = query.strip()
@@ -85,7 +85,6 @@ class GeneratedQueryRegexpMatcher(comparator.Comparator):
         generated_eval_result: str,
         generated_error: str,
     ) -> Tuple[float, str]:
-
         """compare function implements the comparison logic for GeneratedQueryRegexpMatcher comparator."""
 
         cleaned_query = clean_sql_query(generated_query)

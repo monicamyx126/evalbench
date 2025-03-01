@@ -1,5 +1,0 @@
-generator: magick
-project_id: cloud-db-nl2sql
-location: us-central1
-vertex_model: gemini-pro-1_5_flash-nl2sql
-base_prompt: ""

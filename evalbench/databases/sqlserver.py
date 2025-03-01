@@ -1,64 +1,57 @@
+from sqlalchemy.pool import NullPool
 import sqlalchemy
-
-from sqlalchemy import text
-from google.cloud.sql.connector import Connector
+from sqlalchemy import text, MetaData
+import logging
 from .db import DB
+from google.cloud.sql.connector import Connector
 from .util import (
     get_db_secret,
     rate_limited_execute,
     with_cache_execute,
-    get_cache_client,
+    DBResourceExhaustedError,
+    DatabaseSchema,
 )
-from typing import Any, Tuple
-from threading import Semaphore
-import logging
+from typing import Any, List, Optional, Tuple
 
 
 class SQLServerDB(DB):
 
+    #####################################################
+    #####################################################
+    # Database Connection Setup Logic
+    #####################################################
+    #####################################################
+
     def __init__(self, db_config):
         super().__init__(db_config)
-        instance_connection_name = f"{db_config['project_id']}:{db_config['region']}:{db_config['instance_name']}"
-        db_user = db_config["user_name"]
-        db_pass_secret_path = db_config["password"]
-        db_pass = get_db_secret(db_pass_secret_path)
-        self.db_config = db_config
-        self.db_name = db_config["database_name"]
-        self.execs_per_minute = db_config["max_executions_per_minute"]
-        self.semaphore = Semaphore(self.execs_per_minute)
-        self.max_attempts = 3
         logging.getLogger("pytds").setLevel(logging.ERROR)
-
-        # Initialize the Cloud SQL Connector object
         self.connector = Connector()
 
-        def getconn():
+        def get_conn():
             conn = self.connector.connect(
-                instance_connection_name,
+                f"{db_config['project_id']}:{db_config['region']}:{db_config['instance_name']}",
                 "pytds",
-                user=db_user,
-                password=db_pass,
+                user=db_config["user_name"],
+                password=get_db_secret(db_config["password"]),
                 db=self.db_name,
             )
             return conn
 
-        self.engine = sqlalchemy.create_engine(
-            "mssql+pytds://",
-            creator=getconn,
-            pool_size=50,
-            pool_recycle=3600,
-            pool_pre_ping=True,
-            connect_args={
-                "connect_timeout": 60,
-            },
-            echo=False,
-            logging_name=None,
-        )
+        def get_engine_args():
+            common_args = {
+                "creator": get_conn,
+                "connect_args": {"command_timeout": 60, "multi_statements": True},
+                "echo": False,
+                "logging_name": None,
+            }
+            if "is_tmp_db" in db_config:
+                common_args["poolclass"] = NullPool
+            else:
+                common_args["pool_size"] = 50
+                common_args["pool_recycle"] = 300
+            return common_args
 
-        self.cache_client = get_cache_client(db_config)
-
-    def __del__(self):
-        self.close_connections()
+        self.engine = sqlalchemy.create_engine("mssql+pytds://", **get_engine_args())
 
     def close_connections(self):
         try:
@@ -69,61 +62,124 @@ class SQLServerDB(DB):
                 f"Failed to close connections. This may result in idle unused connections."
             )
 
-    def generate_schema(self):
-        # To be implemented
-        pass
+    #####################################################
+    #####################################################
+    # Database Specific Execution Logic and Handling
+    #####################################################
+    #####################################################
 
-    def generate_ddl(self):
-        # To be implemented
-        pass
+    def batch_execute(self, commands: list[str]):
+        _, _, error = self.execute(";\n".join(commands))
+        if error:
+            raise RuntimeError(f"{error}")
 
-    def get_metadata(self) -> dict:
-        # To be implemented
-        pass
-
-    def _execute(self, query: str) -> Tuple[Any, Any]:
-        result = []
-        error = None
-        try:
-            with self.engine.connect() as connection:
-                with connection.begin():
-                    resultset = connection.execute(text(query))
-                    rows = resultset.fetchall()
-                    for r in rows:
-                        result.append(r._asdict())
-        except Exception as e:
-            error = str(e)
-        return result, error
-
-    def _execute_with_no_caching(self, query: str) -> Tuple[Any, Any]:
-        if isinstance(self.execs_per_minute, int):
-            return rate_limited_execute(
-                query,
-                self._execute,
-                self.execs_per_minute,
-                self.semaphore,
-                self.max_attempts,
-            )
-        else:
-            return self._execute(query)
-
-    def execute(self, query: str, use_cache=False) -> Tuple[Any, Any]:
-        """
-        Execute a query with optional caching. Falls back to the original logic if caching is not provided.
-
-        Args:
-            query (str): The SQL query to execute.
-            cache_client: An optional caching client (e.g., Redis).
-
-        Returns:
-            Tuple[Any, Any]: The query results and any error message (None if successful).
-        """
-        if not use_cache or not self.cache_client:
-            return self._execute_with_no_caching(query)
-
+    def execute(
+        self,
+        query: str,
+        eval_query: Optional[str] = None,
+        use_cache=False,
+        rollback=False,
+    ) -> Tuple[Any, Any, Any]:
+        if query.strip() == "":
+            return None, None, None
+        if not use_cache or not self.cache_client or eval_query:
+            return self._execute(query, eval_query, rollback)
         return with_cache_execute(
             query,
             self.engine.url,
-            self._execute_with_no_caching,
+            self._execute,
             self.cache_client,
         )
+
+    def _execute(
+        self,
+        query: str,
+        eval_query: Optional[str] = None,
+        rollback=False,
+    ) -> Tuple[Any, Any, Any]:
+        def _run_execute(query: str, eval_query: Optional[str] = None, rollback=False):
+            result: List = []
+            eval_result: List = []
+            error = None
+            try:
+                with self.engine.connect() as connection:
+                    with connection.begin() as transaction:
+                        resultset = connection.execute(text(query))
+                        if resultset.returns_rows:
+                            rows = resultset.fetchall()
+                            result.extend(r._asdict() for r in rows)
+
+                        if eval_query:
+                            eval_resultset = connection.execute(text(eval_query))
+                            if eval_resultset.returns_rows:
+                                eval_rows = eval_resultset.fetchall()
+                                eval_result.extend(r._asdict() for r in eval_rows)
+
+                        if rollback:
+                            transaction.rollback()
+            except Exception as e:
+                error = str(e)
+                if "57P03" in error:
+                    raise DBResourceExhaustedError("DB Exhausted") from e
+            return result, eval_result, error
+
+        return rate_limited_execute(
+            (query, eval_query, rollback),
+            _run_execute,
+            self.execs_per_minute,
+            self.semaphore,
+            self.max_attempts,
+        )
+
+    def get_metadata(self) -> dict:
+        db_metadata = {}
+
+        try:
+            with self.engine.connect() as connection:
+                metadata = MetaData()
+                metadata.reflect(bind=connection, schema=self.db_name)
+                for table in metadata.tables.values():
+                    columns = []
+                    for column in table.columns:
+                        columns.append({"name": column.name, "type": str(column.type)})
+                    db_metadata[table.name] = columns
+        except Exception:
+            pass
+
+        return db_metadata
+
+    #####################################################
+    #####################################################
+    # Setup / Teardown of temporary databases
+    #####################################################
+    #####################################################
+
+    def generate_ddl(
+        self,
+        schema: DatabaseSchema,
+    ) -> list[str]:
+        raise RuntimeError("Not yet supported.")
+
+    def create_tmp_database(self, database_name: str):
+        raise RuntimeError("Not yet supported.")
+
+    def drop_tmp_database(self, database_name: str):
+        raise RuntimeError("Not yet supported.")
+
+    def drop_all_tables(self):
+        raise RuntimeError("Not yet supported.")
+
+    def insert_data(self, data: dict[str, List[str]]):
+        raise RuntimeError("Not yet supported.")
+
+    #####################################################
+    #####################################################
+    # Database User Management
+    #####################################################
+    #####################################################
+
+    def create_tmp_users(self, dql_user: str, dml_user: str, tmp_password: str):
+        raise RuntimeError("Not yet supported.")
+
+    def delete_tmp_user(self, username: str):
+        raise RuntimeError("Not yet supported.")

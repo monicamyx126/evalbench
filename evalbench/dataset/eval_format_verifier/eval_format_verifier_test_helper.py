@@ -12,15 +12,17 @@ def get_default_single_json(
     Args:
       update: A dictionary of updates to apply to the default json object.
     """
-    json_data = [{
-        "id": 1,
-        "nl_prompt": "count all the pokemon",
-        "query_type": "DQL",
-        "database": "pokemon",
-        "dialects": ["postgres"],
-        "golden_sql": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
-        "eval_query": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
-    }]
+    json_data = [
+        {
+            "id": 1,
+            "nl_prompt": "count all the pokemon",
+            "query_type": "DQL",
+            "database": "pokemon",
+            "dialects": ["postgres"],
+            "golden_sql": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
+            "eval_query": {"postgres": ["SELECT COUNT(*) FROM pokemon"]},
+        }
+    ]
     if update:
         json_data[0].update(update)
     return json_data
@@ -84,12 +86,8 @@ _DEFAULT_GOOD_JSON_LIST = [
         "database": "pokemon",
         "dialects": ["postgres", "mysql"],
         "golden_sql": {
-            "postgres": [
-                "UPDATE pokemon SET type = '🔥' WHERE type = 'super_fire'"
-            ],
-            "mysql": [
-                "UPDATE pokemon SET type = '🔥' WHERE type = 'super_fire'"
-            ],
+            "postgres": ["UPDATE pokemon SET type = '🔥' WHERE type = 'super_fire'"],
+            "mysql": ["UPDATE pokemon SET type = '🔥' WHERE type = 'super_fire'"],
         },
         "eval_query": {
             "postgres": ["SELECT 1"],

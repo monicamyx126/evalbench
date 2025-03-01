@@ -1,4 +1,5 @@
 """Utility functions to aid the scorers."""
+
 import time
 
 from threading import Semaphore
@@ -31,7 +32,7 @@ def rate_limited_execute(
             # exponentially backoff starting at 5 seconds
             time.sleep(5 * (2 ** (attempt)))
             attempt += 1
-            logging.debug('Vertex API Exception: %s', e)
+            logging.debug("Vertex API Exception: %s", e)
 
     time.sleep(60 / execs_per_minute)
     semaphore.release()
