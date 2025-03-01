@@ -151,14 +151,17 @@ class PGDB(DB):
     def get_metadata(self) -> dict:
         db_metadata = {}
 
-        with self.engine.connect() as connection:
-            metadata = MetaData()
-            metadata.reflect(bind=connection, schema="public")
-            for table in metadata.tables.values():
-                columns = []
-                for column in table.columns:
-                    columns.append({"name": column.name, "type": str(column.type)})
-                db_metadata[table.name] = columns
+        try:
+            with self.engine.connect() as connection:
+                metadata = MetaData()
+                metadata.reflect(bind=connection, schema="public")
+                for table in metadata.tables.values():
+                    columns = []
+                    for column in table.columns:
+                        columns.append({"name": column.name, "type": str(column.type)})
+                    db_metadata[table.name] = columns
+        except Exception:
+            pass
 
         return db_metadata
 
