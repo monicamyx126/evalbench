@@ -19,8 +19,12 @@ FROM INFORMATION_SCHEMA.TABLES
 WHERE TABLE_TYPE = 'BASE TABLE';
 """
 
-DROP_TABLE_COMMAND = """
-DROP TABLE [{SCHEMA}].[{TABLE_NAME}];
+DROP_ALL_TABLES_QUERY = """
+USE master;
+ALTER DATABASE {DATABASE} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+DROP DATABASE {DATABASE};
+CREATE DATABASE {DATABASE};
+USE {DATABASE};
 """
 
 DELETE_USER_QUERY = """
@@ -209,15 +213,9 @@ class SQLServerDB(DB):
             logging.info(f"Could not delete database: {error}")
 
     def drop_all_tables(self):
-        results, _, error = self.execute(LIST_ALL_TABLES_QUERY)
+        _, error = self._execute_autocommit(DROP_ALL_TABLES_QUERY.format(DATABASE=self.db_name))
         if error:
             raise RuntimeError(error)
-        
-        drop_all_tables_commands = [
-            DROP_TABLE_COMMAND.format(SCHEMA=table["TABLE_SCHEMA"], TABLE_NAME=table["TABLE_NAME"])
-            for table in results
-        ]
-        self.batch_execute(drop_all_tables_commands)
 
     def insert_data(self, data: dict[str, List[str]]):
         if not data:
