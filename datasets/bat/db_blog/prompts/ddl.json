@@ -5,7 +5,9 @@
     "query_type": "ddl",
     "database": "db_blog",
     "dialects": [
-      "mysql"
+      "postgres",
+      "mysql",
+      "sqlserver"
     ],
     "golden_sql": {
       "postgres": [
@@ -13,6 +15,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_labels ADD comments_description NVARCHAR(MAX);"
       ]
     },
     "eval_query": {
@@ -21,6 +26,9 @@
       ],
       "mysql": [
         "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+      ],
+      "sqlserver": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_labels' AND COLUMN_NAME = 'comments_description' AND DATA_TYPE = 'nvarchar';"
       ]
     },
     "setup_sql": {
@@ -28,6 +36,9 @@
         "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
       ],
       "mysql": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "sqlserver": [
         "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
       ]
     },
@@ -37,6 +48,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "sqlserver": [  
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"  
       ]
     },
     "tags": [
@@ -60,7 +74,8 @@
     "database": "db_blog",
     "dialects": [
       "postgres",
-      "mysql"
+      "mysql",
+      "sqlserver"
     ],
     "golden_sql": {
       "postgres": [
@@ -68,6 +83,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+      ],
+      "sqlserver": [
+        "EXEC sp_rename 'tbl_posts.content', 'post_content', 'COLUMN';"
       ]
     },
     "eval_query": {
@@ -75,6 +93,9 @@
         "SELECT post_content FROM tbl_posts;"
       ],
       "mysql": [
+        "SELECT post_content FROM tbl_posts;"
+      ],
+      "sqlserver": [
         "SELECT post_content FROM tbl_posts;"
       ]
     },
@@ -84,6 +105,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "sqlserver": [
+        "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
       ]
     },
     "cleanup_sql": {
@@ -92,6 +116,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "sqlserver": [
+        "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
       ]
     },
     "tags": [
@@ -114,7 +141,8 @@
     "database": "db_blog",
     "dialects": [
       "postgres",
-      "mysql"
+      "mysql",
+      "sqlserver"
     ],
     "golden_sql": {
       "postgres": [
@@ -122,6 +150,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_tags ADD COLUMN access_level_enum ENUM('Public', 'Private', 'Restricted');"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_tags ADD access_level_enum VARCHAR(10) CONSTRAINT chk_access_level CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
       ]
     },
     "eval_query": {
@@ -130,6 +161,9 @@
       ],
       "mysql": [
         "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+      ],
+      "sqlserver": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_tags' AND COLUMN_NAME = 'access_level_enum';"
       ]
     },
     "setup_sql": {
@@ -138,6 +172,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
       ]
     },
     "cleanup_sql": {
@@ -146,6 +183,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
       ]
     },
     "tags": [
@@ -169,7 +209,8 @@
     "database": "db_blog",
     "dialects": [
       "postgres",
-      "mysql"
+      "mysql",
+      "sqlserver"
     ],
     "golden_sql": {
       "postgres": [
@@ -177,6 +218,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (CONCAT(first_name, ' ', last_name)) STORED;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_users ADD full_name AS CONCAT(first_name, ' ', last_name) PERSISTED;"
       ]
     },
     "eval_query": {
@@ -185,6 +229,9 @@
       ],
       "mysql": [
         "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+      ],
+      "sqlserver": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name';"
       ]
     },
     "setup_sql": {
@@ -193,6 +240,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ],
+      "sqlserver": [
+        "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
       ]
     },
     "cleanup_sql": {
@@ -201,6 +251,9 @@
       ],
       "mysql": [
         "ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ],
+      "sqlserver": [
+        "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
       ]
     },
     "tags": [

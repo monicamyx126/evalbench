@@ -1,0 +1,1 @@
+GRANT SELECT, UPDATE ON SCHEMA::dbo TO public;
