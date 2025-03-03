@@ -7,7 +7,7 @@ CREATE TABLE dbo.tbl_attachments (
   file_size INT NULL,
   file_type NVARCHAR(50) NULL,
   upload_date DATETIME NULL,
-  description TEXT NULL,
+  description VARCHAR(MAX) NULL,
   is_active BIT NULL,
   visibility_status NVARCHAR(20) NULL,
   download_count INT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE dbo.tbl_categories (
   created_by INT NULL,
   updated_by INT NULL,
   name NVARCHAR(255) NULL,
-  description TEXT NULL,
+  description VARCHAR(MAX) NULL,
   created_at DATETIME NULL,
   updated_at DATETIME NULL,
   parent_category INT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE dbo.tbl_categories_hierarchy (
   created_by INT NULL,
   updated_by INT NULL,
   name NVARCHAR(255) NULL,
-  description TEXT NULL,
+  description VARCHAR(MAX) NULL,
   created_at DATETIME NULL,
   updated_at DATETIME NULL,
   status NVARCHAR(50) NULL,
@@ -54,13 +54,13 @@ CREATE TABLE dbo.tbl_categories_hierarchy (
   orden_priority INT NULL,
   icon NVARCHAR(255) NULL,
   color NVARCHAR(50) NULL,
-  metadata TEXT NULL,
+  metadata VARCHAR(MAX) NULL,
   parent_category_name NVARCHAR(255) NULL
 );
 
 CREATE TABLE dbo.tbl_comments (
   comment_id INT NOT NULL PRIMARY KEY,
-  content TEXT NULL,
+  content VARCHAR(MAX) NULL,
   user_id INT NULL,
   post_id INT NULL,
   parent_comment_id INT NULL,

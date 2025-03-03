@@ -33,7 +33,8 @@
     },
     "setup_sql": {
       "postgres": [],
-      "mysql": []
+      "mysql": [],
+      "sqlserver" : []
     },
     "cleanup_sql": {
       "postgres": [
@@ -163,7 +164,7 @@
         "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"\"database\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"programming\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"\"marketing\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"digital\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
       ],
       "sqlserver": [
-        "INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+        "DELETE FROM tbl_attachments WHERE attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', N'[\"database\", \"attachment\"]', N'[\"programming\"]', N'{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
       ]
     },
     "cleanup_sql": {
