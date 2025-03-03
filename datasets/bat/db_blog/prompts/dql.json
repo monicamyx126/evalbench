@@ -605,7 +605,7 @@
         "SELECT * FROM tbl_posts WHERE JSON_CONTAINS(tags, '\"programming\"') AND JSON_CONTAINS(tags, '\"database\"');"
       ],
       "sqlserver": [
-        "SELECT * FROM tbl_posts WHERE JSON_VALUE(tags, '$[0]') = 'programming' AND JSON_VALUE(tags, '$[1]') = 'database';"
+        "SELECT * FROM tbl_posts WHERE EXISTS (SELECT 1 FROM OPENJSON(tags) WHERE value = 'programming') AND EXISTS (SELECT 1 FROM OPENJSON(tags) WHERE value = 'database');"
       ]
     },
     "eval_query": {
