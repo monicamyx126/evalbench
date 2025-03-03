@@ -1,4 +1,4 @@
-CREATE TABLE tbl_attachments (
+CREATE TABLE dbo.tbl_attachments (
   attachment_id INT NOT NULL PRIMARY KEY,
   post_id INT NULL,
   user_id INT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE tbl_attachments (
   parent_attachment_id INT NULL
 );
 
-CREATE TABLE tbl_categories (
+CREATE TABLE dbo.tbl_categories (
   category_id INT NOT NULL PRIMARY KEY,
   created_by INT NULL,
   updated_by INT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE tbl_categories (
   is_edited BIT NULL
 );
 
-CREATE TABLE tbl_categories_hierarchy (
+CREATE TABLE dbo.tbl_categories_hierarchy (
   category_hierarchy_id INT NOT NULL PRIMARY KEY,
   category_id INT NULL,
   created_by INT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE tbl_categories_hierarchy (
   parent_category_name NVARCHAR(255) NULL
 );
 
-CREATE TABLE tbl_comments (
+CREATE TABLE dbo.tbl_comments (
   comment_id INT NOT NULL PRIMARY KEY,
   content TEXT NULL,
   user_id INT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE tbl_comments (
   is_edited BIT NULL
 );
 
-CREATE TABLE tbl_country (
+CREATE TABLE dbo.tbl_country (
   country_name NVARCHAR(255) NOT NULL PRIMARY KEY,
   country_id INT NULL,
   continent NVARCHAR(255) NULL,
@@ -90,7 +90,7 @@ CREATE TABLE tbl_country (
   Y FLOAT NULL
 );
 
-CREATE TABLE tbl_followers (
+CREATE TABLE dbo.tbl_followers (
   follower_id INT NOT NULL PRIMARY KEY,
   following_id INT NULL,
   created_at DATETIME NULL,
@@ -98,7 +98,7 @@ CREATE TABLE tbl_followers (
   follower_data NVARCHAR(MAX) NULL
 );
 
-CREATE TABLE tbl_labels (
+CREATE TABLE dbo.tbl_labels (
   label_id INT NOT NULL PRIMARY KEY,
   creator_id INT NULL,
   updated_by INT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE tbl_labels (
   parent_label_id INT NULL
 );
 
-CREATE TABLE tbl_media (
+CREATE TABLE dbo.tbl_media (
   media_id INT NOT NULL PRIMARY KEY,
   post_id INT NULL,
   type NVARCHAR(255) NULL,
@@ -136,7 +136,7 @@ CREATE TABLE tbl_media (
   status_id INT NULL
 );
 
-CREATE TABLE tbl_notifications (
+CREATE TABLE dbo.tbl_notifications (
   notification_id INT NOT NULL PRIMARY KEY,
   user_id INT NULL,
   notification_type NVARCHAR(255) NULL,
@@ -169,7 +169,7 @@ CREATE TABLE tbl_notifications (
 );
 
 
-CREATE TABLE tbl_posts (
+CREATE TABLE dbo.tbl_posts (
   post_id INT NOT NULL PRIMARY KEY,
   user_id INT NULL,
   title NVARCHAR(255) NULL,
@@ -196,7 +196,7 @@ CREATE TABLE tbl_posts (
   metadata NVARCHAR(MAX) NULL
 );
 
-CREATE TABLE tbl_posts_tags (
+CREATE TABLE dbo.tbl_posts_tags (
   post_id INT NOT NULL,
   tag_id INT NOT NULL,
   comments NVARCHAR(MAX) NULL,
@@ -206,7 +206,7 @@ CREATE TABLE tbl_posts_tags (
   PRIMARY KEY (post_id, tag_id),
 );
 
-CREATE TABLE tbl_private_messages (
+CREATE TABLE dbo.tbl_private_messages (
   message_id INT NOT NULL PRIMARY KEY,
   sender_id INT NULL,
   receiver_id INT NULL,
@@ -227,7 +227,7 @@ CREATE TABLE tbl_private_messages (
   message_data NVARCHAR(MAX) NULL
 );
 
-CREATE TABLE tbl_reactions (
+CREATE TABLE dbo.tbl_reactions (
   reaction_id INT NOT NULL PRIMARY KEY,
   comment_id INT NULL,
   user_id INT NULL,
@@ -242,7 +242,7 @@ CREATE TABLE tbl_reactions (
   device_info NVARCHAR(MAX) NULL
 );
 
-CREATE TABLE tbl_reports (
+CREATE TABLE dbo.tbl_reports (
   report_id INT NOT NULL PRIMARY KEY,
   user_id INT NULL,
   post_id INT NULL,
@@ -276,12 +276,12 @@ CREATE TABLE tbl_reports (
 );
 
 
-CREATE TABLE tbl_status (
+CREATE TABLE dbo.tbl_status (
   status_id INT NOT NULL PRIMARY KEY,
   Name NVARCHAR(255) NULL
 );
 
-CREATE TABLE tbl_tags (
+CREATE TABLE dbo.tbl_tags (
   tag_id INT NOT NULL PRIMARY KEY,
   creator_id INT NULL,
   category_id INT NULL,
@@ -301,7 +301,7 @@ CREATE TABLE tbl_tags (
   is_edited BIT NULL
 );
 
-CREATE TABLE tbl_tags_hierarchy (
+CREATE TABLE dbo.tbl_tags_hierarchy (
   tag_hierarchy_id INT NOT NULL PRIMARY KEY,
   tag_id INT NULL,
   relationship_type NVARCHAR(255) NULL,
@@ -318,7 +318,7 @@ CREATE TABLE tbl_tags_hierarchy (
   comments NVARCHAR(MAX) NULL
 );
 
-CREATE TABLE tbl_user_activity (
+CREATE TABLE dbo.tbl_user_activity (
   activity_id INT NOT NULL PRIMARY KEY,
   user_id INT NULL,
   activity_type NVARCHAR(255) NULL,
@@ -348,7 +348,7 @@ CREATE TABLE tbl_user_activity (
   session_duration INT NULL
 );
 
-CREATE TABLE tbl_user_roles (
+CREATE TABLE dbo.tbl_user_roles (
   role_id INT NOT NULL PRIMARY KEY,
   created_by INT NULL,
   updated_by INT NULL,
@@ -368,7 +368,7 @@ CREATE TABLE tbl_user_roles (
   last_sessions NVARCHAR(MAX) NULL
 );
 
-CREATE TABLE tbl_users (
+CREATE TABLE dbo.tbl_users (
   user_id INT NOT NULL PRIMARY KEY,
   first_name NVARCHAR(255) NULL,
   last_name NVARCHAR(255) NULL,

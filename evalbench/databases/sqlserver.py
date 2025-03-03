@@ -13,12 +13,6 @@ from .util import (
 )
 from typing import Any, List, Optional, Tuple
 
-LIST_ALL_TABLES_QUERY = """
-SELECT TABLE_SCHEMA, TABLE_NAME 
-FROM INFORMATION_SCHEMA.TABLES 
-WHERE TABLE_TYPE = 'BASE TABLE';
-"""
-
 DROP_ALL_TABLES_QUERY = """
 USE master;
 ALTER DATABASE {DATABASE} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -44,6 +38,7 @@ CREATE LOGIN [{DML_USERNAME}] WITH PASSWORD = '{PASSWORD}';
 CREATE USER [{DML_USERNAME}] FOR LOGIN [{DML_USERNAME}];
 GRANT SELECT, INSERT, UPDATE, DELETE ON DATABASE::{DATABASE} TO [{DML_USERNAME}];
 """
+
 
 class SQLServerDB(DB):
 
@@ -168,7 +163,7 @@ class SQLServerDB(DB):
         try:
             with self.engine.connect() as connection:
                 metadata = MetaData()
-                metadata.reflect(bind=connection, schema=self.db_name)
+                metadata.reflect(bind=connection, schema="dbo")
                 for table in metadata.tables.values():
                     columns = []
                     for column in table.columns:
@@ -191,16 +186,14 @@ class SQLServerDB(DB):
     ) -> list[str]:
         create_statements = []
         for table in schema.tables:
-            table_name = table.table
             columns = ", ".join(
-                [f"{column.column} {column.data_type}" for column in table.columns]
+                [f"{column.name} {column.type}" for column in table.columns]
             )
-            create_statements.append(f"CREATE TABLE `{table_name}` ({columns});")
+            create_statements.append(f"CREATE TABLE dbo.{table.name} ({columns});")
         return create_statements
 
-
     def create_tmp_database(self, database_name: str):
-        _,  error = self._execute_autocommit(f"CREATE DATABASE {database_name};")
+        _, error = self._execute_autocommit(f"CREATE DATABASE {database_name};")
         if error:
             raise RuntimeError(f"Could not create database: {error}")
         self.tmp_dbs.append(database_name)
@@ -217,20 +210,23 @@ class SQLServerDB(DB):
         if error:
             raise RuntimeError(error)
 
-    def insert_data(self, data: dict[str, List[str]]):
+    def insert_data(self, data):
         if not data:
             return
-        
+
         insertion_statements = []
-        
         for table_name in data:
             for row in data[table_name]:
-                formatted_values = ", ".join(
-                    [f"'{value.replace('\'', '\'\'')}'" if isinstance(value, str) else str(value) for value in row]
-                )
-                insertion_statements.append(
-                    f"INSERT INTO [{table_name}] VALUES ({formatted_values});"
-                )
+                formatted_values = []
+                for value in row:
+                    if str(value).lower() in ["true", "false"]:
+                        formatted_values.append("1" if str(value).lower() == "true" else "0")
+                    else:
+                        formatted_values.append(str(value))
+
+                inline_values = ", ".join(formatted_values)
+                insertion_statements.append(f"INSERT INTO dbo.{table_name} VALUES ({inline_values});")
+
         try:
             self.batch_execute(insertion_statements)
         except RuntimeError as error:
@@ -267,14 +263,14 @@ class SQLServerDB(DB):
     # Internal helpers
     #####################################################
     #####################################################
-  
+
     def _execute_autocommit(self, query: str):
         error = None
         raw_conn = None
         cursor = None
         try:
             raw_conn = self.engine.raw_connection()
-            raw_conn.connection.autocommit = True  
+            raw_conn.connection.autocommit = True
             cursor = raw_conn.cursor()
             cursor.execute(query)
 

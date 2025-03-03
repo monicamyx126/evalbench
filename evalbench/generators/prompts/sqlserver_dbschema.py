@@ -40,6 +40,7 @@ Here is the natural language question for generating SQL:
 {USER_PROMPT}
 """
 
+
 class SQLServerDBSchemaGenerator(PromptGenerator):
 
     def __init__(self, db: DB, promptgenerator_config):
