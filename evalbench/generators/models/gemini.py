@@ -19,7 +19,6 @@ class GeminiGenerator(QueryGenerator):
         self.vertex_model = querygenerator_config["vertex_model"]
         self.base_prompt = querygenerator_config["base_prompt"]
         self.generation_config = None
-        self.name = "gemini"
 
         vertexai.init(project=self.project_id, location=self.location)
         self.model = GenerativeModel(self.vertex_model)
@@ -32,5 +31,5 @@ class GeminiGenerator(QueryGenerator):
         )
         if isinstance(response, GenerationResponse):
             r = response.text
-            r = r.replace("```sql", "")
+            r = r.replace("```sql", "") #required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
         return r
