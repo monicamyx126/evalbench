@@ -31,5 +31,5 @@ class GeminiGenerator(QueryGenerator):
         )
         if isinstance(response, GenerationResponse):
             r = response.text
-            r = r.replace("```sql", "") #required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
+            r = r.replace("```sql", "")  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
         return r
