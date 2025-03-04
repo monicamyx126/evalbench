@@ -34,7 +34,6 @@ class ClaudeGenerator(QueryGenerator):
             )
 
             r = response.content[0].text if response.content else ""
-            print(r)
             return r
 
         except Exception as e:
