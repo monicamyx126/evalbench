@@ -26,7 +26,7 @@ product_name: sql
 ### Prompt and Generation Modules
 ############################################################
 # The YAML config for the model to be used for generation.
-model_config: datasets/bat/db_blog/model_configs/base_gemini_model.yaml
+model_config: datasets/bat/db_blog/model_configs/gemini_1.0_pro_model.yaml
 # The prompt generator module id for prompt generation.
 prompt_generator: 'SQLServer_DBSchemaGenerator'
 #
