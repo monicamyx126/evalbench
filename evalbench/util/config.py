@@ -132,7 +132,7 @@ def set_session_configs(session, experiment_config: dict):
 
 
 def generate_key(length=12):
-    categories = [string.ascii_uppercase, string.ascii_lowercase, string.digits, "_"]
-    password = [random.choice(c) for c in random.sample(categories, 3)]
-    password += random.choices("".join(categories), k=length - 3)
-    return "".join(password)
+    categories = [string.ascii_lowercase, string.digits, "_"]
+    key = [random.choice(c) for c in random.sample(categories, 3)]
+    key += random.choices("".join(categories), k=length - 3)
+    return "".join(key)
