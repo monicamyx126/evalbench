@@ -43,6 +43,22 @@ class Evaluator:
         self.total_eval_outputs = []
         self.total_scoring_results = []
 
+        # Set default value for runners
+        self.promptgen_runners = 10
+        self.sqlgen_runners = 10
+        self.sqlexec_runners = 10
+        self.scoring_runners = 10
+
+        if "runners" in self.experiment_config:
+            if "promptgen_runners" in self.experiment_config["runners"]:
+                self.promptgen_runners = self.experiment_config["runners"]["promptgen_runners"]
+            if "sqlgen_runners" in self.experiment_config["runners"]:
+                self.sqlgen_runners = self.experiment_config["runners"]["sqlgen_runners"]
+            if "sqlexec_runners" in self.experiment_config["runners"]:
+                self.sqlexec_runners = self.experiment_config["runners"]["sqlexec_runners"]
+            if "scoring_runners" in self.experiment_config["runners"]:
+                self.scoring_runners = self.experiment_config["runners"]["scoring_runners"]
+
     def evaluate(self, dataset: List[EvalInputRequest]):
         """This wrapper breaks down evaluations by category of evaluations. (dql, dml, ddl).
         This allows the module to prepare the correct database connections as DDL queries
@@ -68,10 +84,10 @@ class Evaluator:
         eval_outputs: List[Any] = []
         scoring_results: List[Any] = []
 
-        self.promptrunner = mprunner.MPRunner(NUM_WORKERS)
-        self.genrunner = mprunner.MPRunner(NUM_WORKERS)
-        self.sqlrunner = mprunner.MPRunner(NUM_WORKERS)
-        self.scoringrunner = mprunner.MPRunner(NUM_WORKERS)
+        self.promptrunner = mprunner.MPRunner(self.promptgen_runners)
+        self.genrunner = mprunner.MPRunner(self.sqlgen_runners)
+        self.sqlrunner = mprunner.MPRunner(self.sqlexec_runners)
+        self.scoringrunner = mprunner.MPRunner(self.scoring_runners)
 
         prompt_i = 0
         gen_i = 0
@@ -156,7 +172,7 @@ class Evaluator:
                 self.db_config,
                 self.setup_config,
                 query_type,
-                min(NUM_WORKERS, len(filtered_dataset)),
+                min(self.sqlexec_runners, len(filtered_dataset)),
             )
             logging.info(f"Evaluating {len(filtered_dataset)} {query_type} queries.")
             eval_outputs, scoring_results = self._execute_evaluations(
