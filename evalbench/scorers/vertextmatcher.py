@@ -1,4 +1,33 @@
-"""Simple comparison strategy that checks if the two execution results are exactly the same."""
+"""
+VertexMatcher
+
+This comparison strategy uses an LLM to find the extent to which the generated and expected queries are semantically equivalent.
+It considers both, the SQL syntax, and their execution results
+
+The LLM returns a score between 0 and 100 with 100 meaning generated query is sematically equivalent to the ground truth query,
+and 0 meaning that both the queries are entirely different.
+
+The LLM also returns a detailed explanation of its scoring decision.
+
+Evaluation guidelines given to LLM:
+    1. Analyze SQL Queries:
+        - Do they have the same structure (tables, joins, WHERE clauses, etc.)?
+        - Are there any logical differences that would produce different results?
+
+    2. Compare Execution Results:
+        - Do the results contain the same columns and data types?
+        - Are the returned rows identical? Consider the ordering of the rows if order is important.
+
+Run Configuration Options:
+    1. gcp_project_id: Required
+        - A valid GCP project ID which will be used for querying the LLM
+
+    2. gcp_project_location: Required
+        - A valid region from where the vertexAI resources will be utilized
+
+    3. model: Required
+        - An LLM model to use for evaluation. e.g. gemini-1.5-pro-002
+"""
 
 from typing import Tuple
 import json
@@ -10,18 +39,18 @@ from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
 
 
 class VertexMatcher(comparator.Comparator):
-    """VertexMatcher.
+    """
+    VertexMatcher class implements the Comparator base class.
 
     Attributes:
-      name:
+        1. name: Name of the comparator. Set to "vertexmatcher"
+        2. config: Scorer config defined in the run config yaml file
+        3. gcp_project_id: ID of the GCP project ID from where the resources will be utilized
+        4. gcp_project_location: A valid region for vertexAI resources
+        5. model: The LLM model to use
     """
 
     def __init__(self, config: dict):
-        """Constructor.
-
-        Args:
-            config: Configuration dictionary.
-        """
         self.name = "vertexmatcher"
         self.config = config
         vertexai.init(
