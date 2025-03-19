@@ -47,11 +47,6 @@ class Evaluator:
         self.sqlexec_runners = runner_config.get("sqlexec_runners", 10)
         self.scoring_runners = runner_config.get("scoring_runners", 10)
 
-        print(self.promptgen_runners)
-        print(self.sqlgen_runners)
-        print(self.sqlexec_runners)
-        print(self.scoring_runners)
-
     def evaluate(self, dataset: List[EvalInputRequest]):
         """This wrapper breaks down evaluations by category of evaluations. (dql, dml, ddl).
         This allows the module to prepare the correct database connections as DDL queries
