@@ -18,8 +18,6 @@ from queue import Queue
 from databases import DB
 from dataset.dataset import breakdown_datasets_by_query_type
 
-NUM_WORKERS = 10
-
 
 class Evaluator:
     def __init__(
@@ -43,21 +41,16 @@ class Evaluator:
         self.total_eval_outputs = []
         self.total_scoring_results = []
 
-        # Set default value for runners
-        self.promptgen_runners = 10
-        self.sqlgen_runners = 10
-        self.sqlexec_runners = 10
-        self.scoring_runners = 10
+        runner_config = self.experiment_config.get("runners", {})
+        self.promptgen_runners = runner_config.get("promptgen_runners", 10)
+        self.sqlgen_runners = runner_config.get("sqlgen_runners", 10)
+        self.sqlexec_runners = runner_config.get("sqlexec_runners", 10)
+        self.scoring_runners = runner_config.get("scoring_runners", 10)
 
-        if "runners" in self.experiment_config:
-            if "promptgen_runners" in self.experiment_config["runners"]:
-                self.promptgen_runners = self.experiment_config["runners"]["promptgen_runners"]
-            if "sqlgen_runners" in self.experiment_config["runners"]:
-                self.sqlgen_runners = self.experiment_config["runners"]["sqlgen_runners"]
-            if "sqlexec_runners" in self.experiment_config["runners"]:
-                self.sqlexec_runners = self.experiment_config["runners"]["sqlexec_runners"]
-            if "scoring_runners" in self.experiment_config["runners"]:
-                self.scoring_runners = self.experiment_config["runners"]["scoring_runners"]
+        print(self.promptgen_runners)
+        print(self.sqlgen_runners)
+        print(self.sqlexec_runners)
+        print(self.scoring_runners)
 
     def evaluate(self, dataset: List[EvalInputRequest]):
         """This wrapper breaks down evaluations by category of evaluations. (dql, dml, ddl).
