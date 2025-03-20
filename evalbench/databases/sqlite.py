@@ -33,6 +33,7 @@ class SQLiteDB(DB):
             if not self.db_path.endswith(".db"):
                 self.db_path += ".db"
             conn = sqlite3.connect(self.db_path)
+            conn.autocommit = False
             return conn
 
         def get_engine_args():
@@ -188,12 +189,13 @@ class SQLiteDB(DB):
     def drop_all_tables(self):
         try:
             with self.engine.connect() as conn:
-                result = conn.execute(text(GET_TABLES_SQL))
-                tables = [row[0] for row in result.fetchall()]
-
-                if tables:
-                    drop_statements = [DROP_TABLE_SQL.format(TABLE=table) for table in tables]
-                    self.batch_execute(drop_statements)
+                with conn.begin():
+                    result = conn.execute(text(GET_TABLES_SQL))
+                    tables = [row[0] for row in result.fetchall()]
+                    if tables:
+                        for table in tables:
+                            sql = DROP_TABLE_SQL.format(TABLE=table)
+                            conn.execute(text(sql))
 
         except Exception as error:
             logging.error(f"Failed to drop all tables: {error}")
