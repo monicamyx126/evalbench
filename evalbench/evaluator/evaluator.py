@@ -18,8 +18,6 @@ from queue import Queue
 from databases import DB
 from dataset.dataset import breakdown_datasets_by_query_type
 
-NUM_WORKERS = 10
-
 
 class Evaluator:
     def __init__(
@@ -42,6 +40,12 @@ class Evaluator:
         self.run_time = datetime.datetime.now()
         self.total_eval_outputs = []
         self.total_scoring_results = []
+
+        runner_config = self.experiment_config.get("runners", {})
+        self.promptgen_runners = runner_config.get("promptgen_runners", 10)
+        self.sqlgen_runners = runner_config.get("sqlgen_runners", 10)
+        self.sqlexec_runners = runner_config.get("sqlexec_runners", 10)
+        self.scoring_runners = runner_config.get("scoring_runners", 10)
 
     def evaluate(self, dataset: List[EvalInputRequest]):
         """This wrapper breaks down evaluations by category of evaluations. (dql, dml, ddl).
@@ -68,10 +72,10 @@ class Evaluator:
         eval_outputs: List[Any] = []
         scoring_results: List[Any] = []
 
-        self.promptrunner = mprunner.MPRunner(NUM_WORKERS)
-        self.genrunner = mprunner.MPRunner(NUM_WORKERS)
-        self.sqlrunner = mprunner.MPRunner(NUM_WORKERS)
-        self.scoringrunner = mprunner.MPRunner(NUM_WORKERS)
+        self.promptrunner = mprunner.MPRunner(self.promptgen_runners)
+        self.genrunner = mprunner.MPRunner(self.sqlgen_runners)
+        self.sqlrunner = mprunner.MPRunner(self.sqlexec_runners)
+        self.scoringrunner = mprunner.MPRunner(self.scoring_runners)
 
         prompt_i = 0
         gen_i = 0
@@ -156,7 +160,7 @@ class Evaluator:
                 self.db_config,
                 self.setup_config,
                 query_type,
-                min(NUM_WORKERS, len(filtered_dataset)),
+                min(self.sqlexec_runners, len(filtered_dataset)),
             )
             logging.info(f"Evaluating {len(filtered_dataset)} {query_type} queries.")
             eval_outputs, scoring_results = self._execute_evaluations(
