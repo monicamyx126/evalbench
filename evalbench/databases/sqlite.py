@@ -188,14 +188,12 @@ class SQLiteDB(DB):
 
     def drop_all_tables(self):
         try:
-            with self.engine.connect() as conn:
-                with conn.begin():
-                    result = conn.execute(text(GET_TABLES_SQL))
-                    tables = [row[0] for row in result.fetchall()]
-                    if tables:
-                        for table in tables:
-                            sql = DROP_TABLE_SQL.format(TABLE=table)
-                            conn.execute(text(sql))
+            result = self.execute(GET_TABLES_SQL)
+            tables = [table['name'] for table in result[0]]
+
+            if tables:
+                drop_statements = [DROP_TABLE_SQL.format(TABLE=table) for table in tables]
+                self.batch_execute(drop_statements)
 
         except Exception as error:
             logging.error(f"Failed to drop all tables: {error}")
