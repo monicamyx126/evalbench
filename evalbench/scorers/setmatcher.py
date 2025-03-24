@@ -1,15 +1,23 @@
-"""Set match between the golden query execution result and the generated query execution result. This is the Execution Accuracy measured in BIRD"""
+"""
+This comparison strategy compares the set of generated and expected results and gives full score if the sets match exactly.
+This is the execution accuracy measured in BIRD
+
+Run configurations: None
+"""
 
 from typing import Tuple
 
 from scorers import comparator
+from scorers.comparator import convert_to_set
 
 
 class SetMatcher(comparator.Comparator):
-    """SetMatcher.
+    """
+    SetMatcher class implements the Comparator base class with set comparison logic.
 
     Attributes:
-      name:
+        1. name: Name of the comparator. Set to "set_match"
+        2. config: Scorer config defined in the run config yaml file
     """
 
     def __init__(self, config: dict):
@@ -29,6 +37,8 @@ class SetMatcher(comparator.Comparator):
         generated_eval_result: str,
         generated_error: str,
     ) -> Tuple[float, str]:
+        """Implements the set comparison logic"""
+
         if golden_error or generated_error:
             return 0, None
         else:
@@ -45,4 +55,5 @@ class SetMatcher(comparator.Comparator):
                 == set(generated_execution_result_tuple)
                 else 0
             )
+
             return score, None
