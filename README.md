@@ -1,6 +1,6 @@
 # EvalBench
 
-EvalBench is a flexible framework designed to measure the quality of generative AI (GenAI) workflows around database specific tasks. As of now, it provides a comprehensive set of tools, and modules to evaluate models on NL2SQL tasks, including capability of running and scoring DQL, DML, and DDL queries. Its modular, plug-and-play architecture allows you to seamlessly integrate custom components while leveraging a robust evaluation pipeline, result storage, scoring strategies, and dashboarding capabilities.
+EvalBench is a flexible framework designed to measure the quality of generative AI (GenAI) workflows around database specific tasks. As of now, it provides a comprehensive set of tools, and modules to evaluate models on NL2SQL tasks, including capability of running and scoring DQL, DML, and DDL queries across multiple supported databases. Its modular, plug-and-play architecture allows you to seamlessly integrate custom components while leveraging a robust evaluation pipeline, result storage, scoring strategies, and dashboarding capabilities.
 
 ---
 
@@ -45,11 +45,22 @@ Then, authenticate using the Google Cloud CLI:
 gcloud auth application-default login
 ```
 
-This step sets up the necessary credentials for accessing Vertex AI resources.
+This step sets up the necessary credentials for accessing Vertex AI resources on your GCP project.
+
+We can globally set our gcp_project_id using
+
+```bash
+export EVAL_GCP_PROJECT_ID=your_project_id_here
+export EVAL_GCP_PROJECT_REGION=your_region_here
+```
 
 ### 5. Set Your Evaluation Configuration
 
-Configure your evaluation by setting the `EVAL_CONFIG` environment variable. For example, to run a configuration using the `db_blog` dataset on SQLite:
+For a quick start, let's run NL2SQL on some sqlite DQL queries.
+
+1. First, read through [sqlite/run_dql.yaml](/datasets/bat/db_blog/run_configs/sqlite/run_dql.yaml) and see the configuration settings we will be running.
+
+Now, configure your evaluation by setting the `EVAL_CONFIG` environment variable. For example, to run a configuration using the `db_blog` dataset on SQLite:
 
 ```bash
 export EVAL_CONFIG=datasets/bat/db_blog/run_configs/sqlite/run_dql.yaml
@@ -78,5 +89,4 @@ A complete guide of all available functionality can be found in [run-config docu
 Please explore the repository to learn more about customizing your evaluation workflows, integrating new metrics, and leveraging the full potential of EvalBench.
 
 ---
-
 For additional documentation, examples, and support, please refer to the [EvalBench documentation](https://github.com/GoogleCloudPlatform/evalbench). Enjoy evaluating your GenAI models!
