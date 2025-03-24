@@ -6,11 +6,10 @@ from .db import DB
 from google.cloud.sql.connector import Connector
 from .util import (
     get_db_secret,
-    rate_limited_execute,
     with_cache_execute,
-    DBResourceExhaustedError,
     DatabaseSchema,
 )
+from util.rate_limit import rate_limit, ResourceExhaustedError
 from typing import Any, List, Optional, Tuple
 
 DROP_ALL_TABLES_QUERY = """
@@ -55,10 +54,10 @@ class SQLServerDB(DB):
 
         def get_conn():
             conn = self.connector.connect(
-                f"{db_config['project_id']}:{db_config['region']}:{db_config['instance_name']}",
+                self.db_path,
                 "pytds",
-                user=db_config["user_name"],
-                password=get_db_secret(db_config["password"]),
+                user=self.username,
+                password=self.password,
                 db=self.db_name,
             )
             return conn
@@ -146,10 +145,10 @@ class SQLServerDB(DB):
             except Exception as e:
                 error = str(e)
                 if "57P03" in error:
-                    raise DBResourceExhaustedError("DB Exhausted") from e
+                    raise ResourceExhaustedError("DB Exhausted") from e
             return result, eval_result, error
 
-        return rate_limited_execute(
+        return rate_limit(
             (query, eval_query, rollback),
             _run_execute,
             self.execs_per_minute,
@@ -206,7 +205,9 @@ class SQLServerDB(DB):
             logging.info(f"Could not delete database: {error}")
 
     def drop_all_tables(self):
-        _, error = self._execute_autocommit(DROP_ALL_TABLES_QUERY.format(DATABASE=self.db_name))
+        _, error = self._execute_autocommit(
+            DROP_ALL_TABLES_QUERY.format(DATABASE=self.db_name)
+        )
         if error:
             raise RuntimeError(error)
 
@@ -220,12 +221,16 @@ class SQLServerDB(DB):
                 formatted_values = []
                 for value in row:
                     if str(value).lower() in ["true", "false"]:
-                        formatted_values.append("1" if str(value).lower() == "true" else "0")
+                        formatted_values.append(
+                            "1" if str(value).lower() == "true" else "0"
+                        )
                     else:
                         formatted_values.append(str(value))
 
                 inline_values = ", ".join(formatted_values)
-                insertion_statements.append(f"INSERT INTO dbo.{table_name} VALUES ({inline_values});")
+                insertion_statements.append(
+                    f"INSERT INTO dbo.{table_name} VALUES ({inline_values});"
+                )
 
         try:
             self.batch_execute(insertion_statements)
@@ -270,7 +275,7 @@ class SQLServerDB(DB):
         cursor = None
         try:
             raw_conn = self.engine.raw_connection()
-            raw_conn.connection.autocommit = True
+            raw_conn.connection.autocommit = True  # type: ignore
             cursor = raw_conn.cursor()
             cursor.execute(query)
 

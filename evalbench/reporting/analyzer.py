@@ -11,7 +11,7 @@ def analyze_one_metric(
     metric_score: int,
     execution: bool = False,
     num_scorers: int = 1,
-) -> int:
+) -> dict:
     """Analyze one metric from dataframe with flexibility."""
     original_df_size = int(len(df) / num_scorers)
     df = df[df["generated_sql"].notna()]
@@ -71,9 +71,23 @@ def analyze_result(scores, experiment_config: dict[str, str]):
     summary_scores.append(summary)
     summary_scores_df = pd.DataFrame.from_dict(summary_scores)
     df[
-        ["generated_error", "comparator", "comparison_error", "generated_sql", "job_id", "id"]
+        [
+            "generated_error",
+            "comparator",
+            "comparison_error",
+            "generated_sql",
+            "job_id",
+            "id",
+        ]
     ] = df[
-        ["generated_error", "comparator", "comparison_error", "generated_sql", "job_id", "id"]
+        [
+            "generated_error",
+            "comparator",
+            "comparison_error",
+            "generated_sql",
+            "job_id",
+            "id",
+        ]
     ].astype(
         "string"
     )

@@ -1,6 +1,3 @@
-import time
-
-from threading import Semaphore
 from google.cloud import secretmanager_v1
 from typing import Any, Tuple
 import sqlparse
@@ -39,18 +36,16 @@ class DatabaseSchema:
     views: list[View] = field(default_factory=list)
 
 
-class DBResourceExhaustedError(Exception):
-    pass
-
-
-def is_db_secret_path(secret: str) -> bool:
+def _is_db_secret_path(secret: str) -> bool:
     pattern = r"^projects/[^/]+/secrets/[^/]+/versions/\d+$"
     return bool(re.match(pattern, secret))
 
 
 def get_db_secret(secret):
-    if not is_db_secret_path(secret):
-        return secret
+    if not _is_db_secret_path(secret):
+        raise ValueError(
+            "secret manager path not parsable. Could not recover password for DB."
+        )
     secret_path = secret
     # Create a client
     client = secretmanager_v1.SecretManagerServiceClient()
@@ -97,35 +92,6 @@ def generate_ddl(data, db_name, comments_data=None):
         ddl_statements.append(");\n")  # End the last table statement
 
     return "".join(ddl_statements)
-
-
-def rate_limited_execute(
-    query: Tuple,
-    execution_method,
-    execs_per_minute: int,
-    semaphore: Semaphore,
-    max_attempts: int,
-) -> Tuple[Any, Any, Any]:
-    # If no limit is specified, run immediately.
-    if not isinstance(execs_per_minute, int):
-        return execution_method(*query)
-
-    result = None
-    eval_result = None
-    error = None
-    semaphore.acquire()
-    attempt = 1
-    while attempt <= max_attempts:
-        try:
-            result, eval_result, error = execution_method(*query)
-            break
-        except DBResourceExhaustedError as e:
-            # exponentially backoff starting at 5 seconds
-            time.sleep(5 * (2 ** (attempt)))
-            attempt += 1
-    time.sleep(60 / execs_per_minute)
-    semaphore.release()
-    return result, eval_result, error
 
 
 def with_cache_execute(
