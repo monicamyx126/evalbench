@@ -66,17 +66,30 @@ def build_normalized_other(other: dict[str, Any]):
     return {key: json.dumps(value) for key, value in other.items()}
 
 
-def breakdown_datasets_by_query_type(total_dataset: list[EvalInputRequest]):
-    total_dataset_len = 0
-    dataset: dict[str, list[EvalInputRequest]] = {
-        "dql": [],
-        "dml": [],
-        "ddl": [],
+def breakdown_datasets(total_dataset: list[EvalInputRequest]):
+    """
+    The shape of the output will be dict[str, dict[str, list[EvalInputRequest]]]
+    in the following format:
+    {
+      dialect (str):
+      -> database (str):
+          -> query_type (str; [dql,dml,ddl]):
+              -> list[EvalInputRequest]
     }
+    """
+    total_dataset_len = 0
+    datasets: dict[str, dict[str, dict[str, list[EvalInputRequest]]]] = {}
     for input in total_dataset:
-        dataset[input.query_type].append(input)
-        total_dataset_len += 1
-    return dataset, total_dataset_len
+        for dialect in input.dialects:
+            if dialect not in datasets:
+                datasets[dialect] = {}
+            if input.database not in datasets[dialect]:
+                datasets[dialect][input.database] = {}
+            if input.query_type not in datasets[dialect][input.database]:
+                datasets[dialect][input.database][input.query_type] = []
+            datasets[dialect][input.database][input.query_type].append(input.copy())
+            total_dataset_len += 1
+    return datasets, total_dataset_len
 
 
 def flatten_dataset(dataset: dict[str, list]):
