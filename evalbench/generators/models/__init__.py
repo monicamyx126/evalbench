@@ -6,11 +6,12 @@ from util.config import load_yaml_config
 
 _global_models_checked_out: dict[str, QueryGenerator] = {}
 
+
 def get_generator(model_config_path: str):
     global _global_models_checked_out
     if model_config_path in _global_models_checked_out:
         return _global_models_checked_out[model_config_path]
-    
+
     model_config = load_yaml_config(model_config_path)
 
     # Create a new model_config
