@@ -11,6 +11,7 @@ import databases
 import generators.models as models
 import generators.prompts as prompts
 import concurrent.futures
+import multiprocessing
 
 
 class Orchestrator:
@@ -27,6 +28,7 @@ class Orchestrator:
         self.run_time = datetime.datetime.now()
         self.total_eval_outputs = []
         self.total_scoring_results = []
+        self.reporting_total_evals_done = 0
 
         runner_config = self.config.get("runners", {})
         self.eval_runners = runner_config.get("eval_runners", 4)
@@ -39,6 +41,15 @@ class Orchestrator:
         of unintended consequences. Additionally, DQLs are run under a read-only user.
         """
         sub_datasets, total_dataset_len = breakdown_datasets(dataset)
+        manager = multiprocessing.Manager()
+        progress_reporting = {
+            "lock": manager.Lock(),
+            "prompt_i": manager.Value("i", 0),
+            "gen_i": manager.Value("i", 0),
+            "exec_i": manager.Value("i", 0),
+            "score_i": manager.Value("i", 0),
+            "total": total_dataset_len,
+        }
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.eval_runners
@@ -59,7 +70,7 @@ class Orchestrator:
                         db_config,
                         dialect,
                         database,
-                        total_dataset_len,
+                        progress_reporting,
                     )
                     futures.append(future)
             for future in concurrent.futures.as_completed(futures):
@@ -68,7 +79,7 @@ class Orchestrator:
                 self.total_scoring_results.extend(scoring_results)
 
     def evaluate_sub_dataset(
-        self, sub_datasets, db_config, dialect, database, total_dataset_len
+        self, sub_datasets, db_config, dialect, database, progress_reporting
     ):
         total_eval_outputs = []
         total_scoring_results = []
@@ -113,9 +124,9 @@ class Orchestrator:
                     db_queue,
                     prompt_generator,
                     model_generator,
-                    total_dataset_len,
                     self.job_id,
                     self.run_time,
+                    progress_reporting,
                 )
                 total_eval_outputs.extend(eval_outputs)
                 total_scoring_results.extend(scoring_results)

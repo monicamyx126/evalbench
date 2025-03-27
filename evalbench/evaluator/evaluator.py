@@ -31,9 +31,9 @@ class Evaluator:
         db_queue: Queue[DB],
         prompt_generator,
         model_generator,
-        total_dataset_len: int,
         job_id: str,
         run_time: datetime.datetime,
+        progress_reporting,
     ):
         eval_outputs: List[Any] = []
         scoring_results: List[Any] = []
@@ -44,15 +44,11 @@ class Evaluator:
         self.scoringrunner = mprunner.MPRunner(self.scoring_runners)
         prompt_generator.setup()
 
-        prompt_i = 0
-        gen_i = 0
-        exec_i = 0
-        score_i = 0
-
         self.promptrunner.futures.clear()
         self.genrunner.futures.clear()
         self.sqlrunner.futures.clear()
         self.scoringrunner.futures.clear()
+        total_dataset_len = progress_reporting["total"]
 
         for eval_input in dataset:
             eval_output = EvalOutput(eval_input)
@@ -63,9 +59,10 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.promptrunner.futures):
             eval_output = future.result()
-            prompt_i = prompt_i + 1
+            with progress_reporting["lock"]:
+                progress_reporting["prompt_i"].value += 1
             printProgressBar(
-                prompt_i,
+                progress_reporting["prompt_i"].value,
                 total_dataset_len,
                 prefix="Prompts:",
                 suffix="Complete",
@@ -76,9 +73,14 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.genrunner.futures):
             eval_output = future.result()
-            gen_i = gen_i + 1
+            with progress_reporting["lock"]:
+                progress_reporting["gen_i"].value += 1
             printProgressBar(
-                gen_i, total_dataset_len, prefix="SQLGen:", suffix="Complete", length=50
+                progress_reporting["gen_i"].value,
+                total_dataset_len,
+                prefix="SQLGen:",
+                suffix="Complete",
+                length=50,
             )
             work = sqlexecwork.SQLExecWork(
                 db_queue.get(), self.config, eval_output, db_queue
@@ -87,11 +89,12 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.sqlrunner.futures):
             eval_output = future.result()
-            exec_i = exec_i + 1
+            with progress_reporting["lock"]:
+                progress_reporting["exec_i"].value += 1
             work = scorework.ScorerWork(self.config, eval_output, scoring_results)
             self.scoringrunner.execute_work(work)
             printProgressBar(
-                exec_i,
+                progress_reporting["exec_i"].value,
                 total_dataset_len,
                 prefix="SQLExec:",
                 suffix="Complete",
@@ -100,14 +103,15 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.scoringrunner.futures):
             eval_output = future.result()
-            score_i = score_i + 1
+            with progress_reporting["lock"]:
+                progress_reporting["score_i"].value += 1
             if "truncate_execution_outputs" in self.config:
                 truncateExecutionOutputs(
                     eval_output,
                     self.config["truncate_execution_outputs"],
                 )
             printProgressBar(
-                score_i,
+                progress_reporting["score_i"].value,
                 total_dataset_len,
                 prefix="Scoring:",
                 suffix="Complete",
