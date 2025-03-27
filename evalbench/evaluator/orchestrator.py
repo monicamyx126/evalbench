@@ -72,16 +72,17 @@ class Orchestrator:
     ):
         total_eval_outputs = []
         total_scoring_results = []
-        prompt_generator = None
-        model_generator = None
 
         try:
             # Setup the core connection just once (for all query types in database)
-            core_db = databases.get_database(db_config, None)
+            core_db = databases.get_database(db_config, database)
         except Exception as e:
             raise RuntimeError(
                 f"Could not connect to database {database} on {dialect}; due to {e}"
             )
+
+        prompt_generator = prompts.get_generator(core_db, self.config)
+        model_generator = models.get_generator(self.config["model_config"])
 
         for query_type in ["dql", "dml", "ddl"]:
             if query_type not in sub_datasets[dialect][database]:
@@ -104,20 +105,6 @@ class Orchestrator:
                     + f"could not be setup properly in {dialect} due to {e}."
                 )
                 return
-            
-            # Setup prompt generator for each DB once
-            # and re-use the setup schema (DDLs as context for LLM)
-            # for all subsequent runs
-            if not prompt_generator:
-                try:
-                    pre_setup_db = db_queue.get()
-                    prompt_generator = prompts.get_generator(pre_setup_db, self.config)
-                    db_queue.put(pre_setup_db)
-                except Exception as e:
-                    logging.error(f"Could not setup prompt generator due to {e}.")
-                    return
-            if not model_generator:
-                model_generator = models.get_generator(self.config["model_config"])
 
             evaluator = Evaluator(self.config)
             try:
