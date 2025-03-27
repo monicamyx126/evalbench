@@ -7,8 +7,6 @@ dataset_config: datasets/bat/db_blog/prompts/dql.json
 # The YAML config for the database connection information
 database_configs:
  - datasets/bat/db_blog/db_configs/sqlite_db_config.yaml
- - datasets/bat/db_blog/db_configs/pg_db_config.yaml
- - datasets/bat/db_blog/db_configs/mysql_db_config.yaml
 # The dialect that the dataset_config will be filtered by. Only one can be
 # specified at a time (per run). See above for list of supported Dialects
 dialect: sqlite
