@@ -85,3 +85,8 @@ class EvalInputRequest:
 
     def copy(self):
         return copy.deepcopy(self)
+
+    def copy_for_dialect(self, dialect: str):
+        copy = self.copy()
+        copy.dialects = [dialect]
+        return copy
