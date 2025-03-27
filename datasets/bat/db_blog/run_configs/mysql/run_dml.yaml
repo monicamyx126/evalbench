@@ -5,7 +5,8 @@
 dataset_config: datasets/bat/db_blog/prompts/dml.json
 ### Database Info
 # The YAML config for the database connection information
-database_config: datasets/bat/db_blog/db_configs/mysql_db_config.yaml
+database_configs:
+ - datasets/bat/db_blog/db_configs/mysql_db_config.yaml
 # The dialect that the dataset_config will be filtered by. Only one can be
 # specified at a time (per run). See above for list of supported Dialects
 dialect: mysql
