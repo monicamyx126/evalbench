@@ -1,4 +1,5 @@
 from google.protobuf.json_format import MessageToDict
+import copy
 
 try:
     from evalproto import eval_request_pb2
@@ -81,3 +82,6 @@ class EvalInputRequest:
         @classmethod
         def init_from_proto(cls, proto):
             raise ImportError("protobuf module not available")
+
+    def copy(self):
+        return copy.deepcopy(self)
