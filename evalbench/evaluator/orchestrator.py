@@ -70,12 +70,12 @@ class Orchestrator:
     def evaluate_sub_dataset(
         self, sub_datasets, db_config, dialect, database, total_dataset_len
     ):
-        eval_outputs = []
-        scoring_results = []
+        total_eval_outputs = []
+        total_scoring_results = []
 
         try:
             # Setup the core connection just once (for all query types in database)
-            core_db = databases.get_database(db_config)
+            core_db = databases.get_database(db_config, None)
         except Exception as e:
             raise RuntimeError(
                 f"Could not connect to database {database} on {dialect}; due to {e}"
@@ -88,6 +88,7 @@ class Orchestrator:
             try:
                 db_queue = build_db_queue(
                     core_db,
+                    database,
                     db_config,
                     self.setup_config,
                     query_type,
@@ -111,6 +112,8 @@ class Orchestrator:
                     self.job_id,
                     self.run_time,
                 )
+                total_eval_outputs.extend(eval_outputs)
+                total_scoring_results.extend(scoring_results)
             except Exception as e:
                 logging.info(
                     f"Failed to evaluate {sub_dataset_len} {query_type} queries "
@@ -122,7 +125,7 @@ class Orchestrator:
             core_db.clean_tmp_creations()
             core_db.close_connections()
 
-        return eval_outputs, scoring_results
+        return total_eval_outputs, total_scoring_results
 
     def process(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
