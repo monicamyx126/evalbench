@@ -2,6 +2,8 @@ from queue import Queue
 from copy import deepcopy
 from databases import DB, get_database
 from util.config import load_db_data_from_csvs, load_setup_scripts
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 
 
 def build_db_queue(core_db: DB, db_config, setup_config, query_type: str, num_dbs: int):
@@ -53,14 +55,23 @@ def _prepare_db_queue_for_ddl(core_db: DB, db_config, setup_config, num_dbs):
         raise ValueError("No Setup Config was provided for DDL")
     setup_scripts, _ = _get_setup_values(setup_config, db_config.get("db_type"))
     tmp_dbs = core_db.create_tmp_databases(db_config, num_dbs)
-    for db_name in tmp_dbs:
-        tmp_ddl_db_config = deepcopy(db_config)
-        tmp_ddl_db_config["database_name"] = db_name
-        tmp_ddl_db_config["is_tmp_db"] = True
-        tmp_db = get_database(tmp_ddl_db_config)
-        tmp_db.set_setup_instructions(setup_scripts, None)
-        db_queue.put(tmp_db)
+    with ThreadPoolExecutor() as executor:
+        create_ddl_tmp_db_p = partial(
+            _create_ddl_tmp_db, db_config=db_config, setup_scripts=setup_scripts
+        )
+        results = executor.map(create_ddl_tmp_db_p, tmp_dbs)
+        for tmp_db in results:
+            db_queue.put(tmp_db)
     return db_queue
+
+
+def _create_ddl_tmp_db(db_name, db_config, setup_scripts):
+    tmp_ddl_db_config = deepcopy(db_config)
+    tmp_ddl_db_config["database_name"] = db_name
+    tmp_ddl_db_config["is_tmp_db"] = True
+    tmp_db = get_database(tmp_ddl_db_config)
+    tmp_db.set_setup_instructions(setup_scripts, None)
+    return tmp_db
 
 
 def _get_setup_values(setup_config, db_type: str):
