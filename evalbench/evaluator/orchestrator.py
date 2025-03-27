@@ -72,6 +72,8 @@ class Orchestrator:
     ):
         total_eval_outputs = []
         total_scoring_results = []
+        prompt_generator = None
+        model_generator = None
 
         try:
             # Setup the core connection just once (for all query types in database)
@@ -81,7 +83,9 @@ class Orchestrator:
                 f"Could not connect to database {database} on {dialect}; due to {e}"
             )
 
-        for query_type in sub_datasets[dialect][database]:
+        for query_type in ["dql", "dml", "ddl"]:
+            if query_type not in sub_datasets[dialect][database]:
+                continue
             sub_dataset = sub_datasets[dialect][database][query_type]
             sub_dataset_len = len(sub_dataset)
             db_queue = None
@@ -100,14 +104,28 @@ class Orchestrator:
                     + f"could not be setup properly in {dialect} due to {e}."
                 )
                 return
+            
+            # Setup prompt generator for each DB once
+            # and re-use the setup schema (DDLs as context for LLM)
+            # for all subsequent runs
+            if not prompt_generator:
+                try:
+                    pre_setup_db = db_queue.get()
+                    prompt_generator = prompts.get_generator(pre_setup_db, self.config)
+                    db_queue.put(pre_setup_db)
+                except Exception as e:
+                    logging.error(f"Could not setup prompt generator due to {e}.")
+                    return
+            if not model_generator:
+                model_generator = models.get_generator(self.config["model_config"])
 
             evaluator = Evaluator(self.config)
             try:
                 eval_outputs, scoring_results = evaluator.evaluate(
                     sub_dataset,
                     db_queue,
-                    prompts.get_generator(core_db, self.config),
-                    models.get_generator(self.config["model_config"]),
+                    prompt_generator,
+                    model_generator,
                     total_dataset_len,
                     self.job_id,
                     self.run_time,
