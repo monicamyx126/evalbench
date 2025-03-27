@@ -6,12 +6,12 @@ from absl import flags
 from reporting import get_reporters
 from util.config import load_yaml_config, config_to_df
 from dataset.dataset import load_json, load_dataset_from_json, flatten_dataset
-from evaluator.evaluator import Evaluator
+from evaluator.orchestrator import Orchestrator
 import reporting.report as report
 import reporting.analyzer as analyzer
 import logging
 from util.config import set_session_configs
-from util.service import load_session_configs, create_eval_instances
+from util.service import load_session_configs
 import os
 
 logging.getLogger().setLevel(logging.INFO)
@@ -35,31 +35,22 @@ def main(argv: Sequence[str]):
 
         set_session_configs(session, parsed_config)
         # Load the configs
-        config, db_config, model_config, setup_config = load_session_configs(session)
+        config, db_configs, model_config, setup_config = load_session_configs(session)
         logging.info("Loaded Configurations in %s", _EXPERIMENT_CONFIG.value)
 
         # Load the dataset
         dataset = load_dataset_from_json(session["dataset_config"], config)
 
-        # Load the instances for eval
-        core_db, model_generator, prompt_generator = create_eval_instances(
-            config, db_config, model_config
-        )
-
         # Load the evaluator
-        evaluator = Evaluator(
-            config, prompt_generator, model_generator, db_config, core_db, setup_config
-        )
+        evaluator = Orchestrator(config, db_configs, setup_config)
 
         # Run evaluations
         evaluator.evaluate(flatten_dataset(dataset))
         job_id, run_time, results_tf, scores_tf = evaluator.process()
-        core_db.clean_tmp_creations()
-        core_db.close_connections()
 
         # Create Dataframes for reporting
         reporters = get_reporters(parsed_config.get("reporting"), job_id, run_time)
-        config_df = config_to_df(job_id, run_time, config, model_config, db_config)
+        config_df = config_to_df(job_id, run_time, config, model_config, db_configs)
         results = load_json(results_tf)
         results_df = report.get_dataframe(results)
         report.quick_summary(results_df)
@@ -78,6 +69,7 @@ def main(argv: Sequence[str]):
         print(f"Finished Job ID {job_id}")
         return os._exit(0)
     except Exception as e:
+        raise e
         logging.error(e)
         return os._exit(1)
 
