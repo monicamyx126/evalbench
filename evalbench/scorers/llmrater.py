@@ -21,7 +21,6 @@ from typing import Tuple
 from generators.models import get_generator
 from scorers import exactmatcher
 import logging
-from util.config import load_yaml_config
 
 from scorers import comparator
 from .util import make_hashable, with_cache_execute
@@ -44,7 +43,7 @@ class LLMRater(comparator.Comparator):
         self.model_config = config.get("model_config") or ""
         if not self.model_config:
             raise ValueError("model_config is required for LLM Rater")
-        self.model = get_generator(load_yaml_config(self.model_config))
+        self.model = get_generator(self.model_config)
 
     def _is_exact_match(
         self,
