@@ -6,6 +6,8 @@ import tempfile
 from evaluator.progress_reporter import (
     setup_progress_reporting,
     cleanup_progress_reporting,
+    skip_dialect,
+    skip_database,
 )
 from evaluator.evaluator import Evaluator
 from evaluator.db_manager import build_db_queue
@@ -66,6 +68,7 @@ class Orchestrator:
                         f"Skipping queries for {dialect} as no applicable db_config"
                         + " was found."
                     )
+                    skip_dialect(sub_datasets[dialect], progress_reporting)
                     continue
                 for database in sub_datasets[dialect]:
                     future = executor.submit(
@@ -97,10 +100,14 @@ class Orchestrator:
             # Setup the core connection just once (for all query types in database)
             core_db = databases.get_database(db_config, database)
         except Exception as e:
+            skip_database(sub_datasets[dialect][database], progress_reporting)
             raise RuntimeError(
                 f"Could not connect to database {database} on {dialect}; due to {e}"
             )
 
+        if progress_reporting:
+            with progress_reporting["lock"]:
+                progress_reporting["setup_i"].value += 1
         prompt_generator = prompts.get_generator(core_db, self.config)
         model_generator = models.get_generator(self.config["model_config"])
 
@@ -124,6 +131,7 @@ class Orchestrator:
                     f"Skipping {query_type} queries as DB {database} "
                     + f"could not be setup properly in {dialect} due to {e}."
                 )
+                skip_database(sub_datasets[dialect][database], progress_reporting)
                 return
 
             evaluator = Evaluator(self.config)

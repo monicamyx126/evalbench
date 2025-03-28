@@ -1,3 +1,4 @@
+import logging
 import sys
 import threading
 from io import StringIO
@@ -5,11 +6,20 @@ import threading
 import multiprocessing
 
 _ORIGINAL_STDOUT = sys.stdout
+_ORIGINAL_STDERR = sys.stderr
+_ORIGINAL_HANDLERS = logging.getLogger().handlers[:]
+_NUM_LINES_FOR_PROGRESS = 5
 
 
 def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
     manager = multiprocessing.Manager()
     sys.stdout = tmp_buffer = StringIO()
+    sys.stderr = tmp_buffer
+    logger = logging.getLogger()
+    logger.handlers = []
+    buffer_handler = logging.StreamHandler(tmp_buffer)
+    logger.addHandler(buffer_handler)
+    _ORIGINAL_STDOUT.write(("-" * 80 + "\n") * _NUM_LINES_FOR_PROGRESS)
     progress_reporting = {
         "lock": manager.Lock(),
         "setup_i": manager.Value("i", 0),
@@ -23,7 +33,7 @@ def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
     progress_reporting_finished = threading.Event()
     progress_reporting_thread = threading.Thread(
         target=_report,
-        args=(progress_reporting, progress_reporting_finished),
+        args=(progress_reporting, progress_reporting_finished, tmp_buffer),
         daemon=True,
     )
     progress_reporting_thread.start()
@@ -35,7 +45,7 @@ def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
     )
 
 
-def _report(progress_reporting, progress_reporting_finished):
+def _report(progress_reporting, progress_reporting_finished, tmp_buffer):
     while not progress_reporting_finished.is_set():
 
         setup_i = progress_reporting["setup_i"].value
@@ -46,32 +56,58 @@ def _report(progress_reporting, progress_reporting_finished):
         dataset_len = progress_reporting["total"]
         databases = progress_reporting["total_dbs"]
 
-        for _ in range(5):
-            _ORIGINAL_STDOUT.write("\033[F\033[K")
+        buffer_content = tmp_buffer.getvalue()
+        tmp_buffer.seek(0)
+        tmp_buffer.truncate(0)
+        if buffer_content != "":
+            _ORIGINAL_STDOUT.write("\n")
+            _ORIGINAL_STDOUT.write(buffer_content)
+            _ORIGINAL_STDOUT.write("\n" * (_NUM_LINES_FOR_PROGRESS + 1))
+
+        _ORIGINAL_STDOUT.write("\033[F\033[K" * _NUM_LINES_FOR_PROGRESS)
 
         report_progress(
             setup_i, databases, prefix="DBs Setup:", suffix="Complete", length=50
         )
         report_progress(
-            prompt_i, dataset_len, prefix="Prompts:", suffix="Complete", length=50
+            prompt_i, dataset_len, prefix="Prompts:  ", suffix="Complete", length=50
         )
         report_progress(
-            gen_i, dataset_len, prefix="SQLGen:", suffix="Complete", length=50
+            gen_i, dataset_len, prefix="SQLGen:   ", suffix="Complete", length=50
         )
         report_progress(
-            exec_i, dataset_len, prefix="SQLExec:", suffix="Complete", length=50
+            exec_i, dataset_len, prefix="SQLExec:  ", suffix="Complete", length=50
         )
         report_progress(
-            score_i, dataset_len, prefix="Scoring:", suffix="Complete", length=50
+            score_i, dataset_len, prefix="Scoring:  ", suffix="Complete", length=50
         )
         _ORIGINAL_STDOUT.flush()
+
         if progress_reporting_finished.wait(timeout=3):
             break
 
 
+def skip_database(sub_datasets, progress_reporter):
+    evals_in_db = sum(
+        len(sub_datasets.get(query_type, [])) for query_type in ["dql", "dml", "ddl"]
+    )
+    with progress_reporter["lock"]:
+        progress_reporter["total_dbs"] -= 1
+        progress_reporter["total"] -= evals_in_db
+
+
+def skip_dialect(sub_datasets, progress_reporter):
+    for database in sub_datasets:
+        skip_database(sub_datasets[database], progress_reporter)
+
+
 def cleanup_progress_reporting(tmp_buffer):
     sys.stdout = _ORIGINAL_STDOUT
+    sys.stderr = _ORIGINAL_STDERR
+    logger = logging.getLogger()
+    logger.handlers = _ORIGINAL_HANDLERS
     sys.stdout.write(tmp_buffer.getvalue())
+    tmp_buffer.close()
 
 
 # Print iterations progress bar for parallel calls
@@ -97,7 +133,6 @@ def report_progress(
         fill        - Optional  : bar fill character (Str)
         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
-    global _ORIGINAL_STDOUT
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + "-" * (length - filledLength)
