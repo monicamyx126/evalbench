@@ -12,7 +12,7 @@ class ResourceExhaustedError(Exception):
 def rate_limit(
     query: Tuple,
     execution_method,
-    execs_per_minute: int,
+    execs_per_minute: int | None,
     semaphore: Semaphore,
     max_attempts: int,
 ) -> Any:

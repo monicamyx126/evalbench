@@ -10,16 +10,20 @@ message PingRequest {
   string id = 1;
 }
 
+message DialectBasedSQLStatements {
+  repeated string sql_statements = 1;
+}
+
 message EvalInputRequest {
   int64 id = 1;
   string nl_prompt = 2;
   string query_type = 3;
   string database = 4;
   repeated string dialects = 5;
-  repeated string golden_sql = 6;
-  repeated string eval_query = 7;
-  repeated string setup_sql = 8;
-  repeated string cleanup_sql = 9;
+  map<string, DialectBasedSQLStatements> golden_sql = 6;
+  map<string, DialectBasedSQLStatements> eval_query = 7;
+  map<string, DialectBasedSQLStatements> setup_sql = 8;
+  map<string, DialectBasedSQLStatements> cleanup_sql = 9;
   repeated string tags = 10;
   map<string, string> other = 11; 
   string sql_generator_error = 12;

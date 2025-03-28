@@ -102,19 +102,7 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         dataset = load_dataset_from_json(dataset_config_json, experiment_config)
         for _, eval_inputs in dataset.items():
             for eval_input in eval_inputs:
-                eval_input_request = eval_request_pb2.EvalInputRequest(
-                    id=eval_input.id,
-                    query_type=eval_input.query_type,
-                    database=eval_input.database,
-                    nl_prompt=eval_input.nl_prompt,
-                    dialects=eval_input.dialects,
-                    golden_sql=[q for q in eval_input.golden_sql if q is not None],
-                    eval_query=[q for q in eval_input.eval_query if q is not None],
-                    setup_sql=[q for q in eval_input.setup_sql if q is not None],
-                    cleanup_sql=[q for q in eval_input.cleanup_sql if q is not None],
-                    tags=eval_input.tags,
-                )
-                eval_input_request.other.update(eval_input.other)
+                eval_input_request = eval_input.to_proto()
                 yield eval_input_request
 
     async def Eval(
