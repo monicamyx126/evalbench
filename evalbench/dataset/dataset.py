@@ -11,13 +11,6 @@ from dataset.evaloutput import EvalOutput
 from itertools import chain
 
 
-_SOURCE_DATASET_PATH = flags.DEFINE_string(
-    "source_dataset_path",
-    "datasets/bird_pg_dev/financial.json",
-    "Path to the source dataset configuration file.",
-)
-
-
 def load_json(json_file_path):
     all_items = []
     json_file_path = f"{json_file_path}"
@@ -26,40 +19,55 @@ def load_json(json_file_path):
     return all_items
 
 
-def load_dataset_from_json(json_file_path, experiment_config):
+def load_dataset_from_json(json_file_path, config):
     input_items = []
     all_items = load_json(json_file_path)
     if "nl_prompt" in all_items[0].keys():
-
-        logging.info("dataset in new Evalbench Format")
-        dialect = experiment_config["dialect"]
-        input_items = load_dataset_from_newFormat(all_items, dialect)
+        input_items = load_dataset(all_items, config)
     else:
-        raise ValueError("Dataset not in new Evalbench Format")
+        raise ValueError("Dataset not in Evalbench Format")
     totalEntries = sum(len(input_items.get(q, [])) for q in ["dql", "dml", "ddl"])
     logging.info(f"Converted {totalEntries} entries to EvalInput.")
 
     return input_items
 
 
-def load_dataset_from_newFormat(dataset: Sequence[dict], dialect: str):
-    input_items = {"dql": [], "dml": [], "ddl": []}
+def load_dataset(dataset: Sequence[dict], config):
+    input_items: dict[str, list[EvalInputRequest]] = {"dql": [], "dml": [], "ddl": []}
     for item in dataset:
+        if not _item_meets_config_filters(item, config):
+            continue
         eval_input = EvalInputRequest(
             id=item["id"],
             nl_prompt=item["nl_prompt"],
             query_type=item["query_type"].lower(),
             database=item["database"],
-            dialects=item["dialects"],
-            golden_sql=item["golden_sql"].get(dialect, []),
-            eval_query=item["eval_query"].get(dialect, []),
-            setup_sql=item["setup_sql"].get(dialect, []),
-            cleanup_sql=item["cleanup_sql"].get(dialect, []),
+            dialects=_union_dialects(item["dialects"], config.get("dialects", [])),
+            golden_sql=item["golden_sql"],
+            eval_query=item["eval_query"],
+            setup_sql=item["setup_sql"],
+            cleanup_sql=item["cleanup_sql"],
             tags=item["tags"],
             other=build_normalized_other(item["other"]),
         )
         input_items[eval_input.query_type].append(eval_input)
     return input_items
+
+def _union_dialects(item_dialects: list[str], config_dialects: list[str]):
+    if not len(config_dialects):
+        return item_dialects
+    return list(set(item_dialects) & set(config_dialects))
+
+def _item_meets_config_filters(item: dict, config: dict):
+    if item["query_type"].lower() not in config.get("query_types",["dql","dml","ddl"]):
+        return False
+    if len(config.get("databases",[])) and item["database"] not in config.get("databases",[]):
+        return False
+    if(len(config.get("dialects",[]))):
+        for dialect in item["dialects"]:
+            if dialect in config.get("dialects", []):
+                return True
+    return False
 
 
 def build_normalized_other(other: dict[str, Any]):
@@ -98,16 +106,3 @@ def breakdown_datasets(total_dataset: list[EvalInputRequest]):
 
 def flatten_dataset(dataset: dict[str, list]):
     return list(chain.from_iterable(dataset.values()))
-
-
-def main(argv: Sequence[str]) -> None:
-    logging.info("Dataset converter v1.0.0")
-    logging.info("Loading dataset from %s", _SOURCE_DATASET_PATH.value)
-    dataset = load_dataset_from_json(_SOURCE_DATASET_PATH.value)
-    logging.info("Loaded %d entries.", len(dataset))
-    evaloutput = EvalOutput(dataset[0])
-    logging.info("Done.")
-
-
-if __name__ == "__main__":
-    app.run(main)

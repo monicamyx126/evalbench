@@ -18,10 +18,10 @@ class EvalInputRequest:
         database: str,
         nl_prompt: str,
         dialects: list,
-        golden_sql: list,
-        eval_query: list,
-        setup_sql: list,
-        cleanup_sql: list,
+        golden_sql: dict | list,
+        eval_query: dict | list,
+        setup_sql: dict | list,
+        cleanup_sql: dict | list,
         tags: list,
         other: dict,
         sql_generator_error: str = "",
@@ -89,4 +89,12 @@ class EvalInputRequest:
     def copy_for_dialect(self, dialect: str):
         copy = self.copy()
         copy.dialects = [dialect]
+        if isinstance(self.golden_sql, dict):
+            copy.golden_sql = self.golden_sql.get(dialect, [])
+        if isinstance(self.eval_query, dict):
+            copy.eval_query = self.eval_query.get(dialect, [])
+        if isinstance(self.setup_sql, dict):
+            copy.setup_sql = self.setup_sql.get(dialect, [])
+        if isinstance(self.cleanup_sql, dict):
+            copy.cleanup_sql = self.cleanup_sql.get(dialect, [])
         return copy
