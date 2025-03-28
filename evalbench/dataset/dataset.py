@@ -78,12 +78,14 @@ def breakdown_datasets(total_dataset: list[EvalInputRequest]):
     }
     """
     total_dataset_len = 0
+    total_db_len = 0
     datasets: dict[str, dict[str, dict[str, list[EvalInputRequest]]]] = {}
     for input in total_dataset:
         for dialect in input.dialects:
             if dialect not in datasets:
                 datasets[dialect] = {}
             if input.database not in datasets[dialect]:
+                total_db_len += 1
                 datasets[dialect][input.database] = {}
             if input.query_type not in datasets[dialect][input.database]:
                 datasets[dialect][input.database][input.query_type] = []
@@ -91,7 +93,7 @@ def breakdown_datasets(total_dataset: list[EvalInputRequest]):
                 input.copy_for_dialect(dialect)
             )
             total_dataset_len += 1
-    return datasets, total_dataset_len
+    return datasets, total_dataset_len, total_db_len
 
 
 def flatten_dataset(dataset: dict[str, list]):

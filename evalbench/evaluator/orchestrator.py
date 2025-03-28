@@ -45,7 +45,7 @@ class Orchestrator:
         require setting up and tearing down the databsae and DML queries require prevention
         of unintended consequences. Additionally, DQLs are run under a read-only user.
         """
-        sub_datasets, total_dataset_len = breakdown_datasets(dataset)
+        sub_datasets, total_dataset_len, total_db_len = breakdown_datasets(dataset)
         progress_reporting = None
         if self.report_progress:
             (
@@ -53,7 +53,7 @@ class Orchestrator:
                 progress_reporting,
                 progress_reporting_finished,
                 tmp_buffer,
-            ) = setup_progress_reporting(total_dataset_len)
+            ) = setup_progress_reporting(total_dataset_len, total_db_len)
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.eval_runners

@@ -7,7 +7,7 @@ import multiprocessing
 _ORIGINAL_STDOUT = sys.stdout
 
 
-def setup_progress_reporting(total_dataset_len: int):
+def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
     manager = multiprocessing.Manager()
     sys.stdout = tmp_buffer = StringIO()
     progress_reporting = {
@@ -18,6 +18,7 @@ def setup_progress_reporting(total_dataset_len: int):
         "exec_i": manager.Value("i", 0),
         "score_i": manager.Value("i", 0),
         "total": total_dataset_len,
+        "total_dbs": total_dbs,
     }
     progress_reporting_finished = threading.Event()
     progress_reporting_thread = threading.Thread(
