@@ -69,7 +69,6 @@ def main(argv: Sequence[str]):
         print(f"Finished Job ID {job_id}")
         return os._exit(0)
     except Exception as e:
-        raise e
         logging.error(e)
         return os._exit(1)
 
