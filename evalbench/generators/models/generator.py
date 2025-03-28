@@ -6,9 +6,9 @@ from threading import Semaphore
 class QueryGenerator(ABC):
 
     def __init__(self, querygenerator_config):
-        self.execs_per_minute = querygenerator_config.get("execs_per_minute") or 60
+        self.execs_per_minute = querygenerator_config.get("execs_per_minute") or None
         self.max_attempts = querygenerator_config.get("max_attempts") or 3
-        self.semaphore = Semaphore(self.execs_per_minute)
+        self.semaphore = Semaphore(self.execs_per_minute or 1)
 
     def generate(self, prompt):
         return rate_limit(
