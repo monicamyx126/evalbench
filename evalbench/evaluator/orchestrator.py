@@ -56,6 +56,7 @@ class Orchestrator:
                 progress_reporting,
                 progress_reporting_finished,
                 tmp_buffer,
+                colab_progress_report,
             ) = setup_progress_reporting(total_dataset_len, total_db_len)
 
         with concurrent.futures.ThreadPoolExecutor(
@@ -87,7 +88,7 @@ class Orchestrator:
                 self.total_scoring_results.extend(scoring_results)
 
         if self.report_progress:
-            cleanup_progress_reporting(progress_reporting, tmp_buffer)  # type: ignore
+            cleanup_progress_reporting(progress_reporting, tmp_buffer, colab_progress_report)  # type: ignore
             progress_reporting_finished.set()  # type: ignore
             progress_reporting_thread.join()  # type: ignore
 

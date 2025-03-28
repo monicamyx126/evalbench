@@ -53,6 +53,7 @@ def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
         progress_reporting,
         progress_reporting_finished,
         tmp_buffer,
+        colab_progress_report,
     )
 
 
@@ -96,7 +97,7 @@ def _colab_progress(progress_reporting):
         progress_reporting["score_i"].value / progress_reporting["total"]
     ) * 100
     return HTML(  # type: ignore
-        """ 
+        """
         <div style="width: 100px; float:left;">DBs Setup:</div>
         <progress value='{setup_i}' max='{total_dbs}', style='width: calc(100% - 200px);'>
             {setup_i}
@@ -231,8 +232,9 @@ def record_successful_setup(progress_reporting):
             progress_reporting["setup_i"].value += 1
 
 
-def cleanup_progress_reporting(progress_report, tmp_buffer):
+def cleanup_progress_reporting(progress_report, tmp_buffer, colab_progress_report):
     if _IN_COLAB:
+        colab_progress_report.update(_colab_progress(progress_report))
         return
     global _ORIGINAL_HANDLERS
     sys.stdout = _ORIGINAL_STDOUT
