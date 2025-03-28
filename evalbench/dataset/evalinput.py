@@ -54,33 +54,60 @@ class EvalInputRequest:
     if PROTO_IMPORTED:
 
         @classmethod
-        def init_from_proto(self, proto: eval_request_pb2.EvalInputRequest):
+        def init_from_proto(self, proto: eval_request_pb2.EvalInputRequest):  # type: ignore
             """Initializes an EvalInputRequest from eval_request_pb2 proto."""
 
             request = MessageToDict(proto)
             return self(
-                id=request.get("id"),
-                query_type=request.get("queryType"),
-                database=request.get("database"),
-                nl_prompt=request.get("nlPrompt"),
-                dialects=request.get("dialects"),
-                golden_sql=request.get("goldenSql"),
-                eval_query=request.get("evalQuery"),
-                setup_sql=request.get("setupSql"),
-                cleanup_sql=request.get("cleanupSql"),
-                tags=request.get("tags"),
-                other=request.get("other"),
-                sql_generator_error=request.get("sqlGeneratorError"),
-                sql_generator_time=request.get("sqlGeneratorTime"),
-                generated_sql=request.get("generatedSql"),
-                job_id=request.get("jobId"),
-                trace_id=request.get("traceId"),
+                id=str(request.get("id") or -1),
+                query_type=request.get("queryType") or "",
+                database=request.get("database") or "",
+                nl_prompt=request.get("nlPrompt") or "",
+                dialects=request.get("dialects") or [],
+                golden_sql=_get_dialect_based_sql(request.get("goldenSql")),
+                eval_query=_get_dialect_based_sql(request.get("evalQuery")),
+                setup_sql=_get_dialect_based_sql(request.get("setupSql")),
+                cleanup_sql=_get_dialect_based_sql(request.get("cleanupSql")),
+                tags=request.get("tags") or [],
+                other=request.get("other") or {},
+                sql_generator_error=request.get("sqlGeneratorError") or "",
+                sql_generator_time=request.get("sqlGeneratorTime") or 0,
+                generated_sql=request.get("generatedSql") or "",
+                job_id=request.get("jobId") or "",
+                trace_id=request.get("traceId") or "",
             )
+
+        def to_proto(self):  # type: ignore
+            return eval_request_pb2.EvalInputRequest(  # type: ignore
+                id=int(self.id),
+                query_type=self.query_type,
+                database=self.database,
+                nl_prompt=self.nl_prompt,
+                dialects=self.dialects,
+                golden_sql=self._set_dialect_based_sql(self.golden_sql),
+                eval_query=self._set_dialect_based_sql(self.eval_query),
+                setup_sql=self._set_dialect_based_sql(self.setup_sql),
+                cleanup_sql=self._set_dialect_based_sql(self.cleanup_sql),
+                tags=self.tags,
+                other=self.other,
+            )
+
+        def _set_dialect_based_sql(self, dialect_based_sql):
+            if not isinstance(dialect_based_sql, dict):
+                return None
+            response: dict[str, eval_request_pb2.DialectBasedSQLStatements] = {}  # type: ignore
+            for k, v in dialect_based_sql.items():
+                response[k] = eval_request_pb2.DialectBasedSQLStatements()  # type: ignore
+                response[k].sql_statements.extend(v)
+            return response
 
     else:
 
         @classmethod
         def init_from_proto(cls, proto):
+            raise ImportError("protobuf module not available")
+
+        def to_proto(self):
             raise ImportError("protobuf module not available")
 
     def copy(self):
@@ -98,3 +125,11 @@ class EvalInputRequest:
         if isinstance(self.cleanup_sql, dict):
             copy.cleanup_sql = self.cleanup_sql.get(dialect, [])
         return copy
+
+
+def _get_dialect_based_sql(dialect_based_sql):
+    if not dialect_based_sql:
+        return {}
+    return {
+        dialect: sqls["sqlStatements"] for dialect, sqls in dialect_based_sql.items()
+    }
