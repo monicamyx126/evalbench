@@ -100,12 +100,15 @@ def update_google3_relative_paths(experiment_config: dict, session_id: str):
                 values = []
                 for sub_value in value:
                     if isinstance(sub_value, str) and sub_value.startswith("google3/"):
-                        values.append(get_google3_relative_path(sub_value,session_id))
+                        values.append(get_google3_relative_path(sub_value, session_id))
                     else:
                         values.append(sub_value)
                 experiment_config[key] = values
             elif isinstance(value, str) and value.startswith("google3/"):
-                experiment_config[key] = get_google3_relative_path(experiment_config[key],session_id)
+                experiment_config[key] = get_google3_relative_path(
+                    experiment_config[key], session_id
+                )
+
 
 def get_google3_relative_path(value, session_id):
     return os.path.join(
