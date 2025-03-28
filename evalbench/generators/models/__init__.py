@@ -26,4 +26,4 @@ def get_generator(model_config_path: str):
         raise ValueError(f"Unknown Generator {model_config['generator']}")
 
     _global_models_checked_out[model_config_path] = model
-    return GeminiGenerator(model_config)
+    return model
