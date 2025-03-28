@@ -9,6 +9,12 @@ from mp import mprunner
 import concurrent.futures
 from dataset.evalinput import EvalInputRequest
 from dataset.evaloutput import EvalOutput
+from evaluator.progress_reporter import (
+    record_successful_prompt_gen,
+    record_successful_sql_gen,
+    record_successful_sql_exec,
+    record_successful_scoring,
+)
 from queue import Queue
 from databases import DB
 
@@ -58,17 +64,13 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.promptrunner.futures):
             eval_output = future.result()
-            if progress_reporting:
-                with progress_reporting["lock"]:
-                    progress_reporting["prompt_i"].value += 1
+            record_successful_prompt_gen(progress_reporting)
             work = sqlgenwork.SQLGenWork(model_generator, eval_output)
             self.genrunner.execute_work(work)
 
         for future in concurrent.futures.as_completed(self.genrunner.futures):
             eval_output = future.result()
-            if progress_reporting:
-                with progress_reporting["lock"]:
-                    progress_reporting["gen_i"].value += 1
+            record_successful_sql_gen(progress_reporting)
             work = sqlexecwork.SQLExecWork(
                 db_queue.get(), self.config, eval_output, db_queue
             )
@@ -76,17 +78,13 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.sqlrunner.futures):
             eval_output = future.result()
-            if progress_reporting:
-                with progress_reporting["lock"]:
-                    progress_reporting["exec_i"].value += 1
+            record_successful_sql_exec(progress_reporting)
             work = scorework.ScorerWork(self.config, eval_output, scoring_results)
             self.scoringrunner.execute_work(work)
 
         for future in concurrent.futures.as_completed(self.scoringrunner.futures):
             eval_output = future.result()
-            if progress_reporting:
-                with progress_reporting["lock"]:
-                    progress_reporting["score_i"].value += 1
+            record_successful_scoring(progress_reporting)
             if "truncate_execution_outputs" in self.config:
                 truncateExecutionOutputs(
                     eval_output,

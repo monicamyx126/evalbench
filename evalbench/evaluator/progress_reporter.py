@@ -85,7 +85,7 @@ def _report(progress_reporting, progress_reporting_finished, tmp_buffer):
         )
         _ORIGINAL_STDOUT.flush()
 
-        if progress_reporting_finished.wait(timeout=3):
+        if progress_reporting_finished.wait(timeout=1):
             break
 
 
@@ -111,6 +111,30 @@ def skip_database(sub_datasets, progress_reporting, query_type):
     with progress_reporting["lock"]:
         progress_reporting["total_dbs"] -= total_dbs
         progress_reporting["total"] -= evals_in_db
+
+
+def record_successful_prompt_gen(progress_reporting):
+    if progress_reporting:
+        with progress_reporting["lock"]:
+            progress_reporting["prompt_i"].value += 1
+
+
+def record_successful_sql_gen(progress_reporting):
+    if progress_reporting:
+        with progress_reporting["lock"]:
+            progress_reporting["gen_i"].value += 1
+
+
+def record_successful_sql_exec(progress_reporting):
+    if progress_reporting:
+        with progress_reporting["lock"]:
+            progress_reporting["exec_i"].value += 1
+
+
+def record_successful_scoring(progress_reporting):
+    if progress_reporting:
+        with progress_reporting["lock"]:
+            progress_reporting["score_i"].value += 1
 
 
 def record_successful_setup(progress_reporting):
