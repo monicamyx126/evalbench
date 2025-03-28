@@ -7,15 +7,17 @@ import multiprocessing
 
 _ORIGINAL_STDOUT = sys.stdout
 _ORIGINAL_STDERR = sys.stderr
-_ORIGINAL_HANDLERS = logging.getLogger().handlers[:]
+_ORIGINAL_HANDLERS = None
 _NUM_LINES_FOR_PROGRESS = 5
 
 
 def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
+    global _ORIGINAL_HANDLERS
     manager = multiprocessing.Manager()
     sys.stdout = tmp_buffer = StringIO()
     sys.stderr = tmp_buffer
     logger = logging.getLogger()
+    _ORIGINAL_HANDLERS = logger.handlers
     logger.handlers = []
     buffer_handler = logging.StreamHandler(tmp_buffer)
     logger.addHandler(buffer_handler)
@@ -87,12 +89,16 @@ def _report(progress_reporting, progress_reporting_finished, tmp_buffer):
             break
 
 
-def skip_dialect(sub_datasets, progress_reporter):
+def skip_dialect(sub_datasets, progress_reporting):
+    if not progress_reporting:
+        return
     for database in sub_datasets:
-        skip_database(sub_datasets[database], progress_reporter, None)
+        skip_database(sub_datasets[database], progress_reporting, None)
 
 
-def skip_database(sub_datasets, progress_reporter, query_type):
+def skip_database(sub_datasets, progress_reporting, query_type):
+    if not progress_reporting:
+        return
     if query_type:
         total_dbs = 1
         evals_in_db = len(sub_datasets.get(query_type, []))
@@ -102,16 +108,22 @@ def skip_database(sub_datasets, progress_reporter, query_type):
             len(sub_datasets.get(query_type, []))
             for query_type in ["dql", "dml", "ddl"]
         )
-    with progress_reporter["lock"]:
-        progress_reporter["total_dbs"] -= total_dbs
-        progress_reporter["total"] -= evals_in_db
+    with progress_reporting["lock"]:
+        progress_reporting["total_dbs"] -= total_dbs
+        progress_reporting["total"] -= evals_in_db
 
+def record_successful_setup(progress_reporting):
+    if progress_reporting:
+        with progress_reporting["lock"]:
+            progress_reporting["setup_i"].value += 1
 
 def cleanup_progress_reporting(tmp_buffer):
+    global _ORIGINAL_HANDLERS
     sys.stdout = _ORIGINAL_STDOUT
     sys.stderr = _ORIGINAL_STDERR
     logger = logging.getLogger()
-    logger.handlers = _ORIGINAL_HANDLERS
+    if _ORIGINAL_HANDLERS:
+        logger.handlers = _ORIGINAL_HANDLERS
     sys.stdout.write(tmp_buffer.getvalue())
     tmp_buffer.close()
 
