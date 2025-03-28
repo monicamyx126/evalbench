@@ -12,6 +12,9 @@ import generators.models as models
 import generators.prompts as prompts
 import concurrent.futures
 import multiprocessing
+import sys
+from io import StringIO
+import threading
 
 
 class Orchestrator:
@@ -42,6 +45,11 @@ class Orchestrator:
         """
         sub_datasets, total_dataset_len = breakdown_datasets(dataset)
         manager = multiprocessing.Manager()
+
+        # Setup progress reporting
+        core_stdout = sys.stdout
+        sys.stdout = tmp_buffer = StringIO()
+        stop_progress_reporting_event = threading.Event()
         progress_reporting = {
             "lock": manager.Lock(),
             "prompt_i": manager.Value("i", 0),
@@ -50,6 +58,12 @@ class Orchestrator:
             "score_i": manager.Value("i", 0),
             "total": total_dataset_len,
         }
+        progress_reporting_thread = threading.Thread(
+            target=self._status_reporter,
+            args=(progress_reporting, core_stdout, stop_progress_reporting_event),
+            daemon=True,
+        )
+        progress_reporting_thread.start()
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.eval_runners
@@ -77,6 +91,11 @@ class Orchestrator:
                 eval_outputs, scoring_results = future.result()
                 self.total_eval_outputs.extend(eval_outputs)
                 self.total_scoring_results.extend(scoring_results)
+
+        stop_progress_reporting_event.set()
+        progress_reporting_thread.join()
+        sys.stdout = core_stdout
+        sys.stdout.write(tmp_buffer.getvalue())
 
     def evaluate_sub_dataset(
         self, sub_datasets, db_config, dialect, database, progress_reporting
@@ -142,6 +161,14 @@ class Orchestrator:
             core_db.close_connections()
 
         return total_eval_outputs, total_scoring_results
+
+    def _status_reporter(self, progress_reporting, stdout, stop_event):
+        while not stop_event.is_set():
+            stdout.write(
+                f"Status: Processing...{progress_reporting["prompt_i"].value}\n"
+            )
+            if stop_event.wait(timeout=10):
+                break
 
     def process(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
