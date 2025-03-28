@@ -9,7 +9,8 @@ database_configs:
  - datasets/bat/db_blog/db_configs/sqlserver_db_config.yaml
 # The dialect that the dataset_config will be filtered by. Only one can be
 # specified at a time (per run). See above for list of supported Dialects
-dialect: sqlserver
+dialects:
+ - sqlite
 #
 #
 ############################################################
