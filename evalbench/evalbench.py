@@ -13,6 +13,14 @@ import logging
 from util.config import set_session_configs
 from util.service import load_session_configs
 import os
+import sys
+
+try:
+    import google.colab  # type: ignore
+
+    _IN_COLAB = True
+except ImportError:
+    _IN_COLAB = False
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -67,6 +75,9 @@ def main(argv: Sequence[str]):
             reporter.store(summary_scores_df, report.STORETYPE.SUMMARY)
 
         print(f"Finished Job ID {job_id}")
+        if _IN_COLAB:
+            # Exit gracefully for colab environment
+            return sys.exit(0)
         return os._exit(0)
     except Exception as e:
         logging.error(e)
