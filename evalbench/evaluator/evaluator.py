@@ -48,7 +48,6 @@ class Evaluator:
         self.genrunner.futures.clear()
         self.sqlrunner.futures.clear()
         self.scoringrunner.futures.clear()
-        total_dataset_len = progress_reporting["total"]
 
         for eval_input in dataset:
             eval_output = EvalOutput(eval_input)
@@ -59,15 +58,17 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.promptrunner.futures):
             eval_output = future.result()
-            with progress_reporting["lock"]:
-                progress_reporting["prompt_i"].value += 1
+            if progress_reporting:
+                with progress_reporting["lock"]:
+                    progress_reporting["prompt_i"].value += 1
             work = sqlgenwork.SQLGenWork(model_generator, eval_output)
             self.genrunner.execute_work(work)
 
         for future in concurrent.futures.as_completed(self.genrunner.futures):
             eval_output = future.result()
-            with progress_reporting["lock"]:
-                progress_reporting["gen_i"].value += 1
+            if progress_reporting:
+                with progress_reporting["lock"]:
+                    progress_reporting["gen_i"].value += 1
             work = sqlexecwork.SQLExecWork(
                 db_queue.get(), self.config, eval_output, db_queue
             )
@@ -75,15 +76,17 @@ class Evaluator:
 
         for future in concurrent.futures.as_completed(self.sqlrunner.futures):
             eval_output = future.result()
-            with progress_reporting["lock"]:
-                progress_reporting["exec_i"].value += 1
+            if progress_reporting:
+                with progress_reporting["lock"]:
+                    progress_reporting["exec_i"].value += 1
             work = scorework.ScorerWork(self.config, eval_output, scoring_results)
             self.scoringrunner.execute_work(work)
 
         for future in concurrent.futures.as_completed(self.scoringrunner.futures):
             eval_output = future.result()
-            with progress_reporting["lock"]:
-                progress_reporting["score_i"].value += 1
+            if progress_reporting:
+                with progress_reporting["lock"]:
+                    progress_reporting["score_i"].value += 1
             if "truncate_execution_outputs" in self.config:
                 truncateExecutionOutputs(
                     eval_output,

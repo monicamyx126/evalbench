@@ -3,6 +3,10 @@ import json
 import datetime
 import logging
 import tempfile
+from evaluator.progress_reporter import (
+    setup_progress_reporting,
+    cleanup_progress_reporting,
+)
 from evaluator.evaluator import Evaluator
 from evaluator.db_manager import build_db_queue
 from dataset.evalinput import EvalInputRequest
@@ -11,10 +15,6 @@ import databases
 import generators.models as models
 import generators.prompts as prompts
 import concurrent.futures
-import multiprocessing
-import sys
-from io import StringIO
-import threading
 
 
 class Orchestrator:
@@ -23,6 +23,7 @@ class Orchestrator:
         config,
         db_configs,
         setup_config,
+        report_progress=False,
     ):
         self.config = config
         self.db_configs = db_configs
@@ -32,6 +33,7 @@ class Orchestrator:
         self.total_eval_outputs = []
         self.total_scoring_results = []
         self.reporting_total_evals_done = 0
+        self.report_progress = report_progress
 
         runner_config = self.config.get("runners", {})
         self.eval_runners = runner_config.get("eval_runners", 4)
@@ -44,26 +46,14 @@ class Orchestrator:
         of unintended consequences. Additionally, DQLs are run under a read-only user.
         """
         sub_datasets, total_dataset_len = breakdown_datasets(dataset)
-        manager = multiprocessing.Manager()
-
-        # Setup progress reporting
-        core_stdout = sys.stdout
-        sys.stdout = tmp_buffer = StringIO()
-        stop_progress_reporting_event = threading.Event()
-        progress_reporting = {
-            "lock": manager.Lock(),
-            "prompt_i": manager.Value("i", 0),
-            "gen_i": manager.Value("i", 0),
-            "exec_i": manager.Value("i", 0),
-            "score_i": manager.Value("i", 0),
-            "total": total_dataset_len,
-        }
-        progress_reporting_thread = threading.Thread(
-            target=self._status_reporter,
-            args=(progress_reporting, core_stdout, stop_progress_reporting_event),
-            daemon=True,
-        )
-        progress_reporting_thread.start()
+        progress_reporting = None
+        if self.report_progress:
+            (
+                progress_reporting_thread,
+                progress_reporting,
+                progress_reporting_finished,
+                tmp_buffer,
+            ) = setup_progress_reporting(total_dataset_len)
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.eval_runners
@@ -92,10 +82,10 @@ class Orchestrator:
                 self.total_eval_outputs.extend(eval_outputs)
                 self.total_scoring_results.extend(scoring_results)
 
-        stop_progress_reporting_event.set()
-        progress_reporting_thread.join()
-        sys.stdout = core_stdout
-        sys.stdout.write(tmp_buffer.getvalue())
+        if self.report_progress:
+            cleanup_progress_reporting(tmp_buffer)  # type: ignore
+            progress_reporting_finished.set()  # type: ignore
+            progress_reporting_thread.join()  # type: ignore
 
     def evaluate_sub_dataset(
         self, sub_datasets, db_config, dialect, database, progress_reporting
@@ -161,14 +151,6 @@ class Orchestrator:
             core_db.close_connections()
 
         return total_eval_outputs, total_scoring_results
-
-    def _status_reporter(self, progress_reporting, stdout, stop_event):
-        while not stop_event.is_set():
-            stdout.write(
-                f"Status: Processing...{progress_reporting["prompt_i"].value}\n"
-            )
-            if stop_event.wait(timeout=10):
-                break
 
     def process(self):
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:

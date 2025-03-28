@@ -42,7 +42,7 @@ def main(argv: Sequence[str]):
         dataset = load_dataset_from_json(session["dataset_config"], config)
 
         # Load the evaluator
-        evaluator = Orchestrator(config, db_configs, setup_config)
+        evaluator = Orchestrator(config, db_configs, setup_config, report_progress=True)
 
         # Run evaluations
         evaluator.evaluate(flatten_dataset(dataset))
