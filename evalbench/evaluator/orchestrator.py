@@ -100,7 +100,7 @@ class Orchestrator:
             # Setup the core connection just once (for all query types in database)
             core_db = databases.get_database(db_config, database)
         except Exception as e:
-            skip_database(sub_datasets[dialect][database], progress_reporting)
+            skip_database(sub_datasets[dialect][database], progress_reporting, None)
             raise RuntimeError(
                 f"Could not connect to database {database} on {dialect}; due to {e}"
             )
@@ -131,7 +131,9 @@ class Orchestrator:
                     f"Skipping {query_type} queries as DB {database} "
                     + f"could not be setup properly in {dialect} due to {e}."
                 )
-                skip_database(sub_datasets[dialect][database], progress_reporting)
+                skip_database(
+                    sub_datasets[dialect][database], progress_reporting, query_type
+                )
                 return
 
             evaluator = Evaluator(self.config)

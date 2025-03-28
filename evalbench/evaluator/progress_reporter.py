@@ -87,18 +87,24 @@ def _report(progress_reporting, progress_reporting_finished, tmp_buffer):
             break
 
 
-def skip_database(sub_datasets, progress_reporter):
-    evals_in_db = sum(
-        len(sub_datasets.get(query_type, [])) for query_type in ["dql", "dml", "ddl"]
-    )
-    with progress_reporter["lock"]:
-        progress_reporter["total_dbs"] -= 1
-        progress_reporter["total"] -= evals_in_db
-
-
 def skip_dialect(sub_datasets, progress_reporter):
     for database in sub_datasets:
-        skip_database(sub_datasets[database], progress_reporter)
+        skip_database(sub_datasets[database], progress_reporter, None)
+
+
+def skip_database(sub_datasets, progress_reporter, query_type):
+    if query_type:
+        total_dbs = 1
+        evals_in_db = len(sub_datasets.get(query_type, []))
+    else:
+        total_dbs = len(sub_datasets)
+        evals_in_db = sum(
+            len(sub_datasets.get(query_type, []))
+            for query_type in ["dql", "dml", "ddl"]
+        )
+    with progress_reporter["lock"]:
+        progress_reporter["total_dbs"] -= total_dbs
+        progress_reporter["total"] -= evals_in_db
 
 
 def cleanup_progress_reporting(tmp_buffer):
