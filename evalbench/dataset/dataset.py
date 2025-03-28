@@ -73,6 +73,8 @@ def _item_meets_config_filters(item: dict, config: dict):
         for dialect in item["dialects"]:
             if dialect in config.get("dialects", []):
                 return True
+    else:
+        return True
     return False
 
 
