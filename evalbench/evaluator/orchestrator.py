@@ -8,7 +8,7 @@ from evaluator.progress_reporter import (
     cleanup_progress_reporting,
     skip_dialect,
     skip_database,
-    record_successful_setup
+    record_successful_setup,
 )
 from evaluator.evaluator import Evaluator
 from evaluator.db_manager import build_db_queue

@@ -53,17 +53,23 @@ def load_dataset(dataset: Sequence[dict], config):
         input_items[eval_input.query_type].append(eval_input)
     return input_items
 
+
 def _union_dialects(item_dialects: list[str], config_dialects: list[str]):
     if not len(config_dialects):
         return item_dialects
     return list(set(item_dialects) & set(config_dialects))
 
+
 def _item_meets_config_filters(item: dict, config: dict):
-    if item["query_type"].lower() not in config.get("query_types",["dql","dml","ddl"]):
+    if item["query_type"].lower() not in config.get(
+        "query_types", ["dql", "dml", "ddl"]
+    ):
         return False
-    if len(config.get("databases",[])) and item["database"] not in config.get("databases",[]):
+    if len(config.get("databases", [])) and item["database"] not in config.get(
+        "databases", []
+    ):
         return False
-    if(len(config.get("dialects",[]))):
+    if len(config.get("dialects", [])):
         for dialect in item["dialects"]:
             if dialect in config.get("dialects", []):
                 return True

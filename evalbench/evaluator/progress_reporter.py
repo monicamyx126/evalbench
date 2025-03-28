@@ -112,10 +112,12 @@ def skip_database(sub_datasets, progress_reporting, query_type):
         progress_reporting["total_dbs"] -= total_dbs
         progress_reporting["total"] -= evals_in_db
 
+
 def record_successful_setup(progress_reporting):
     if progress_reporting:
         with progress_reporting["lock"]:
             progress_reporting["setup_i"].value += 1
+
 
 def cleanup_progress_reporting(tmp_buffer):
     global _ORIGINAL_HANDLERS
