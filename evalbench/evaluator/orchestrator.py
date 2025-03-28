@@ -87,7 +87,7 @@ class Orchestrator:
                 self.total_scoring_results.extend(scoring_results)
 
         if self.report_progress:
-            cleanup_progress_reporting(tmp_buffer)  # type: ignore
+            cleanup_progress_reporting(progress_reporting, tmp_buffer)  # type: ignore
             progress_reporting_finished.set()  # type: ignore
             progress_reporting_thread.join()  # type: ignore
 

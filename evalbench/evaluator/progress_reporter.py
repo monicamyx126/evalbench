@@ -49,44 +49,46 @@ def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
 
 def _report(progress_reporting, progress_reporting_finished, tmp_buffer):
     while not progress_reporting_finished.is_set():
-
-        setup_i = progress_reporting["setup_i"].value
-        prompt_i = progress_reporting["prompt_i"].value
-        gen_i = progress_reporting["gen_i"].value
-        exec_i = progress_reporting["exec_i"].value
-        score_i = progress_reporting["score_i"].value
-        dataset_len = progress_reporting["total"]
-        databases = progress_reporting["total_dbs"]
-
-        buffer_content = tmp_buffer.getvalue()
-        tmp_buffer.seek(0)
-        tmp_buffer.truncate(0)
-        if buffer_content != "":
-            _ORIGINAL_STDOUT.write("\n")
-            _ORIGINAL_STDOUT.write(buffer_content)
-            _ORIGINAL_STDOUT.write("\n" * (_NUM_LINES_FOR_PROGRESS + 1))
-
-        _ORIGINAL_STDOUT.write("\033[F\033[K" * _NUM_LINES_FOR_PROGRESS)
-
-        report_progress(
-            setup_i, databases, prefix="DBs Setup:", suffix="Complete", length=50
-        )
-        report_progress(
-            prompt_i, dataset_len, prefix="Prompts:  ", suffix="Complete", length=50
-        )
-        report_progress(
-            gen_i, dataset_len, prefix="SQLGen:   ", suffix="Complete", length=50
-        )
-        report_progress(
-            exec_i, dataset_len, prefix="SQLExec:  ", suffix="Complete", length=50
-        )
-        report_progress(
-            score_i, dataset_len, prefix="Scoring:  ", suffix="Complete", length=50
-        )
-        _ORIGINAL_STDOUT.flush()
-
+        _print_report(progress_reporting, tmp_buffer)
         if progress_reporting_finished.wait(timeout=1):
             break
+
+
+def _print_report(progress_reporting, tmp_buffer):
+    setup_i = progress_reporting["setup_i"].value
+    prompt_i = progress_reporting["prompt_i"].value
+    gen_i = progress_reporting["gen_i"].value
+    exec_i = progress_reporting["exec_i"].value
+    score_i = progress_reporting["score_i"].value
+    dataset_len = progress_reporting["total"]
+    databases = progress_reporting["total_dbs"]
+
+    buffer_content = tmp_buffer.getvalue()
+    tmp_buffer.seek(0)
+    tmp_buffer.truncate(0)
+    if buffer_content != "":
+        _ORIGINAL_STDOUT.write("\n")
+        _ORIGINAL_STDOUT.write(buffer_content)
+        _ORIGINAL_STDOUT.write("\n" * (_NUM_LINES_FOR_PROGRESS + 1))
+
+    _ORIGINAL_STDOUT.write("\033[F\033[K" * _NUM_LINES_FOR_PROGRESS)
+
+    report_progress(
+        setup_i, databases, prefix="DBs Setup:", suffix="Complete", length=50
+    )
+    report_progress(
+        prompt_i, dataset_len, prefix="Prompts:  ", suffix="Complete", length=50
+    )
+    report_progress(
+        gen_i, dataset_len, prefix="SQLGen:   ", suffix="Complete", length=50
+    )
+    report_progress(
+        exec_i, dataset_len, prefix="SQLExec:  ", suffix="Complete", length=50
+    )
+    report_progress(
+        score_i, dataset_len, prefix="Scoring:  ", suffix="Complete", length=50
+    )
+    _ORIGINAL_STDOUT.flush()
 
 
 def skip_dialect(sub_datasets, progress_reporting):
@@ -143,14 +145,14 @@ def record_successful_setup(progress_reporting):
             progress_reporting["setup_i"].value += 1
 
 
-def cleanup_progress_reporting(tmp_buffer):
+def cleanup_progress_reporting(progress_report, tmp_buffer):
     global _ORIGINAL_HANDLERS
     sys.stdout = _ORIGINAL_STDOUT
     sys.stderr = _ORIGINAL_STDERR
     logger = logging.getLogger()
     if _ORIGINAL_HANDLERS:
         logger.handlers = _ORIGINAL_HANDLERS
-    sys.stdout.write(tmp_buffer.getvalue())
+    _print_report(progress_report, tmp_buffer)
     tmp_buffer.close()
 
 
