@@ -8,6 +8,7 @@ from evaluator.progress_reporter import (
     cleanup_progress_reporting,
     skip_dialect,
     skip_database,
+    record_successful_setup
 )
 from evaluator.evaluator import Evaluator
 from evaluator.db_manager import build_db_queue
@@ -101,13 +102,11 @@ class Orchestrator:
             core_db = databases.get_database(db_config, database)
         except Exception as e:
             skip_database(sub_datasets[dialect][database], progress_reporting, None)
-            raise RuntimeError(
+            logging.error(
                 f"Could not connect to database {database} on {dialect}; due to {e}"
             )
+            return [], []
 
-        if progress_reporting:
-            with progress_reporting["lock"]:
-                progress_reporting["setup_i"].value += 1
         prompt_generator = prompts.get_generator(core_db, self.config)
         model_generator = models.get_generator(self.config["model_config"])
 
@@ -126,6 +125,7 @@ class Orchestrator:
                     query_type,
                     min(self.sqlexec_runners, sub_dataset_len),
                 )
+                record_successful_setup(progress_reporting)
             except Exception as e:
                 logging.info(
                     f"Skipping {query_type} queries as DB {database} "
@@ -134,7 +134,7 @@ class Orchestrator:
                 skip_database(
                     sub_datasets[dialect][database], progress_reporting, query_type
                 )
-                return
+                continue
 
             evaluator = Evaluator(self.config)
             try:
