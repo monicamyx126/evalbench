@@ -65,13 +65,13 @@ def config_to_df(
     run_time: datetime.datetime,
     experiment_config: dict,
     model_config: dict,
-    db_config: dict,
+    db_configs: list[dict],
 ):
     configs = []
     config = {
         "experiment_config": experiment_config,
         "model_config": model_config,
-        "db_config": db_config,
+        "db_configs": db_configs,
     }
     df = pd.json_normalize(config, sep=".")
     d_flat = df.to_dict(orient="records")[0]
@@ -109,8 +109,16 @@ def set_session_configs(session, experiment_config: dict):
     session["config"] = experiment_config
     if "dataset_config" in experiment_config and experiment_config["dataset_config"]:
         session["dataset_config"] = experiment_config["dataset_config"]
-    if "database_config" in experiment_config and experiment_config["database_config"]:
-        session["db_config"] = load_yaml_config(experiment_config["database_config"])
+    if (
+        "database_configs" in experiment_config
+        and experiment_config["database_configs"]
+        and len(experiment_config["database_configs"])
+    ):
+        session["db_configs"] = breakdown_db_configs_by_type(
+            experiment_config["database_configs"]
+        )
+    else:
+        session["db_configs"] = []
     if "model_config" in experiment_config and experiment_config["model_config"]:
         session["model_config"] = load_yaml_config(experiment_config["model_config"])
     session["setup_config"] = {}
@@ -128,3 +136,18 @@ def generate_key(length=12):
     key = [random.choice(c) for c in random.sample(categories, 3)]
     key += random.choices("".join(categories), k=length - 3)
     return "".join(key)
+
+
+def breakdown_db_configs_by_type(db_configs: list[dict]):
+    db_configs_by_type = {}
+    for db_config_yaml in db_configs:
+        db_config = load_yaml_config(db_config_yaml)
+        db_type = db_config.get("db_type")
+        if not db_type:
+            continue
+        elif db_type in db_configs_by_type:
+            raise ValueError(
+                f"Duplicate db_type provided in databse_configs: {db_type}"
+            )
+        db_configs_by_type[db_type] = db_config
+    return db_configs_by_type

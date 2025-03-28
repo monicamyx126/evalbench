@@ -5,7 +5,13 @@ from .sqlite import SQLiteDB
 from .db import DB
 
 
-def get_database(db_config) -> DB:
+def get_database(db_config, db_name) -> DB:
+    # if db_name is provided:
+    #   - It will override the provided default database_name
+    #   - This is useful as the default db may be "postgres" or a default only used for setup
+    if db_name:
+        db_config["database_name"] = db_name
+
     if db_config["db_type"] == "postgres":
         return PGDB(db_config)
     if db_config["db_type"] == "mysql":

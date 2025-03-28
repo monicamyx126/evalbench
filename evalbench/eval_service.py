@@ -10,13 +10,13 @@ import yaml
 import grpc
 import pathlib
 from dataset.dataset import load_json
+from evaluator.orchestrator import Orchestrator
 import reporting.report as report
 from reporting import get_reporters
 import reporting.analyzer as analyzer
 from util.config import update_google3_relative_paths, set_session_configs, config_to_df
 from util import get_SessionManager
 from dataset.dataset import load_dataset_from_json
-from evaluator.evaluator import Evaluator
 from evalproto import (
     eval_request_pb2,
     eval_response_pb2,
@@ -25,7 +25,6 @@ from evalproto import (
 from util.service import (
     load_session_configs,
     get_dataset_from_request,
-    create_eval_instances,
 )
 
 
@@ -124,14 +123,10 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
         context: grpc.ServicerContext,
     ) -> eval_response_pb2.EvalResponse:
         session = SESSIONMANAGER.get_session(rpc_id_var.get())
-        config, db_config, model_config, setup_config = load_session_configs(session)
+        config, db_configs, model_config, setup_config = load_session_configs(session)
         dataset = await get_dataset_from_request(request_iterator)
-        core_db, model_generator, prompt_generator = create_eval_instances(
-            config, db_config, model_config
-        )
-        evaluator = Evaluator(
-            config, prompt_generator, model_generator, db_config, core_db, setup_config
-        )
+
+        evaluator = Orchestrator(config, db_configs, setup_config)
         evaluator.evaluate(dataset)
 
         job_id, run_time, results_tf, scores_tf = evaluator.process()
@@ -144,23 +139,20 @@ class EvalServicer(eval_service_pb2_grpc.EvalServiceServicer):
             scores_tf,
             config,
             model_config,
-            db_config,
+            db_configs,
         )
-        core_db.clean_tmp_creations()
-        core_db.close_connections()
-
         return eval_response_pb2.EvalResponse(response=f"{job_id}")
 
 
 def _process_results(
-    reporters, job_id, run_time, results_tf, scores_tf, config, model_config, db_config
+    reporters, job_id, run_time, results_tf, scores_tf, config, model_config, db_configs
 ):
     config_df = config_to_df(
         job_id,
         run_time,
         config,
         model_config,
-        db_config,
+        db_configs,
     )
     results = load_json(results_tf)
     results_df = report.get_dataframe(results)

@@ -2,6 +2,8 @@
 
 This YAML configuration file defines the parameters for the generation model used in the NL2SQL project. **This configuration is completely configurable to whatever the generator needs.** Depending on the generator you choose, additional keys may be required. For example, the keys in the *GCP Specific Configuration* section are required only when using generators such as `gcp_vertex_claude` or `gcp_vertex_gemini`.
 
+> *NOTE:* There can only be one generator (LLM connection) instance per model_config file. In other words, if you have an LLM Rater and a SQL Generator that are both using the same model_config, the quota will at max be the `execs_per_minute` provided in the YAML config for this file. If you want to have separate generators and separate quotas for different modules, but for the same exact model_config, you must duplicate the file so it has a different path (path is used as key).
+
 ---
 
 ## General Generator Configuration
