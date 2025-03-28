@@ -1,6 +1,6 @@
 from typing import Any, List
 import datetime
-from util import printProgressBar, truncateExecutionOutputs
+from util import truncateExecutionOutputs
 from work import promptgenwork
 from work import sqlgenwork
 from work import sqlexecwork
@@ -61,13 +61,6 @@ class Evaluator:
             eval_output = future.result()
             with progress_reporting["lock"]:
                 progress_reporting["prompt_i"].value += 1
-            printProgressBar(
-                progress_reporting["prompt_i"].value,
-                total_dataset_len,
-                prefix="Prompts:",
-                suffix="Complete",
-                length=50,
-            )
             work = sqlgenwork.SQLGenWork(model_generator, eval_output)
             self.genrunner.execute_work(work)
 
@@ -75,13 +68,6 @@ class Evaluator:
             eval_output = future.result()
             with progress_reporting["lock"]:
                 progress_reporting["gen_i"].value += 1
-            printProgressBar(
-                progress_reporting["gen_i"].value,
-                total_dataset_len,
-                prefix="SQLGen:",
-                suffix="Complete",
-                length=50,
-            )
             work = sqlexecwork.SQLExecWork(
                 db_queue.get(), self.config, eval_output, db_queue
             )
@@ -93,13 +79,6 @@ class Evaluator:
                 progress_reporting["exec_i"].value += 1
             work = scorework.ScorerWork(self.config, eval_output, scoring_results)
             self.scoringrunner.execute_work(work)
-            printProgressBar(
-                progress_reporting["exec_i"].value,
-                total_dataset_len,
-                prefix="SQLExec:",
-                suffix="Complete",
-                length=50,
-            )
 
         for future in concurrent.futures.as_completed(self.scoringrunner.futures):
             eval_output = future.result()
@@ -110,13 +89,6 @@ class Evaluator:
                     eval_output,
                     self.config["truncate_execution_outputs"],
                 )
-            printProgressBar(
-                progress_reporting["score_i"].value,
-                total_dataset_len,
-                prefix="Scoring:",
-                suffix="Complete",
-                length=50,
-            )
             eval_outputs.append(eval_output)
 
         if db_queue:
