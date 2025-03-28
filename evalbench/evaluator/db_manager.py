@@ -6,11 +6,17 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
 
-def build_db_queue(core_db: DB, db_name, db_config, setup_config, query_type: str, num_dbs: int):
+def build_db_queue(
+    core_db: DB, db_name, db_config, setup_config, query_type: str, num_dbs: int
+):
     if query_type == "dql":
-        return _prepare_db_queue_for_dql(core_db, db_name, db_config, setup_config, num_dbs)
+        return _prepare_db_queue_for_dql(
+            core_db, db_name, db_config, setup_config, num_dbs
+        )
     elif query_type == "dml":
-        return _prepare_db_queue_for_dml(core_db, db_name, db_config, setup_config, num_dbs)
+        return _prepare_db_queue_for_dml(
+            core_db, db_name, db_config, setup_config, num_dbs
+        )
     elif query_type == "ddl":
         return _prepare_db_queue_for_ddl(core_db, db_config, setup_config, num_dbs)
     return Queue[DB]()
