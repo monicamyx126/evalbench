@@ -58,7 +58,7 @@ class Orchestrator:
                 tmp_buffer,
             ) = setup_progress_reporting(total_dataset_len, total_db_len)
 
-        with concurrent.futures.ProcessPoolExecutor(
+        with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.eval_runners
         ) as executor:
             futures = []
