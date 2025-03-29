@@ -1,9 +1,9 @@
 import logging
+from multiprocessing.managers import SyncManager
 import sys
 import threading
 from io import StringIO
 import threading
-import multiprocessing
 
 _ORIGINAL_STDOUT = sys.stdout
 _ORIGINAL_STDERR = sys.stderr
@@ -18,10 +18,11 @@ except ImportError:
     _IN_COLAB = False
 
 
-def setup_progress_reporting(total_dataset_len: int, total_dbs: int):
+def setup_progress_reporting(
+    manager: SyncManager, total_dataset_len: int, total_dbs: int
+):
     tmp_buffer = None
     colab_progress_report = None
-    manager = multiprocessing.Manager()
     progress_reporting = {
         "lock": manager.Lock(),
         "setup_i": manager.Value("i", 0),

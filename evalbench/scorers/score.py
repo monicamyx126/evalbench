@@ -15,6 +15,7 @@ def compare(
     eval_output_item: EvalOutput,
     experiment_config: dict[str, str],
     scoring_results: list[dict],
+    global_models,
 ):
     """Run comparators against eval output.
 
@@ -31,7 +32,7 @@ def compare(
     if "set_match" in scorers:
         comparators.append(setmatcher.SetMatcher(scorers["set_match"]))
     if "llmrater" in scorers:
-        comparators.append(llmrater.LLMRater(scorers["llmrater"]))
+        comparators.append(llmrater.LLMRater(scorers["llmrater"], global_models))
     if "regexp_matcher" in scorers:
         comparators.append(
             generatedqueryregexpmatcher.GeneratedQueryRegexpMatcher(
