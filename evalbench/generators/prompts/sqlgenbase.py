@@ -132,8 +132,9 @@ _PROMPTS_BY_DIALECT = {
     "sqlite": SQLITE_PROMPT_TEMPLATE_WITH_RULES,
     "postgres": PG_PROMPT_TEMPLATE_WITH_RULES,
     "mysql": MYSQL_PROMPT_TEMPLATE_WITH_RULES,
-    "sqlserver": SQLSERVER_PROMPT_TEMPLATE_WITH_RULES
+    "sqlserver": SQLSERVER_PROMPT_TEMPLATE_WITH_RULES,
 }
+
 
 class SQLGenBasePromptGenerator(PromptGenerator):
 
@@ -146,6 +147,4 @@ class SQLGenBasePromptGenerator(PromptGenerator):
         self.schema = self.db.get_ddl_from_db()
 
     def generate(self, prompt):
-        return self.base_prompt.format(
-            SCHEMA=self.schema, USER_PROMPT=prompt
-        )
+        return self.base_prompt.format(SCHEMA=self.schema, USER_PROMPT=prompt)
