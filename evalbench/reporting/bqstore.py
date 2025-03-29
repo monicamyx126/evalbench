@@ -27,6 +27,7 @@ def _split_dataframe(df, chunk_size):
 class BigQueryReporter(Reporter):
     def __init__(self, reporting_config, job_id, run_time):
         super().__init__(reporting_config, job_id, run_time)
+        reporting_config = reporting_config or {}
         self.project_id = get_gcp_project(reporting_config.get("gcp_project_id"))
         self.location = reporting_config.get("dataset_location") or "US"
         self.dataset_id = "{}.evalbench".format(self.project_id)
