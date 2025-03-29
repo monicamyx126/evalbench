@@ -19,7 +19,7 @@ dialects:
 # The YAML config for the model to be used for generation.
 model_config: datasets/bat/db_blog/model_configs/gemini_2.0_pro_model.yaml
 # The prompt generator module id for prompt generation.
-prompt_generator: 'MySQL_DBSchemaGenerator'
+prompt_generator: 'SQLGenBasePromptGenerator'
 #
 #
 ############################################################
