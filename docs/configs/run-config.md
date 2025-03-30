@@ -24,7 +24,7 @@ This section sets up the configurations for the model and prompt generator used 
 | **Key**            | **Required** | **Description**                                                                                                                                                           |
 | ------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `model_config`     | Yes          | Path to the YAML configuration file for the model that will be used for SQL generation. Please see [model-config documentation](/docs/configs/model-config.md) for additional information on model_config configurations.                                                                                   |
-| `prompt_generator` | Yes          | Identifier for the prompt generator module (e.g., `'MySQL_DBSchemaGenerator'`), which is responsible for generating the necessary prompts for SQL generation. Please see and edit [generators](/evalbench/generators/prompts/__init__.py) for additional prompts.          |
+| `prompt_generator` | Yes          | Identifier for the prompt generator module (e.g., `'SQLGenBasePromptGenerator'`), which is responsible for generating the necessary prompts for SQL generation. Please see and edit [generators](/evalbench/generators/prompts/__init__.py) for additional prompts.          |
 
 ---
 
@@ -86,7 +86,7 @@ dialect: mysql
 ### Prompt and Generation Modules
 ############################################################
 model_config: datasets/bat/db_blog/model_configs/gemini_2.0_pro_model.yaml
-prompt_generator: 'MySQL_DBSchemaGenerator'
+prompt_generator: 'SQLGenBasePromptGenerator'
 
 ############################################################
 ### Optional - Setup / Teardown related configs (Required for testing DDL)

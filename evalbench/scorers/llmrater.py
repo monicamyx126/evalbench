@@ -36,14 +36,14 @@ class LLMRater(comparator.Comparator):
         2. model_config: File that defines the configuration settings for the LLM model used in evaluation.
     """
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, global_models):
         self.name = "llmrater"
         self.exact_match_checker = exactmatcher.ExactMatcher({})
         self.cache_client = get_cache_client(config)
         self.model_config = config.get("model_config") or ""
         if not self.model_config:
             raise ValueError("model_config is required for LLM Rater")
-        self.model = get_generator(self.model_config)
+        self.model = get_generator(global_models, self.model_config)
 
     def _is_exact_match(
         self,

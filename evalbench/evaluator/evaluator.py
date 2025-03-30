@@ -40,6 +40,7 @@ class Evaluator:
         job_id: str,
         run_time: datetime.datetime,
         progress_reporting,
+        global_models,
     ):
         eval_outputs: List[Any] = []
         scoring_results: List[Any] = []
@@ -79,7 +80,9 @@ class Evaluator:
         for future in concurrent.futures.as_completed(self.sqlrunner.futures):
             eval_output = future.result()
             record_successful_sql_exec(progress_reporting)
-            work = scorework.ScorerWork(self.config, eval_output, scoring_results)
+            work = scorework.ScorerWork(
+                self.config, eval_output, scoring_results, global_models
+            )
             self.scoringrunner.execute_work(work)
 
         for future in concurrent.futures.as_completed(self.scoringrunner.futures):

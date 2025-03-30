@@ -1,3 +1,4 @@
+from multiprocessing import Manager
 import uuid
 import json
 import datetime
@@ -48,52 +49,62 @@ class Orchestrator:
         require setting up and tearing down the databsae and DML queries require prevention
         of unintended consequences. Additionally, DQLs are run under a read-only user.
         """
-        sub_datasets, total_dataset_len, total_db_len = breakdown_datasets(dataset)
-        progress_reporting = None
-        if self.report_progress:
-            (
-                progress_reporting_thread,
-                progress_reporting,
-                progress_reporting_finished,
-                tmp_buffer,
-                colab_progress_report,
-            ) = setup_progress_reporting(total_dataset_len, total_db_len)
+        with Manager() as manager:
+            sub_datasets, total_dataset_len, total_db_len = breakdown_datasets(dataset)
+            progress_reporting = None
+            if self.report_progress:
+                (
+                    progress_reporting_thread,
+                    progress_reporting,
+                    progress_reporting_finished,
+                    tmp_buffer,
+                    colab_progress_report,
+                ) = setup_progress_reporting(manager, total_dataset_len, total_db_len)
 
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=self.eval_runners
-        ) as executor:
-            futures = []
-            for dialect in sub_datasets:
-                db_config = self.db_configs.get(dialect)
-                if not db_config:
-                    logging.info(
-                        f"Skipping queries for {dialect} as no applicable db_config"
-                        + " was found."
-                    )
-                    skip_dialect(sub_datasets[dialect], progress_reporting)
-                    continue
-                for database in sub_datasets[dialect]:
-                    future = executor.submit(
-                        self.evaluate_sub_dataset,
-                        sub_datasets,
-                        db_config,
-                        dialect,
-                        database,
-                        progress_reporting,
-                    )
-                    futures.append(future)
-            for future in concurrent.futures.as_completed(futures):
-                eval_outputs, scoring_results = future.result()
-                self.total_eval_outputs.extend(eval_outputs)
-                self.total_scoring_results.extend(scoring_results)
+            global_models = manager.dict()
 
-        if self.report_progress:
-            cleanup_progress_reporting(progress_reporting, tmp_buffer, colab_progress_report)  # type: ignore
-            progress_reporting_finished.set()  # type: ignore
-            progress_reporting_thread.join()  # type: ignore
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=self.eval_runners
+            ) as executor:
+                futures = []
+                for dialect in sub_datasets:
+                    db_config = self.db_configs.get(dialect)
+                    if not db_config:
+                        logging.info(
+                            f"Skipping queries for {dialect} as no applicable db_config"
+                            + " was found."
+                        )
+                        skip_dialect(sub_datasets[dialect], progress_reporting)
+                        continue
+                    for database in sub_datasets[dialect]:
+                        future = executor.submit(
+                            self.evaluate_sub_dataset,
+                            sub_datasets,
+                            db_config,
+                            dialect,
+                            database,
+                            progress_reporting,
+                            global_models,
+                        )
+                        futures.append(future)
+                for future in concurrent.futures.as_completed(futures):
+                    eval_outputs, scoring_results = future.result()
+                    self.total_eval_outputs.extend(eval_outputs)
+                    self.total_scoring_results.extend(scoring_results)
+
+            if self.report_progress:
+                cleanup_progress_reporting(progress_reporting, tmp_buffer, colab_progress_report)  # type: ignore
+                progress_reporting_finished.set()  # type: ignore
+                progress_reporting_thread.join()  # type: ignore
 
     def evaluate_sub_dataset(
-        self, sub_datasets, db_config, dialect, database, progress_reporting
+        self,
+        sub_datasets,
+        db_config,
+        dialect,
+        database,
+        progress_reporting,
+        global_models,
     ):
         total_eval_outputs = []
         total_scoring_results = []
@@ -109,7 +120,9 @@ class Orchestrator:
             return [], []
 
         prompt_generator = prompts.get_generator(core_db, self.config)
-        model_generator = models.get_generator(self.config["model_config"])
+        model_generator = models.get_generator(
+            global_models, self.config["model_config"]
+        )
 
         for query_type in ["dql", "dml", "ddl"]:
             if query_type not in sub_datasets[dialect][database]:
@@ -147,6 +160,7 @@ class Orchestrator:
                     self.job_id,
                     self.run_time,
                     progress_reporting,
+                    global_models,
                 )
                 total_eval_outputs.extend(eval_outputs)
                 total_scoring_results.extend(scoring_results)
