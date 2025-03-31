@@ -104,20 +104,20 @@ Below is an example snippet of how this configuration file might appear:
 ############################################################
 ### Dataset / Eval Items
 ############################################################
-dataset_config: datasets/bat/db_blog/prompts/ddl.json
-database_config: datasets/bat/db_blog/db_configs/mysql_db_config.yaml
+dataset_config: datasets/bat/prompts.json
+database_config: datasets/bat/db_configs/mysql.yaml
 dialect: mysql
 
 ############################################################
 ### Prompt and Generation Modules
 ############################################################
-model_config: datasets/bat/db_blog/model_configs/gemini_2.0_pro_model.yaml
+model_config: datasets/bat/model_configs/gemini_2.0_pro_model.yaml
 prompt_generator: 'SQLGenBasePromptGenerator'
 
 ############################################################
 ### Optional - Setup / Teardown related configs (Required for testing DDL)
 ############################################################
-setup_directory: datasets/bat/db_blog/setup
+setup_directory: datasets/bat/setup
 
 ############################################################
 ### Scorer Related Configs
@@ -127,7 +127,7 @@ scorers:
   returned_sql: null
   regexp_matcher: null
   llmrater:
-    model_config: datasets/bat/db_blog/model_configs/gemini_1.5-pro-002_model.yaml
+    model_config: datasets/bat/model_configs/gemini_1.5-pro-002_model.yaml
   recall_match: null
   set_match: null
 
