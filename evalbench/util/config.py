@@ -139,9 +139,6 @@ def set_session_configs(session, experiment_config: dict):
         session["setup_config"]["setup_directory"] = experiment_config[
             "setup_directory"
         ]
-        session["setup_config"]["data_directory"] = (
-            experiment_config["setup_directory"] + "/data"
-        )
 
 
 def generate_key(length=12):
