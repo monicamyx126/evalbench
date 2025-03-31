@@ -30,15 +30,41 @@ This section sets up the configurations for the model and prompt generator used 
 
 ## 3. Setup / Teardown Configuration (Optional for DDL Testing)
 
-The `setup_directory` provides the path to the SQL setup/teardown files, which are essential for running Data Definition Language (DDL) tests. The setup directory should include a subdirectory matching the specified dialect (e.g., `mysql`). Additionally, you may include a `data` subdirectory for setting up the database content from CSV files.
+The `setup_directory` provides the path to the SQL setup/teardown files that will allow setting up a database for evaluations. While these are required for running evals taht include DDL, they are highly recommended for any eval instance.
+<br>
 
 | **Key**           | **Required** | **Description**                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ----------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `setup_directory` | No*         | The directory containing SQL files for setting up and tearing down a database instance for DDL testing. This directory must have a subdirectory corresponding to the dialect (e.g., `parent_dir/my_setup_path/mysql`) that includes: <br>- `pre_setup.sql`: Prepares the environment (e.g., disabling checks). <br>- `setup.sql`: Performs the actual setup operations. <br>- `post_setup.sql`: Re-enables any checks or constraints. |
-
-> *Hint*: You may have a `data` subdirectory which can be included with CSV files (named after the table) for data insertion. This allows creating and maintaining one csv file that inserts and fills up databases across dialects rather than specifying insertions in setup.sql.
+| `setup_directory` | No*         | See description and requirements below. |
 
 > *Note: This configuration is required when performing DDL evaluations but can be ommited for DQL and DML evaluations.
+
+### Requirements
+The setup directory should include a subdirectory matching the specified database (e.g. `db_blog`) and each DB should have subdirectories for each dialect (e.g., `mysql`) it supports.
+The directories must include the following 3 files:
+ - `pre_setup.sql`: Prepares the environment (e.g., disabling checks).
+ - `setup.sql`: Performs the actual setup operations.
+ - `post_setup.sql`: Re-enables any checks or constraints.
+
+Additionally, you may optionally include a `data` subdirectory for setting up the database content from CSV files. The `data` subdirectory must include .csv files which are named after the tables in the schema for data insertion. This allows creating and maintaining one csv file that inserts and fills up databases across dialects rather than specifying insertions in setup.sql.
+Here's an example of the directory structure:
+
+```
+setup_directory/
+├── db_blog/
+│   ├── mysql/
+│   │   ├── pre_setup.sql
+│   │   ├── setup.sql
+│   │   ├── post_setup.sql
+│   ├── postgres/
+│   │   ├── pre_setup.sql
+│   │   ├── setup.sql
+│   │   ├── post_setup.sql
+│   ├── data/
+│   │   ├── table_one_data.csv
+│   │   ├── table_two_data.csv
+│   │   ├── table_three_data.csv
+```
 
 ---
 
