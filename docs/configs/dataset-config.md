@@ -2,8 +2,6 @@
 
 This JSON dataset / prompts file contains a list of evaluation items to run. Each item represents a test case that defines a natural language prompt, the corresponding expected SQL modifications (golden SQL), and the SQL queries for setting up, evaluating, and cleaning up the database. These evaluation items are used to validate that the system correctly generates SQL statements based on natural language inputs.
 
----
-
 ## File Structure
 
 Each evaluation item in the JSON file includes the following keys:
@@ -22,7 +20,6 @@ Each evaluation item in the JSON file includes the following keys:
 | `tags`         | Optional     | An array of tags to categorize the evaluation item (e.g., `DDL`, `difficulty: simple`, `ALTER`, `ADD_COLUMN`, etc.).                                                                                                      |
 | `other`        | Optional     | A flexible field where you can include any additional metadata, custom information, or reporting details. This field can be used for further context, logging, or any extra information that may be helpful.     |
 
----
 
 ## Important Notes
 
@@ -30,7 +27,6 @@ Each evaluation item in the JSON file includes the following keys:
 - **Custom Metadata:** The `other` field is optional and can contain any additional information you deem necessary for reporting or contextual purposes.
 - **Structured Testing:** By defining separate SQL statements for setup, evaluation, and cleanup, this configuration supports robust testing of DDL operations.
 
----
 
 ## Example Entry
 

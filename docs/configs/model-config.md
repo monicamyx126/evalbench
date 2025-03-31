@@ -4,8 +4,6 @@ This YAML configuration file defines the parameters for the generation model use
 
 > *NOTE:* There can only be one generator (LLM connection) instance per model_config file. In other words, if you have an LLM Rater and a SQL Generator that are both using the same model_config, the quota will at max be the `execs_per_minute` provided in the YAML config for this file. If you want to have separate generators and separate quotas for different modules, but for the same exact model_config, you must duplicate the file so it has a different path (path is used as key).
 
----
-
 ## General Generator Configuration
 
 These settings are passed to all generators, regardless of the specific engine used.
@@ -18,8 +16,6 @@ These settings are passed to all generators, regardless of the specific engine u
 | `execs_per_minute` | Optional     | `60`              | Sets the maximum number of executions allowed per minute. If not provided, it defaults to `60`. This helps throttle the rate of query generation.                                                                                                                                                                        |
 | `max_attempts`     | Optional     | `3`               | Specifies the maximum number of attempts for query generation in case of failures. Defaults to `3` if not provided.                                                                                                                                                                          |
 
----
-
 ## GCP Specific Configuration
 
 These settings are **required only** for generators that utilize Google Cloud Vertex AI, such as `gcp_vertex_claude` and `gcp_vertex_gemini`. They are not needed for other generators.
@@ -30,7 +26,6 @@ These settings are **required only** for generators that utilize Google Cloud Ve
 | `gcp_project_id`  | **Required*** for `gcp_vertex_claude`, `gcp_vertex_gemini`   | ''                             | The Google Cloud Project ID that hosts your Vertex AI resources.                                                                                                                                                                                |
 | `gcp_region`      | **Required*** for `gcp_vertex_claude`, `gcp_vertex_gemini`   | ''                             | The Google Cloud region where the Vertex AI service is deployed.                                                                                                                                                                                 |
 
----
 > Required*, you can globally set your GCP project_id and gcp_region using the environment variables `EVAL_GCP_PROJECT_ID` and `EVAL_GCP_PROJECT_REGION`. 
 
 ## Important Notes
@@ -41,7 +36,6 @@ These settings are **required only** for generators that utilize Google Cloud Ve
 - **Token Limits:** Adjust `max_tokens` based on the complexity and expected length of responses. A higher token limit allows for more detailed output but may also increase computational costs.
 - **Rate Limiting & Retries:** The `execs_per_minute` and `max_attempts` keys help control the query generation process, ensuring that you can stay below project quota limits.
 
----
 
 ## Example Configuration
 
