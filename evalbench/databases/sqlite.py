@@ -28,9 +28,9 @@ class SQLiteDB(DB):
         super().__init__(db_config)
 
         def get_conn():
-            conn = sqlite3.connect(
-                self._get_connection_path(self.db_path, self.db_name)
-            )
+            path = self._get_connection_path(self.db_path, self.db_name)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            conn = sqlite3.connect(path)
             return conn
 
         def get_engine_args():
