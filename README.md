@@ -35,6 +35,11 @@ Install the required Python dependencies:
 pip install -r requirements.txt
 ```
 
+Due to proto conflict between google-cloud packages you may need to force install common-protos:
+ ```
+ pip install --force-reinstall googleapis-common-protos==1.64.0
+ ```
+
 ### 4. Configure GCP Authentication (For Vertex AI | Gemini Examples)
 
 If gcloud is not installed already, follow the steps in [gcloud installation guide](https://cloud.google.com/sdk/docs/install#installation_instructions).
