@@ -2,11 +2,11 @@
 ### Dataset / Eval Items
 ############################################################
 # The JSON list of prompts / golden SQLs and eval attributes for the run
-dataset_config: datasets/bat/prompts.json
+dataset_config: datasets/bird/prompts.json
 ### Database Info
 # The YAML config for the database connection information
 database_configs:
- - datasets/bat/db_configs/sqlite.yaml
+ - datasets/bird/db_configs/sqlite.yaml
 # The dialect that the dataset_config will be filtered by. Only one can be
 # specified at a time (per run). See above for list of supported Dialects
 dialects:
@@ -22,14 +22,6 @@ query_types:
 model_config: datasets/model_configs/gemini_2.0_pro_model.yaml
 # The prompt generator module id for prompt generation.
 prompt_generator: 'SQLGenBasePromptGenerator'
-#
-#
-############################################################
-### Optional - Setup / Teardown related configs (Required for testing DDL)
-############################################################
-# Used for setup / teardown, the directory path to the sql files used for setting up
-# / tearing down a database instance. This is required for running DDL
-setup_directory: datasets/bat/setup
 #
 #
 ############################################################

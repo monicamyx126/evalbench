@@ -24,11 +24,36 @@ def load_dataset_from_json(json_file_path, config):
     all_items = load_json(json_file_path)
     if "nl_prompt" in all_items[0].keys():
         input_items = load_dataset(all_items, config)
+    elif "db_id" in all_items[0].keys():
+        input_items = load_dataset_from_bird_format(all_items)
     else:
         raise ValueError("Dataset not in Evalbench Format")
     totalEntries = sum(len(input_items.get(q, [])) for q in ["dql", "dml", "ddl"])
     logging.info(f"Converted {totalEntries} entries to EvalInput.")
 
+    return input_items
+
+def load_dataset_from_bird_format(dataset: Sequence[dict]):
+    input_items: dict[str, list[EvalInputRequest]] = {"dql": [], "dml": [], "ddl": []}
+    dialect="sqlite"
+    query_type="dql"
+    for item in dataset:
+        eval_input = EvalInputRequest(
+            id=item["question_id"],
+            nl_prompt="".join([item["question"], item["evidence"]]).replace(
+                    "`", '"'
+                ),
+            query_type=query_type,
+            database=item["db_id"],
+            dialects=[dialect],
+            golden_sql=item['SQL'],
+            eval_query="",
+            setup_sql="",
+            cleanup_sql="",
+            tags=[item["difficulty"]],
+            other={}            
+        )
+        input_items[eval_input.query_type].append(eval_input)
     return input_items
 
 
