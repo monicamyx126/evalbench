@@ -36,14 +36,14 @@ def load_dataset_from_json(json_file_path, config):
 
 def load_dataset_from_bird_format(dataset: Sequence[dict]):
     input_items: dict[str, list[EvalInputRequest]] = {"dql": [], "dml": [], "ddl": []}
-    dialect="sqlite"
-    query_type="dql"
+    dialect = "sqlite"
+    query_type = "dql"
     for item in dataset:
         eval_input = EvalInputRequest(
             id=item["question_id"],
-            nl_prompt = "".join([item["question"], item["evidence"]]).replace(
+            nl_prompt="".join([item["question"], item["evidence"]]).replace(
                 "`", '"'
-            )
+            ),
             query_type=query_type,
             database=item["db_id"],
             dialects=[dialect],
