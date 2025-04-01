@@ -58,12 +58,12 @@ export EVAL_GCP_PROJECT_REGION=your_region_here
 
 For a quick start, let's run NL2SQL on some sqlite DQL queries.
 
-1. First, read through [sqlite/run_dql.yaml](/datasets/bat/db_blog/run_configs/sqlite/run_dql.yaml) and see the configuration settings we will be running.
+1. First, read through [sqlite/run_dql.yaml](/datasets/bat/example_run_config.yaml) and see the configuration settings we will be running.
 
 Now, configure your evaluation by setting the `EVAL_CONFIG` environment variable. For example, to run a configuration using the `db_blog` dataset on SQLite:
 
 ```bash
-export EVAL_CONFIG=datasets/bat/db_blog/run_configs/sqlite/run_dql.yaml
+export EVAL_CONFIG=datasets/bat/example_run_config.yaml
 ```
 
 ### 6. Run EvalBench

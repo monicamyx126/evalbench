@@ -898,5 +898,559 @@
       "nl_prompt_base": "Show average comment length by browser for users who exclusively use a specific browser",
       "nl_prompt_extra_context": ""
     }
+  },
+  {
+    "id": 42,
+    "nl_prompt": "Can you update my username to 'magic_one' -- user_id = 9;",
+    "query_type": "dml",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
+      ],
+      "mysql": [
+        "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
+      ],
+      "sqlserver": [
+        "UPDATE tbl_users SET username = 'magic_one', updated_at = GETDATE() WHERE user_id = 9;"
+      ],
+      "sqlite": [
+        "UPDATE tbl_users SET username = 'magic_one', updated_at = CURRENT_TIMESTAMP WHERE user_id = 9;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
+      ],
+      "mysql": [
+        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
+      ],
+      "sqlserver": [
+        "SELECT username, updated_at, CASE WHEN updated_at > '2024-02-27 07:27:14' THEN 1 ELSE 0 END AS is_updated FROM tbl_users WHERE user_id = 9;"
+      ],
+      "sqlite": [
+        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' AS is_updated FROM tbl_users WHERE user_id = 9;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [],
+      "mysql": [],
+      "sqlserver": [],
+      "sqlite": []
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+      ],
+      "mysql": [
+        "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+      ],
+      "sqlserver": [
+        "UPDATE tbl_users SET username = 'sophia.anderson', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+      ],
+      "sqlite": [
+        "UPDATE tbl_users SET username = 'sophia.anderson', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+      ]
+    },
+    "tags": [
+      "DML",
+      "difficulty: moderate",
+      "UPDATE"
+    ],
+    "other": {
+      "Comment": "LGTM. Instructions do not include updated_at, but that is implied.",
+      "nl_prompt_base": "Can you update my username to 'magic_one'",
+      "nl_prompt_extra_context": "user_id = 9;",
+      "public": true
+    }
+  },
+  {
+    "id": 184,
+    "nl_prompt": "Update the post content in tbl_posts -- post_id = 3, new content should be 'Updated content'",
+    "query_type": "dml",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+      ],
+      "sqlserver": [
+        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+      ],
+      "sqlite": [
+        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT content FROM tbl_posts WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "Select COUNT(1) = 1 from tbl_posts where post_id = 3 and content = 'Updated Content'"
+      ],
+      "sqlserver": [
+        "SELECT content FROM tbl_posts WHERE post_id = 3;"
+      ],
+      "sqlite": [
+        "SELECT content FROM tbl_posts WHERE post_id = 3;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "sqlserver": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "sqlite": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "mysql": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "sqlserver": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ],
+      "sqlite": [
+        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+      ]
+    },
+    "tags": [
+      "DML",
+      "difficulty: simple",
+      "UPDATE"
+    ],
+    "other": {
+      "nl_prompt_base": "Update the post content in tbl_posts",
+      "nl_prompt_extra_context": "post_id = 3, new content should be 'Updated content'",
+      "public": true
+    }
+  },
+  {
+    "id": 200,
+    "nl_prompt": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata -- attachment_id =1,2",
+    "query_type": "dml",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;"
+      ],
+      "mysql": [
+        "UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_security'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_privacy'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'security'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'privacy'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1; UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'user_data'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'customer_information'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'personal_data'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'client_data'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains user data and customer information for analysis purposes.') WHERE attachment_id = 2;"
+      ],
+      "sqlserver": [
+        "UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'data_security'), 'append $', 'data_privacy'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'security'), 'append $', 'privacy'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1;"
+      ],
+      "sqlite": [
+        "UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"data_security\"', '$[#]', '\"data_privacy\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"security\"', '$[#]', '\"privacy\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id IN (1, 2);"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "Select * from tbl_attachments;"
+      ],
+      "mysql": [
+        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1; SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
+      ],
+      "sqlserver": [
+        "SELECT * FROM tbl_attachments;"
+      ],
+      "sqlite": [
+        "SELECT * FROM tbl_attachments;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+      ],
+      "mysql": [
+        "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"\"database\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"programming\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"\"marketing\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"digital\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
+      ],
+      "sqlserver": [
+        "DELETE FROM tbl_attachments WHERE attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', N'[\"database\", \"attachment\"]', N'[\"programming\"]', N'{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+      ],
+      "sqlite": [
+        "INSERT INTO tbl_attachments (attachment_id, post_id, user_id, file_name, file_path, file_size, file_type, upload_date, description, is_active, visibility_status, download_count, file_extension, uploaded_by_ip, last_modified, expiration_date, tags_file, category_file, access_permissions, storage_location, metadata, is_featured, parent_attachment_id) VALUES (1, 1, 1, 'attachment1.pdf', '/attachments/attachment1.pdf', 1024, 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', 1, 'public', 50, 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, 0, NULL);"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "delete from tbl_attachments where attachment_id = 1;"
+      ],
+      "mysql": [
+        "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"database\\\", \\\"attachment\\\"]', '[\\\"programming\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"marketing\\\", \\\"attachment\\\"]', '[\\\"digital\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
+      ],
+      "sqlserver": [
+        "DELETE FROM tbl_attachments WHERE attachment_id = 1;"
+      ],
+      "sqlite": [
+        "DELETE FROM tbl_attachments WHERE attachment_id = 1;"
+      ]
+    },
+    "tags": [
+      "DML",
+      "difficulty: challenging",
+      "UPDATE",
+      "COALESCE",
+      "JSON_SET",
+      "JSON",
+      "JSON_ARRAY"
+    ],
+    "other": {
+      "nl_prompt_base": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata",
+      "nl_prompt_extra_context": "attachment_id =1,2",
+      "public": true
+    }
+  },
+  {
+    "id": 43,
+    "nl_prompt": "Update the labels table to include a json field called comments_description.",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_labels ADD comments_description NVARCHAR(MAX);"
+      ],
+      "sqlite": [
+        "ALTER TABLE tbl_labels ADD COLUMN comments_description TEXT CHECK (json_valid(comments_description));"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+      ],
+      "mysql": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+      ],
+      "sqlserver": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_labels' AND COLUMN_NAME = 'comments_description' AND DATA_TYPE = 'nvarchar';"
+      ],
+      "sqlite": [
+        "SELECT COUNT(*) FROM tbl_labels WHERE json_valid(comments_description);"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "sqlite": [
+        "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+      ],
+      "sqlite": [
+        "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: simple",
+      "ALTER",
+      "ADD_COLUMN",
+      "JSON"
+    ],
+    "other": {
+      "Comment": "LGTM",
+      "nl_prompt_base": "Update the labels table to include a json type field called comments_description.",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 185,
+    "nl_prompt": "Rename the content column in the tbl_posts table to post_content",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+      ],
+      "sqlserver": [
+        "EXEC sp_rename 'tbl_posts.content', 'post_content', 'COLUMN';"
+      ],
+      "sqlite": [
+        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT post_content FROM tbl_posts;"
+      ],
+      "mysql": [
+        "SELECT post_content FROM tbl_posts;"
+      ],
+      "sqlserver": [
+        "SELECT post_content FROM tbl_posts;"
+      ],
+      "sqlite": [
+        "SELECT post_content FROM tbl_posts;"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "sqlserver": [
+        "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
+      ],
+      "sqlite": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ],
+      "sqlserver": [
+        "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
+      ],
+      "sqlite": [
+        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: simple",
+      "ALTER",
+      "RENAME"
+    ],
+    "other": {
+      "comment": "LGTM",
+      "nl_prompt_base": "Rename the content column in the tbl_posts table to post_content",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 255,
+    "nl_prompt": "Create an Enumerated Type for Access Levels",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum VARCHAR(10) CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum ENUM('Public', 'Private', 'Restricted');"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_tags ADD access_level_enum VARCHAR(10) CONSTRAINT chk_access_level CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+      ],
+      "sqlite": [
+        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum TEXT CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+      ],
+      "mysql": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+      ],
+      "sqlserver": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_tags' AND COLUMN_NAME = 'access_level_enum';"
+      ],
+      "sqlite": [
+        "SELECT COUNT(*) FROM PRAGMA_TABLE_INFO('tbl_tags') WHERE name = 'access_level_enum';"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
+      ],
+      "sqlite": [
+        "BEGIN TRANSACTION; CREATE TABLE tbl_tags_new (tag_id INTEGER NOT NULL PRIMARY KEY, creator_id INTEGER DEFAULT NULL, category_id INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT NULL, updated_at TIMESTAMP DEFAULT NULL, slug TEXT DEFAULT NULL, count INTEGER DEFAULT NULL, visibility BOOLEAN DEFAULT NULL, active BOOLEAN DEFAULT NULL, parent_tag INTEGER DEFAULT NULL, status_id INTEGER DEFAULT NULL, access_level INTEGER DEFAULT NULL, is_approved BOOLEAN DEFAULT NULL, metadata JSON DEFAULT NULL, is_edited BOOLEAN DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (category_id) REFERENCES tbl_categories(category_id)); INSERT INTO tbl_tags_new (tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited) SELECT tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited FROM tbl_tags; DROP TABLE tbl_tags; ALTER TABLE tbl_tags_new RENAME TO tbl_tags; COMMIT;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
+      ],
+      "sqlite": [
+        "BEGIN TRANSACTION; CREATE TABLE tbl_tags_new (tag_id INTEGER NOT NULL PRIMARY KEY, creator_id INTEGER DEFAULT NULL, category_id INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT NULL, updated_at TIMESTAMP DEFAULT NULL, slug TEXT DEFAULT NULL, count INTEGER DEFAULT NULL, visibility BOOLEAN DEFAULT NULL, active BOOLEAN DEFAULT NULL, parent_tag INTEGER DEFAULT NULL, status_id INTEGER DEFAULT NULL, access_level INTEGER DEFAULT NULL, is_approved BOOLEAN DEFAULT NULL, metadata JSON DEFAULT NULL, is_edited BOOLEAN DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (category_id) REFERENCES tbl_categories(category_id)); INSERT INTO tbl_tags_new (tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited) SELECT tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited FROM tbl_tags; DROP TABLE tbl_tags; ALTER TABLE tbl_tags_new RENAME TO tbl_tags; COMMIT;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: simple",
+      "CREATE",
+      "ENUM",
+      "ALTER",
+      "ADD_COLUMN"
+    ],
+    "other": {
+      "nl_prompt_base": "Create an Enumerated Type for Access Levels",
+      "nl_prompt_extra_context": null,
+      "public": true
+    }
+  },
+  {
+    "id": 256,
+    "nl_prompt": "Add a Generated Column full_name to tbl_users. -- Store first name and last name concatenated",
+    "query_type": "ddl",
+    "database": "db_blog",
+    "dialects": [
+      "postgres",
+      "mysql",
+      "sqlserver",
+      "sqlite"
+    ],
+    "golden_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (CONCAT(first_name, ' ', last_name)) STORED;"
+      ],
+      "sqlserver": [
+        "ALTER TABLE tbl_users ADD full_name AS CONCAT(first_name, ' ', last_name) PERSISTED;"
+      ],
+      "sqlite": [
+        "ALTER TABLE tbl_users ADD COLUMN full_name TEXT GENERATED ALWAYS AS (first_name || ' ' || last_name) VIRTUAL;"
+      ]
+    },
+    "eval_query": {
+      "postgres": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+      ],
+      "mysql": [
+        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+      ],
+      "sqlserver": [
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name';"
+      ],
+      "sqlite": [
+        "SELECT COUNT(*) FROM pragma_table_info('tbl_users') WHERE name = 'full_name';"
+      ]
+    },
+    "setup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ],
+      "sqlserver": [
+        "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ],
+      "sqlite": [
+        "BEGIN TRANSACTION; CREATE TABLE tbl_users_new (user_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password_hash TEXT, social_media_links TEXT, contact_info TEXT, avatar_url TEXT, bio TEXT, website TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, notification_preferences TEXT, role_id INTEGER, last_login TIMESTAMP, active INTEGER); INSERT INTO tbl_users_new (user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active) SELECT user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active FROM tbl_users; DROP TABLE tbl_users; ALTER TABLE tbl_users_new RENAME TO tbl_users; COMMIT;"
+      ]
+    },
+    "cleanup_sql": {
+      "postgres": [
+        "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
+      ],
+      "mysql": [
+        "ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ],
+      "sqlserver": [
+        "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
+      ],
+      "sqlite": [
+        "BEGIN TRANSACTION; CREATE TABLE tbl_users_new (user_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password_hash TEXT, social_media_links TEXT, contact_info TEXT, avatar_url TEXT, bio TEXT, website TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, notification_preferences TEXT, role_id INTEGER, last_login TIMESTAMP, active INTEGER); INSERT INTO tbl_users_new (user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active) SELECT user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active FROM tbl_users; DROP TABLE tbl_users; ALTER TABLE tbl_users_new RENAME TO tbl_users; COMMIT;"
+      ]
+    },
+    "tags": [
+      "DDL",
+      "difficulty: moderate",
+      "ALTER",
+      "ADD_COLUMN",
+      "CONCAT",
+      "SORT"
+    ],
+    "other": {
+      "nl_prompt_base": "Add a Generated Column full_name to tbl_users",
+      "nl_prompt_extra_context": "Store first name and last name concatenated",
+      "public": true
+    }
   }
 ]

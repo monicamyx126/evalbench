@@ -27,6 +27,8 @@ def load_textproto(textproto_file, text_proto_object):
 
 def load_db_data_from_csvs(data_directory: str):
     tables: dict[str, List[str]] = {}
+    if not os.path.isdir(data_directory):
+        return tables
     for filename in os.listdir(data_directory):
         if filename.endswith(".csv"):
             table_name = filename[:-4]
@@ -139,9 +141,6 @@ def set_session_configs(session, experiment_config: dict):
         session["setup_config"]["setup_directory"] = experiment_config[
             "setup_directory"
         ]
-        session["setup_config"]["data_directory"] = (
-            experiment_config["setup_directory"] + "/data"
-        )
 
 
 def generate_key(length=12):

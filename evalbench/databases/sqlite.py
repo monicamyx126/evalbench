@@ -28,7 +28,9 @@ class SQLiteDB(DB):
         super().__init__(db_config)
 
         def get_conn():
-            conn = sqlite3.connect(self.db_path)
+            path = self._get_connection_path(self.db_path, self.db_name)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            conn = sqlite3.connect(path)
             return conn
 
         def get_engine_args():
@@ -170,22 +172,19 @@ class SQLiteDB(DB):
 
     def create_tmp_database(self, database_name: str):
         try:
-            if not database_name.endswith(".db"):
-                db_path = f"{database_name}.db"
-            else:
-                db_path = database_name
-
+            db_path = self._get_connection_path(self.db_path, database_name)
             open(db_path, "a").close()
         except Exception as error:
             raise RuntimeError(f"Could not create database: {error}")
-        self.tmp_dbs.append(db_path)
+        self.tmp_dbs.append(database_name)
 
     def drop_tmp_database(self, database_name: str):
         if database_name in self.tmp_dbs:
             self.tmp_dbs.remove(database_name)
         try:
-            if os.path.exists(database_name):
-                os.remove(database_name)
+            db_path = self._get_connection_path(self.db_path, database_name)
+            if os.path.exists(db_path):
+                os.remove(db_path)
         except Exception as error:
             logging.error(f"Could not delete database: {error}")
 
@@ -229,3 +228,9 @@ class SQLiteDB(DB):
 
     def delete_tmp_user(self, username: str):
         pass
+
+    def _get_connection_path(self, db_path, db_name):
+        if not db_name.endswith(".db"):
+            db_name = db_name + ".db"
+        connection_path = os.path.join(db_path, f"{db_name}")
+        return connection_path

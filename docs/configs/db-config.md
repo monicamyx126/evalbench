@@ -12,7 +12,7 @@ The YAML configuration file is structured as follows:
 | --------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `db_type`                    | Yes                         | Specifies the type of database. Supported types include `postgres`, `mysql`, `sqlserver`, and `sqlite`.                                               |
 | `database_name`             | Yes                          | The name of your database that is used for the default connection. This can be the default admin database (i.e. `postgres`) on the instance. This DB is only used to create databases needed for running evaluations.                                                                                                                            |
-| `database_path`             | Yes                          | The path or instance reference to your database (e.g., cloud instance path, local path). Please see note above on database_path for more information on SQLAlchemy with more instructions on how to connect to local or GCP databases.                                                              |
+| `database_path`             | Yes                          | The path or instance reference to your database (e.g., cloud instance path, local path). Please see note above on database_path for more information on SQLAlchemy with more instructions on how to connect to local or GCP databases. *NOTE: For Sqlite, database_path is the directory that the .db files are found or stored in.*                                                              |
 | `max_executions_per_minute` | No                           | Optional throttle limit for the number of executions per minute.                                                                                      |
 | `user_name`                 | Conditionally (if needed)    | Required only for databases that need authentication (e.g., MySQL, PostgreSQL). Not needed for databases like SQLite.                                 |
 | `password`                  | Conditionally (if needed)    | The password for the database. Can be interchanged with `secret_manager_path` if you prefer using GCP Secret Manager for secure storage.              |
@@ -34,7 +34,7 @@ The YAML configuration file is structured as follows:
 
 ## Example Configuration
 
-Below is an example of the YAML configuration file:
+Below are a couple of examples of the YAML configuration file:
 
 ```yaml
 db: mysql
@@ -43,4 +43,10 @@ database_path: my_gcp_project:my_gcp_region:my_gcp_mysql_instance
 max_executions_per_minute: 180
 user_name: my_cool_username
 password: my_super_secure_password
+```
+
+```yaml
+db_type: sqlite
+database_name: <not-required-for-sqlite>
+database_path: db_connections/my-dataset/
 ```
