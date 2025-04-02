@@ -20,7 +20,7 @@ To download the dataset, execute the following command:
 This script will download the development dataset. If you prefer, you can also work with the [training dataset](https://bird-bench.oss-cn-beijing.aliyuncs.com/train.zip) by downloading it separately.
 
 ## 3. Set Your Evaluation Configuration
-To start the evaluation, you need to configure your environment. Before executing this, make sure to review the [README](https://github.com/GoogleCloudPlatform/evalbench/blob/main/README.md) and other [config related documentation](https://github.com/GoogleCloudPlatform/evalbench/tree/main/docs/configs).
+To start the evaluation, you need to configure your environment. Before executing this, make sure to review the [README](https://github.com/GoogleCloudPlatform/evalbench/blob/main/README.md) and other [config related documentation](https://github.com/GoogleCloudPlatform/evalbench/tree/main/docs/configs) to add other required export variables.
 
 Set the EVAL_CONFIG environment variable to specify your evaluation configuration file. For example:
 ```bash
