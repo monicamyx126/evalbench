@@ -36,6 +36,9 @@ class GeminiGenerator(QueryGenerator):
                 r = r.replace(
                     "```sql", ""
                 )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
+                r = r.replace(
+                    "```", ""
+                )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
             return r
         except ResourceExhausted as e:
             raise ResourceExhaustedError(e)
