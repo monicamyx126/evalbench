@@ -1,4 +1,5 @@
 from multiprocessing import Manager
+import threading
 import uuid
 import json
 import datetime
@@ -61,7 +62,10 @@ class Orchestrator:
                     colab_progress_report,
                 ) = setup_progress_reporting(manager, total_dataset_len, total_db_len)
 
-            global_models = manager.dict()
+            global_models = {
+                "registered_models": {},
+                "lock": threading.Lock()
+            }
 
             with concurrent.futures.ThreadPoolExecutor(
                 max_workers=self.eval_runners
