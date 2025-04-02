@@ -1,9 +1,11 @@
 import vertexai
+from util.rate_limit import ResourceExhaustedError
 from util.gcp import get_gcp_project, get_gcp_region
 from vertexai.generative_models._generative_models import (
     GenerativeModel,
     GenerationResponse,
 )
+from google.api_core.exceptions import ResourceExhausted
 from .generator import QueryGenerator
 
 
@@ -24,13 +26,16 @@ class GeminiGenerator(QueryGenerator):
         self.base_prompt = self.base_prompt
 
     def generate_internal(self, prompt):
-        response = self.model.generate_content(
-            self.base_prompt + prompt,
-            generation_config=self.generation_config,
-        )
-        if isinstance(response, GenerationResponse):
-            r = response.text
-            r = r.replace(
-                "```sql", ""
-            )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
-        return r
+        try:
+            response = self.model.generate_content(
+                self.base_prompt + prompt,
+                generation_config=self.generation_config,
+            )
+            if isinstance(response, GenerationResponse):
+                r = response.text
+                r = r.replace(
+                    "```sql", ""
+                )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
+            return r
+        except ResourceExhausted as e:
+            raise ResourceExhaustedError(e)
