@@ -13,7 +13,7 @@ class QueryGenerator(ABC):
 
     def generate(self, prompt):
         try:
-            result = rate_limit(
+            return rate_limit(
                 (prompt,),
                 self.generate_internal,
                 self.execs_per_minute,
@@ -22,10 +22,10 @@ class QueryGenerator(ABC):
             )
         except ResourceExhaustedError as e:
             logging.info(
-                "Rate limit exceeded and gave up on generation. Try reducing execs_per_minute."
+                "Resource Exhausted after multiple attempts on Generation."
+                + "Giving up. Try reducing execs_per_minute."
             )
             return ""
-        return result
 
     @abstractmethod
     def generate_internal(self, prompt):
