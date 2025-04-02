@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from util.rate_limit import rate_limit
+import logging
+from util.rate_limit import rate_limit, ResourceExhaustedError
 from threading import Semaphore
 
 
@@ -11,13 +12,20 @@ class QueryGenerator(ABC):
         self.semaphore = Semaphore(self.execs_per_minute or 1)
 
     def generate(self, prompt):
-        return rate_limit(
-            (prompt,),
-            self.generate_internal,
-            self.execs_per_minute,
-            self.semaphore,
-            self.max_attempts,
-        )
+        try:
+            return rate_limit(
+                (prompt,),
+                self.generate_internal,
+                self.execs_per_minute,
+                self.semaphore,
+                self.max_attempts,
+            )
+        except ResourceExhaustedError as e:
+            logging.info(
+                "Resource Exhausted after multiple attempts on Generation."
+                + "Giving up. Try reducing execs_per_minute."
+            )
+            return ""
 
     @abstractmethod
     def generate_internal(self, prompt):

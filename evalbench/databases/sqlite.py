@@ -127,13 +127,19 @@ class SQLiteDB(DB):
                     ) from e
             return result, eval_result, error
 
-        return rate_limit(
-            (query, eval_query, rollback),
-            _run_execute,
-            self.execs_per_minute,
-            self.semaphore,
-            self.max_attempts,
-        )
+        try:
+            return rate_limit(
+                (query, eval_query, rollback),
+                _run_execute,
+                self.execs_per_minute,
+                self.semaphore,
+                self.max_attempts,
+            )
+        except ResourceExhaustedError as e:
+            logging.info(
+                "Resource Exhausted on SQLite DB. Giving up execution. Try reducing execs_per_minute."
+            )
+            return None, None, None
 
     def get_metadata(self) -> dict:
         db_metadata = {}

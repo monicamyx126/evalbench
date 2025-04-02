@@ -27,11 +27,14 @@ def rate_limit(
         try:
             result = execution_method(*query)
             break
-        except Exception as e:
+        except ResourceExhaustedError as e:
             logging.info(e)
             # exponentially backoff starting at 5 seconds
             time.sleep(5 * (2 ** (attempt)))
             attempt += 1
     time.sleep(60 / execs_per_minute)
     semaphore.release()
+    if attempt > max_attempts:
+        # All attempts were unsuccessful
+        raise ResourceExhaustedError()
     return result

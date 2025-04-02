@@ -1,4 +1,4 @@
 generator: gcp_vertex_gemini
 vertex_model: gemini-2.0-flash-001
 base_prompt: ""
-execs_per_minute: 30
+execs_per_minute: 120
