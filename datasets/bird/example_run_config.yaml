@@ -4,15 +4,16 @@
 # The JSON list of prompts / golden SQLs and eval attributes for the run
 dataset_config: datasets/bird/prompts.json
 ### Database Info
-# The YAML config for the database connection information
+# List of paths to the YAML files that provide the database connection details
 database_configs:
  - datasets/bird/db_configs/sqlite.yaml
-# The dialect that the dataset_config will be filtered by. Only one can be
-# specified at a time (per run). See above for list of supported Dialects
+# The dialect that the dataset_config will be filtered by. Currently
+# BIRD supports only SQLite
 dialects:
  - sqlite
 query_types:
  - dql
+dataset_format: bird-standard-format
 #
 #
 ############################################################

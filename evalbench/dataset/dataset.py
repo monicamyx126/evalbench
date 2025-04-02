@@ -22,12 +22,13 @@ def load_json(json_file_path):
 def load_dataset_from_json(json_file_path, config):
     input_items = []
     all_items = load_json(json_file_path)
-    if "nl_prompt" in all_items[0].keys():
+    dataset_format = config.get("dataset_format", "evalbench-standard-format")
+    if dataset_format == "evalbench-standard-format":
         input_items = load_dataset(all_items, config)
-    elif "db_id" in all_items[0].keys():
+    elif dataset_format == "bird-standard-format":
         input_items = load_dataset_from_bird_format(all_items)
     else:
-        raise ValueError("Dataset not in Evalbench Format")
+        raise ValueError("Dataset not in any of the recognised formats")
     totalEntries = sum(len(input_items.get(q, [])) for q in ["dql", "dml", "ddl"])
     logging.info(f"Converted {totalEntries} entries to EvalInput.")
 

@@ -4,11 +4,11 @@
 # The JSON list of prompts / golden SQLs and eval attributes for the run
 dataset_config: datasets/bat/prompts.json
 ### Database Info
-# The YAML config for the database connection information
+# List of paths to the YAML files that provide the database connection details
 database_configs:
  - datasets/bat/db_configs/sqlite.yaml
-# The dialect that the dataset_config will be filtered by. Only one can be
-# specified at a time (per run). See above for list of supported Dialects
+# The dialects that the dataset_config will be filtered by. If not provided, 
+# all dialects found in the dataset_config json file will be used.
 dialects:
  - sqlite
 query_types:

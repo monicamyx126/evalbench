@@ -13,6 +13,7 @@ This section defines the primary resources used during evaluation, including the
 | `dialects`         | Optional          | Specifies the SQL dialects (e.g., `mysql`, `postgres`, `sqlite`). This filters the dataset to the provided list. If not provided, all dialects found in the dataset_config json file will be used. Please see [db-config documentation](/docs/configs/db-config.md) for the list of currently supported dialects and please feel free to contribute additional dialects. |
 | `databases`         | Optional          | Specifies the databases (e.g., `db_blog`, `california_schools`, etc.). This filters the dataset to the provided list of databases and ignores all other evals. If not provided, all databases found in the dataset_config json file will be tried. |
 | `query_types`         | Optional          | Specifies the query_types (`dql`, `dml`, `dd`). This filters the dataset to the list of evals that are of the query_types provided. If not provided, all eval types (dql, dml and ddl) found in the dataset_config json file will be tried. |
+| `dataset_format`      | Conditional (if needed) | Defines the dataset format, with `evalbench-standard-format` as the default. For BIRD datasets, it must be set to `bird-standard-format`.|
 ---
 
 ## 2. Prompt and Generation Modules
