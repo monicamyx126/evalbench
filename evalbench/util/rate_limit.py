@@ -34,4 +34,7 @@ def rate_limit(
             attempt += 1
     time.sleep(60 / execs_per_minute)
     semaphore.release()
+    if attempt > max_attempts:
+        # All attempts were unsuccessful
+        raise ResourceExhaustedError()
     return result
