@@ -89,6 +89,5 @@ class BigQueryReporter(Reporter):
             + f"&ds.eval_results.billingProjectId={urllib.parse.quote(self.project_id)}"
             + f"&r.reportName={urllib.parse.quote(report_name)}"
             + f"&params={urllib.parse.quote(report_params)}"
-            + "&c.mode=edit"
         )
         print(f"Results available at:\n{report_link}\n---\n")
