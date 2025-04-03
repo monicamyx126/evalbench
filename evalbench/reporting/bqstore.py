@@ -96,7 +96,7 @@ class BigQueryReporter(Reporter):
             + f"&params={urllib.parse.quote(report_params)}"
         )
         if _IN_COLAB:
-            html_link = f'<The evaluation report is now available on this <a href="{report_link}">Dashboard!</a>'
+            html_link = f'The evaluation report is now available on this <a href="{report_link}">Dashboard!</a>'
             display(HTML(html_link))  # type: ignore
         else:
             print(f"Results available at:\n\033[1;34m{report_link}\033[0m\n---\n")
