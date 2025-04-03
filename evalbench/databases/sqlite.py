@@ -70,7 +70,7 @@ class SQLiteDB(DB):
                     rows = resultset.fetchall()
                     result.extend(r._asdict() for r in rows)
         return result
-    
+
     def batch_execute(self, commands: list[str]):
         batch_commands = []
         for command in commands:

@@ -143,7 +143,7 @@ class DB(ABC):
             commands (list[str]): A list of SQL commands to execute.
         """
         raise NotImplementedError("Subclasses must implement this method")
-    
+
     @abstractmethod
     def execute_queries(self, connection: Connection, query: str) -> List:
         """
