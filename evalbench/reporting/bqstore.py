@@ -83,13 +83,14 @@ class BigQueryReporter(Reporter):
         report_date = self.run_time.strftime("%Y-%m-%d")
         report_name = f"{report_date} Evalbench Report (eval_id={self.job_id})"
         report_params = "{" + f'"eval_results.eval_id": "{self.job_id}"' + "}"
+        report_query = _REPORT_QUERY.replace("__PROJECT_ID__", self.project_id)
         report_link = (
             "https://lookerstudio.google.com/reporting/create?"
             + "c.reportId=e7d7fc00-4268-45d6-b17b-160ca271a4d0"
             + "&ds.eval_results.connector=bigQuery"
             + "&ds.eval_results.type=CUSTOM_QUERY"
             + f"&ds.eval_results.projectId={urllib.parse.quote(self.project_id)}"
-            + f"&ds.eval_results.sql={urllib.parse.quote(_REPORT_QUERY.replace("__PROJECT_ID__", self.project_id))}"
+            + f"&ds.eval_results.sql={urllib.parse.quote(report_query)}"
             + f"&ds.eval_results.billingProjectId={urllib.parse.quote(self.project_id)}"
             + f"&r.reportName={urllib.parse.quote(report_name)}"
             + f"&params={urllib.parse.quote(report_params)}"
