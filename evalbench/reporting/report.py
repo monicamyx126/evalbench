@@ -16,6 +16,9 @@ class Reporter(ABC):
     def store(self, results, type: STORETYPE):
         pass
 
+    def print_dashboard_links(self, is_colab):
+        pass
+
 
 def get_dataframe(results):
     results_df = pd.DataFrame.from_dict(results, dtype="string")

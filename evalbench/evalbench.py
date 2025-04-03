@@ -73,6 +73,7 @@ def main(argv: Sequence[str]):
             reporter.store(results_df, report.STORETYPE.EVALS)
             reporter.store(scores_df, report.STORETYPE.SCORES)
             reporter.store(summary_scores_df, report.STORETYPE.SUMMARY)
+            reporter.print_dashboard_links(_IN_COLAB)
 
         print(f"Finished Job ID {job_id}")
         if _IN_COLAB:

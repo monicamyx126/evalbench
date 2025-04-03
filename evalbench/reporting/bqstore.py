@@ -2,8 +2,11 @@ from google.cloud import bigquery
 import logging
 from reporting.report import Reporter, STORETYPE
 from util.gcp import get_gcp_project
+import urllib.parse
 
 _CHUNK_SIZE = 250
+
+_REPORT_QUERY = "WITH all_runs_with_set_tag AS ( SELECT job_id, database, REPLACE(REPLACE(REPLACE(dialects, '[', ''),']',''),'\\'','') AS dialect, id, nl_prompt, trim(generated_sql) AS generated_sql, golden_sql AS golden_sqls, eval_query AS eval_sqls, CASE WHEN generated_error IS NOT NULL THEN generated_error ELSE generated_result END AS generated_result, CASE WHEN golden_error IS NOT NULL THEN golden_error ELSE golden_result END AS golden_result, eval_results AS generated_eval_result, golden_eval_results AS golden_eval_result, DATE(run_time) AS date_of_eval, FROM evalbench.results WHERE job_id = @eval_id ) SELECT *, comparator = @correctness_scorer AS is_correctness_score FROM all_runs_with_set_tag AS eval LEFT JOIN ( SELECT id, job_id, score, dialects[0] AS dialect, database, comparator, IFNULL(comparison_logs, '') AS comparison_logs FROM evalbench.scores ) AS scores USING (job_id, id, dialect, database) ORDER BY date_of_eval DESC;"
 
 
 def _split_dataframe(df, chunk_size):
@@ -67,3 +70,25 @@ class BigQueryReporter(Reporter):
         for chunk in _split_dataframe(results, _CHUNK_SIZE):
             job = client.load_table_from_dataframe(chunk, table, job_config=job_config)
             job.result()  # Wait for the job to complete.
+
+    def print_dashboard_links(self, is_colab):
+        report_date = self.run_time.strftime("%Y-%m-%d")
+        report_name = f"{report_date} Evalbench Report (eval_id={self.job_id})"
+        report_params = (
+            "{"
+            + f'"eval_results.eval_id": "{self.job_id}"'
+            + "}"
+        )
+        report_link = (
+            "https://lookerstudio.google.com/reporting/create?"
+            + "c.reportId=e7d7fc00-4268-45d6-b17b-160ca271a4d0"
+            + "&ds.eval_results.connector=bigQuery"
+            + "&ds.eval_results.type=CUSTOM_QUERY"
+            + f"&ds.eval_results.projectId={urllib.parse.quote(self.project_id)}"
+            + f"&ds.eval_results.sql={urllib.parse.quote(_REPORT_QUERY)}"
+            + f"&ds.eval_results.billingProjectId={urllib.parse.quote(self.project_id)}"
+            + f"&r.reportName={urllib.parse.quote(report_name)}"
+            + f"&params={urllib.parse.quote(report_params)}"
+            + "&c.mode=edit"
+        )
+        print(f"Results available at:\n{report_link}\n---\n")
