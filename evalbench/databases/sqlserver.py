@@ -1,7 +1,9 @@
 from sqlalchemy.pool import NullPool
 import sqlalchemy
 from sqlalchemy import text, MetaData
+from sqlalchemy.engine.base import Connection
 import logging
+import sqlparse
 from .db import DB
 from google.cloud.sql.connector import Connector
 from .util import (
@@ -11,6 +13,7 @@ from .util import (
 )
 from util.rate_limit import rate_limit, ResourceExhaustedError
 from typing import Any, List, Optional, Tuple
+from util.sanitizer import sanitize_sql
 
 DROP_ALL_TABLES_QUERY = """
 USE master;
@@ -93,6 +96,17 @@ class SQLServerDB(DB):
     #####################################################
     #####################################################
 
+    def execute_queries(self, connection: Connection, query: str) -> List:
+        result: List = []
+        for sub_query in sqlparse.split(query):
+            sub_query = sanitize_sql(sub_query)
+            if sub_query:
+                resultset = connection.execute(text(sub_query))
+                if resultset.returns_rows:
+                    rows = resultset.fetchall()
+                    result.extend(r._asdict() for r in rows)
+        return result
+
     def batch_execute(self, commands: list[str]):
         _, _, error = self.execute(";\n".join(commands))
         if error:
@@ -129,16 +143,10 @@ class SQLServerDB(DB):
             try:
                 with self.engine.connect() as connection:
                     with connection.begin() as transaction:
-                        resultset = connection.execute(text(query))
-                        if resultset.returns_rows:
-                            rows = resultset.fetchall()
-                            result.extend(r._asdict() for r in rows)
+                        result = self.execute_queries(connection, query)
 
                         if eval_query:
-                            eval_resultset = connection.execute(text(eval_query))
-                            if eval_resultset.returns_rows:
-                                eval_rows = eval_resultset.fetchall()
-                                eval_result.extend(r._asdict() for r in eval_rows)
+                            eval_result = self.execute_queries(connection, eval_query)
 
                         if rollback:
                             transaction.rollback()

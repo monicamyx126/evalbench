@@ -1,6 +1,7 @@
 from sqlalchemy.pool import NullPool
 import sqlalchemy
 from sqlalchemy import text, MetaData
+from sqlalchemy.engine.base import Connection
 import logging
 from .db import DB
 from google.cloud.sql.connector import Connector
@@ -86,6 +87,9 @@ class PGDB(DB):
     # Database Specific Execution Logic and Handling
     #####################################################
     #####################################################
+
+    def execute_queries(self, connection: Connection, query: str) -> List:
+        pass
 
     def batch_execute(self, commands: list[str]):
         _, _, error = self.execute(";\n".join(commands))

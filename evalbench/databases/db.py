@@ -3,6 +3,7 @@ from typing import Any, Optional, Tuple, List
 from threading import Semaphore
 from util.config import generate_key
 from .util import get_cache_client, get_db_secret, DatabaseSchema, Table, Column
+from sqlalchemy.engine.base import Connection
 
 
 class DB(ABC):
@@ -140,6 +141,16 @@ class DB(ABC):
 
         Args:
             commands (list[str]): A list of SQL commands to execute.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+    
+    @abstractmethod
+    def execute_queries(self, connection: Connection, query: str) -> List:
+        """
+        Splits the input string containing multiple queries and executes them one by one.
+
+        Returns:
+            List: A list containing the results of each executed query.
         """
         raise NotImplementedError("Subclasses must implement this method")
 

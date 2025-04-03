@@ -345,10 +345,10 @@
     ],
     "golden_sql": {
       "postgres": [
-        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc)"
+        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
       ],
       "mysql": [
-        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc)"
+        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(TIMESTAMPDIFF(SECOND, report_timestamp, resolution_timestamp) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
       ],
       "sqlserver": [
         "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(DATEDIFF(MINUTE, report_timestamp, resolution_timestamp)) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time FROM rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
@@ -632,7 +632,7 @@
         "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
       ],
       "mysql": [
-        "SELECT m1.uploader_id, u.username, m1.url.description FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+        "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
       ],
       "sqlserver": [
         "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
@@ -1000,7 +1000,7 @@
         "SELECT content FROM tbl_posts WHERE post_id = 3;"
       ],
       "mysql": [
-        "Select COUNT(1) = 1 from tbl_posts where post_id = 3 and content = 'Updated Content'"
+        "Select COUNT(1) = 1 from tbl_posts where post_id = 3 and content = 'Updated Content';"
       ],
       "sqlserver": [
         "SELECT content FROM tbl_posts WHERE post_id = 3;"
@@ -1061,30 +1061,30 @@
     ],
     "golden_sql": {
       "postgres": [
-        "UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;"
+        "UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 2;"
       ],
       "mysql": [
         "UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_security'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_privacy'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'security'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'privacy'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1; UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'user_data'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'customer_information'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'personal_data'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'client_data'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains user data and customer information for analysis purposes.') WHERE attachment_id = 2;"
       ],
       "sqlserver": [
-        "UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'data_security'), 'append $', 'data_privacy'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'security'), 'append $', 'privacy'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1;"
+        "UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'data_security'), 'append $', 'data_privacy'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'security'), 'append $', 'privacy'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'data_security'), 'append $', 'data_privacy'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'security'), 'append $', 'privacy'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 2;"
       ],
       "sqlite": [
-        "UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"data_security\"', '$[#]', '\"data_privacy\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"security\"', '$[#]', '\"privacy\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id IN (1, 2);"
+        "UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"data_security\"', '$[#]', '\"data_privacy\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"security\"', '$[#]', '\"privacy\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"data_security\"', '$[#]', '\"data_privacy\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"security\"', '$[#]', '\"privacy\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 2;"
       ]
     },
     "eval_query": {
       "postgres": [
-        "Select * from tbl_attachments;"
+        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1;SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
       ],
       "mysql": [
         "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1; SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
       ],
       "sqlserver": [
-        "SELECT * FROM tbl_attachments;"
+        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1;SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
       ],
       "sqlite": [
-        "SELECT * FROM tbl_attachments;"
+        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1;SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
       ]
     },
     "setup_sql": {
@@ -1149,7 +1149,7 @@
         "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
       ],
       "sqlserver": [
-        "ALTER TABLE tbl_labels ADD comments_description NVARCHAR(MAX);"
+        "ALTER TABLE tbl_labels ADD comments_description NVARCHAR(MAX) CONSTRAINT chk_comments_description_json CHECK (ISJSON(comments_description) = 1);"
       ],
       "sqlite": [
         "ALTER TABLE tbl_labels ADD COLUMN comments_description TEXT CHECK (json_valid(comments_description));"
@@ -1177,7 +1177,7 @@
         "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
       ],
       "sqlserver": [
-        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        "ALTER TABLE tbl_labels DROP CONSTRAINT chk_comments_description_json; ALTER TABLE tbl_labels DROP COLUMN comments_description;"
       ],
       "sqlite": [
         "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
@@ -1191,7 +1191,7 @@
         "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
       ],
       "sqlserver": [
-        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        "ALTER TABLE tbl_labels DROP CONSTRAINT chk_comments_description_json; ALTER TABLE tbl_labels DROP COLUMN comments_description;"
       ],
       "sqlite": [
         "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
