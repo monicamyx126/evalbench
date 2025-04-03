@@ -89,9 +89,23 @@ EvalBench's architecture is built around a modular design that supports diverse 
 - **Result Storage and Reporting:** Store results in various formats (e.g., CSV, BigQuery) and visualize performance with built-in dashboards.
 - **Customizability:** Configure and extend EvalBench to measure the performance of GenAI workflows tailored to your specific requirements.
 
-A complete guide of all available functionality can be found in [run-config documentation](/docs/configs/run-config.md)
+Evalbench allows quickly creating experiments and A/B testing improvements (Available when BigQuery reporting mode set in run_config)
+
+<img width="911" alt="Evalbench Reporting" src="https://github.com/user-attachments/assets/0881c43e-b359-472b-a7fd-e1fee6a9adf3" />
+
+This includes being able to measure and quantify the specific improvements on databases or specific dialects:
+
+<img width="911" alt="Evalbench Reporting by Databaes / Dialects" src="https://github.com/user-attachments/assets/e2172be1-045a-473d-92aa-304121843e7d" />
+
+And allowing digging deeper into the exact details of the improvements and regressions including highlighting the changes, how they impacted the score and a LLM annotated explanation of the scoring changes if LLM rater is used.
+
+<img width="911" alt="Evalbench Reporting by Databaes / Dialects" src="https://github.com/user-attachments/assets/861696b5-42f1-44c7-a7d0-710f7a32918f" />
+<br><br>
+
+A complete guide of Evalbench's available functionality can be found in [run-config documentation](/docs/configs/run-config.md)
 
 Please explore the repository to learn more about customizing your evaluation workflows, integrating new metrics, and leveraging the full potential of EvalBench.
+
 
 ---
 For additional documentation, examples, and support, please refer to the [EvalBench documentation](https://github.com/GoogleCloudPlatform/evalbench). Enjoy evaluating your GenAI models!
