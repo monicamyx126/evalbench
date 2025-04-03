@@ -66,7 +66,9 @@ class Orchestrator:
                         progress_reporting_finished,
                         tmp_buffer,
                         colab_progress_report,
-                    ) = setup_progress_reporting(manager, total_dataset_len, total_db_len)
+                    ) = setup_progress_reporting(
+                        manager, total_dataset_len, total_db_len
+                    )
 
                 global_models = {"registered_models": {}, "lock": threading.Lock()}
 
@@ -100,14 +102,18 @@ class Orchestrator:
                         self.total_scoring_results.extend(scoring_results)
 
                 if self.report_progress:
-                    cleanup_progress_reporting(progress_reporting, tmp_buffer, colab_progress_report)
+                    cleanup_progress_reporting(
+                        progress_reporting, tmp_buffer, colab_progress_report
+                    )
                     if progress_reporting_finished:
                         progress_reporting_finished.set()
                     if progress_reporting_thread:
                         progress_reporting_thread.join()
             except Exception as e:
                 if progress_reporting:
-                    cleanup_progress_reporting(progress_reporting, tmp_buffer, colab_progress_report)
+                    cleanup_progress_reporting(
+                        progress_reporting, tmp_buffer, colab_progress_report
+                    )
                 raise e
 
     def evaluate_sub_dataset(

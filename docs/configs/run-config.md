@@ -83,7 +83,7 @@ The `reporting` section specifies how and where the evaluation results will be r
 
 | **Key**    | **Required** | **Description**                                                                                                                                                  |
 | ---------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `truncate_execution_outputs`| Optional          | This allows truncating the outputs in reporting (CSVs, BQ) for the following fields: `generated_result`, `golden_result`, `golden_eval_results` `eval_results` to the number of rows specified. This prevents logging incredibly large results with potentially thousands or millions of rows. *NOTE: This does not affect any logic other than reporting.* |
+| `truncate_execution_outputs`| Optional (defaults to 250 rows)          | This allows overriding the truncation of outputs in reporting (CSVs, BQ) to the number of rows specified. This affects the following reporting fields: `generated_result`, `golden_result`, `golden_eval_results` `eval_results`. This prevents logging incredibly large results with potentially thousands or millions of rows. *NOTE: This does not affect any logic other than reporting.* |
 | `csv`      | Optional     | Configuration for CSV reporting. <br>**Subkey:** `output_directory` specifies the directory where CSV results will be saved (e.g., `'results'`).          |
 | `bigquery` | Optional     | Configuration for reporting to Google BigQuery. <br>**Subkey:** `gcp_project_id` specifies the Google Cloud Project ID for BigQuery integration (e.g., `my_cool_gcp_project`). |
 
