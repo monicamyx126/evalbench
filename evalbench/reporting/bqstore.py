@@ -41,6 +41,7 @@ class BigQueryReporter(Reporter):
         reporting_config = reporting_config or {}
         self.project_id = get_gcp_project(reporting_config.get("gcp_project_id"))
         self.location = reporting_config.get("dataset_location") or "US"
+        self.client = bigquery.Client(project=self.project_id)
         self.dataset_id = "{}.evalbench".format(self.project_id)
         self.configs_table = "{}.configs".format(self.dataset_id)
         self.results_table = "{}.results".format(self.dataset_id)
@@ -48,15 +49,12 @@ class BigQueryReporter(Reporter):
         self.summary_table = "{}.summary".format(self.dataset_id)
 
     def store(self, results, type: STORETYPE):
-        # Construct a BigQuery client object.
-        client = bigquery.Client()
-        # Construct a full Dataset object to send to the API.
         dataset = bigquery.Dataset(self.dataset_id)
         dataset.location = self.location
-        dataset = client.create_dataset(dataset, exists_ok=True, timeout=30)
+        dataset = self.client.create_dataset(dataset, exists_ok=True, timeout=30)
         logging.info(
             "Created dataset {}.{} for {}".format(
-                client.project, dataset.dataset_id, type
+                self.client.project, dataset.dataset_id, type
             )
         )
         job_config = bigquery.LoadJobConfig()
@@ -76,7 +74,9 @@ class BigQueryReporter(Reporter):
         # Chunk this to avoid BQ OOM
         job_config.write_disposition = bigquery.job.WriteDisposition.WRITE_APPEND  # type: ignore
         for chunk in _split_dataframe(results, _CHUNK_SIZE):
-            job = client.load_table_from_dataframe(chunk, table, job_config=job_config)
+            job = self.client.load_table_from_dataframe(
+                chunk, table, job_config=job_config
+            )
             job.result()  # Wait for the job to complete.
 
     def print_dashboard_links(self):
