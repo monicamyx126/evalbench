@@ -41,11 +41,13 @@ scorers:
     model_config: datasets/bat/model_configs/gemini_1.5-pro-002_model.yaml
   returned_sql: null
   set_match: null
+  executable_sql: null
 #
 #
 ############################################################
 ### Reporting Related Configs
 ############################################################
 reporting:
+  truncate_execution_outputs: 250
   csv:
     output_directory: 'results'
