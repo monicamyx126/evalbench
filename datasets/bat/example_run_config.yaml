@@ -48,6 +48,5 @@ scorers:
 ### Reporting Related Configs
 ############################################################
 reporting:
-  truncate_execution_outputs: 250
   csv:
     output_directory: 'results'
