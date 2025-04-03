@@ -89,7 +89,7 @@ class BigQueryReporter(Reporter):
             + "&ds.eval_results.connector=bigQuery"
             + "&ds.eval_results.type=CUSTOM_QUERY"
             + f"&ds.eval_results.projectId={urllib.parse.quote(self.project_id)}"
-            + f"&ds.eval_results.sql={urllib.parse.quote(_REPORT_QUERY.replace("__PROJECT_ID__",self.project_id))}"
+            + f"&ds.eval_results.sql={urllib.parse.quote(_REPORT_QUERY.replace("__PROJECT_ID__", self.project_id))}"
             + f"&ds.eval_results.billingProjectId={urllib.parse.quote(self.project_id)}"
             + f"&r.reportName={urllib.parse.quote(report_name)}"
             + f"&params={urllib.parse.quote(report_params)}"
