@@ -16,7 +16,7 @@ class Reporter(ABC):
     def store(self, results, type: STORETYPE):
         pass
 
-    def print_dashboard_links(self, is_colab):
+    def print_dashboard_links(self):
         pass
 
 
