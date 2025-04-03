@@ -88,10 +88,13 @@ class Evaluator:
         for future in concurrent.futures.as_completed(self.scoringrunner.futures):
             eval_output = future.result()
             record_successful_scoring(progress_reporting)
-            if "truncate_execution_outputs" in self.config:
+            if (
+                "reporting" in self.config
+                and "truncate_execution_outputs" in self.config["reporting"]
+            ):
                 truncateExecutionOutputs(
                     eval_output,
-                    self.config["truncate_execution_outputs"],
+                    self.config["reporting"]["truncate_execution_outputs"],
                 )
             eval_outputs.append(eval_output)
 

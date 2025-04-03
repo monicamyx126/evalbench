@@ -79,11 +79,11 @@ The `scorers` section defines various scoring strategies to evaluate the quality
 
 ## 5. Reporting Configurations
 
-This section specifies how and where the evaluation results will be reported, supporting both local CSV output and Google BigQuery integration.
+The `reporting` section specifies how and where the evaluation results will be reported, supporting both local CSV output and Google BigQuery integration.
 
 | **Key**    | **Required** | **Description**                                                                                                                                                  |
 | ---------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `reporting`| Yes          | Contains reporting configurations for storing evaluation results.                                                                                              |
+| `truncate_execution_outputs`| Optional          | This allows truncating the outputs in reporting (CSVs, BQ) for the following fields: `generated_result`, `golden_result`, `golden_eval_results` `eval_results` to the number of rows specified. This prevents logging incredibly large results with potentially thousands or millions of rows. *NOTE: This does not affect any logic other than reporting.* |
 | `csv`      | Optional     | Configuration for CSV reporting. <br>**Subkey:** `output_directory` specifies the directory where CSV results will be saved (e.g., `'results'`).          |
 | `bigquery` | Optional     | Configuration for reporting to Google BigQuery. <br>**Subkey:** `gcp_project_id` specifies the Google Cloud Project ID for BigQuery integration (e.g., `my_cool_gcp_project`). |
 
@@ -129,6 +129,7 @@ scorers:
 ### Reporting Related Configs
 ############################################################
 reporting:
+  truncate_execution_outputs: 250
   csv:
     output_directory: 'results'
   bigquery:
