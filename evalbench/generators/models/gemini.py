@@ -9,6 +9,7 @@ from google.api_core.exceptions import ResourceExhausted
 from .generator import QueryGenerator
 import logging
 
+
 class GeminiGenerator(QueryGenerator):
     """Generator queries using Vertex model."""
 
