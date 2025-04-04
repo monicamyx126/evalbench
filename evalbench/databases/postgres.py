@@ -88,9 +88,6 @@ class PGDB(DB):
     #####################################################
     #####################################################
 
-    def execute_queries(self, connection: Connection, query: str) -> List:
-        pass
-
     def batch_execute(self, commands: list[str]):
         _, _, error = self.execute(";\n".join(commands))
         if error:

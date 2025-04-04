@@ -1075,16 +1075,16 @@
     },
     "eval_query": {
       "postgres": [
-        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1;SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
+        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
       ],
       "mysql": [
-        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1; SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
+        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
       ],
       "sqlserver": [
-        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1;SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
+        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
       ],
       "sqlite": [
-        "SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 1;SELECT COUNT(*) FROM tbl_attachments WHERE attachment_id = 2;"
+        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
       ]
     },
     "setup_sql": {

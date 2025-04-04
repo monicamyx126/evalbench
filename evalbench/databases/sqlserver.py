@@ -13,7 +13,6 @@ from .util import (
 )
 from util.rate_limit import rate_limit, ResourceExhaustedError
 from typing import Any, List, Optional, Tuple
-from util.sanitizer import sanitize_sql
 
 DROP_ALL_TABLES_QUERY = """
 USE master;
@@ -96,10 +95,9 @@ class SQLServerDB(DB):
     #####################################################
     #####################################################
 
-    def execute_queries(self, connection: Connection, query: str) -> List:
+    def _execute_queries(self, connection: Connection, query: str) -> List:
         result: List = []
         for sub_query in sqlparse.split(query):
-            sub_query = sanitize_sql(sub_query)
             if sub_query:
                 resultset = connection.execute(text(sub_query))
                 if resultset.returns_rows:
@@ -143,10 +141,10 @@ class SQLServerDB(DB):
             try:
                 with self.engine.connect() as connection:
                     with connection.begin() as transaction:
-                        result = self.execute_queries(connection, query)
+                        result = self._execute_queries(connection, query)
 
                         if eval_query:
-                            eval_result = self.execute_queries(connection, eval_query)
+                            eval_result = self._execute_queries(connection, eval_query)
 
                         if rollback:
                             transaction.rollback()
