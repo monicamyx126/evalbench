@@ -7,6 +7,7 @@ from scorers import recallmatcher
 from scorers import setmatcher
 from scorers import llmrater
 from scorers import returnedsql
+from scorers import executablesql
 from dataset.evaloutput import EvalOutput
 import logging
 
@@ -41,6 +42,10 @@ def compare(
         )
     if "returned_sql" in scorers:
         comparators.append(returnedsql.ReturnedSQL(scorers["returned_sql"]))
+    if "executable_sql" in scorers:
+        comparators.append(
+            executablesql.ExecutableGenerationScore(scorers["executable_sql"])
+        )
 
     for comp in comparators:
         score = 0
