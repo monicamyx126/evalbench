@@ -7,6 +7,7 @@ from vertexai.generative_models._generative_models import (
 )
 from google.api_core.exceptions import ResourceExhausted
 from .generator import QueryGenerator
+from util.sanitizer import sanitize_sql
 import logging
 
 
@@ -34,13 +35,7 @@ class GeminiGenerator(QueryGenerator):
                 generation_config=self.generation_config,
             )
             if isinstance(response, GenerationResponse):
-                r = response.text
-                r = r.replace(
-                    "```sql", ""
-                )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.5_pro
-                r = r.replace(
-                    "```", ""
-                )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.5_pro
+                r = sanitize_sql(response.text)
             return r
         except ResourceExhausted as e:
             raise ResourceExhaustedError(e)

@@ -3,6 +3,7 @@ from typing import Any, Optional, Tuple, List
 from threading import Semaphore
 from util.config import generate_key
 from .util import get_cache_client, get_db_secret, DatabaseSchema, Table, Column
+from sqlalchemy.engine.base import Connection
 
 
 class DB(ABC):
