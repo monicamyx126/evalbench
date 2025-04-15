@@ -50,53 +50,71 @@ class Orchestrator:
         require setting up and tearing down the databsae and DML queries require prevention
         of unintended consequences. Additionally, DQLs are run under a read-only user.
         """
+        progress_reporting_thread = None
+        progress_reporting_finished = None
+        progress_reporting = None
+        tmp_buffer = None
+        colab_progress_report = None
+
         with Manager() as manager:
             sub_datasets, total_dataset_len, total_db_len = breakdown_datasets(dataset)
-            progress_reporting = None
-            if self.report_progress:
-                (
-                    progress_reporting_thread,
-                    progress_reporting,
-                    progress_reporting_finished,
-                    tmp_buffer,
-                    colab_progress_report,
-                ) = setup_progress_reporting(manager, total_dataset_len, total_db_len)
+            try:
+                if self.report_progress:
+                    (
+                        progress_reporting_thread,
+                        progress_reporting,
+                        progress_reporting_finished,
+                        tmp_buffer,
+                        colab_progress_report,
+                    ) = setup_progress_reporting(
+                        manager, total_dataset_len, total_db_len
+                    )
 
-            global_models = {"registered_models": {}, "lock": threading.Lock()}
+                global_models = {"registered_models": {}, "lock": threading.Lock()}
 
-            with concurrent.futures.ThreadPoolExecutor(
-                max_workers=self.eval_runners
-            ) as executor:
-                futures = []
-                for dialect in sub_datasets:
-                    db_config = self.db_configs.get(dialect)
-                    if not db_config:
-                        logging.info(
-                            f"Skipping queries for {dialect} as no applicable db_config"
-                            + " was found."
-                        )
-                        skip_dialect(sub_datasets[dialect], progress_reporting)
-                        continue
-                    for database in sub_datasets[dialect]:
-                        future = executor.submit(
-                            self.evaluate_sub_dataset,
-                            sub_datasets,
-                            db_config,
-                            dialect,
-                            database,
-                            progress_reporting,
-                            global_models,
-                        )
-                        futures.append(future)
-                for future in concurrent.futures.as_completed(futures):
-                    eval_outputs, scoring_results = future.result()
-                    self.total_eval_outputs.extend(eval_outputs)
-                    self.total_scoring_results.extend(scoring_results)
+                with concurrent.futures.ThreadPoolExecutor(
+                    max_workers=self.eval_runners
+                ) as executor:
+                    futures = []
+                    for dialect in sub_datasets:
+                        db_config = self.db_configs.get(dialect)
+                        if not db_config:
+                            logging.info(
+                                f"Skipping queries for {dialect} as no applicable db_config"
+                                + " was found."
+                            )
+                            skip_dialect(sub_datasets[dialect], progress_reporting)
+                            continue
+                        for database in sub_datasets[dialect]:
+                            future = executor.submit(
+                                self.evaluate_sub_dataset,
+                                sub_datasets,
+                                db_config,
+                                dialect,
+                                database,
+                                progress_reporting,
+                                global_models,
+                            )
+                            futures.append(future)
+                    for future in concurrent.futures.as_completed(futures):
+                        eval_outputs, scoring_results = future.result()
+                        self.total_eval_outputs.extend(eval_outputs)
+                        self.total_scoring_results.extend(scoring_results)
 
-            if self.report_progress:
-                cleanup_progress_reporting(progress_reporting, tmp_buffer, colab_progress_report)  # type: ignore
-                progress_reporting_finished.set()  # type: ignore
-                progress_reporting_thread.join()  # type: ignore
+                if self.report_progress:
+                    cleanup_progress_reporting(
+                        progress_reporting, tmp_buffer, colab_progress_report
+                    )
+                    if progress_reporting_finished:
+                        progress_reporting_finished.set()
+                    if progress_reporting_thread:
+                        progress_reporting_thread.join()
+            except Exception as e:
+                if progress_reporting:
+                    cleanup_progress_reporting(
+                        progress_reporting, tmp_buffer, colab_progress_report
+                    )
+                raise e
 
     def evaluate_sub_dataset(
         self,

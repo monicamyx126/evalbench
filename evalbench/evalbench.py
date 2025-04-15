@@ -73,15 +73,15 @@ def main(argv: Sequence[str]):
             reporter.store(results_df, report.STORETYPE.EVALS)
             reporter.store(scores_df, report.STORETYPE.SCORES)
             reporter.store(summary_scores_df, report.STORETYPE.SUMMARY)
+            reporter.print_dashboard_links()
 
         print(f"Finished Job ID {job_id}")
-        if _IN_COLAB:
-            # Exit gracefully for colab environment
-            return sys.exit(0)
-        return os._exit(0)
     except Exception as e:
         logging.error(e)
-        return os._exit(1)
+    finally:
+        if _IN_COLAB:
+            return sys.exit(0)
+        return os._exit(0)
 
 
 if __name__ == "__main__":

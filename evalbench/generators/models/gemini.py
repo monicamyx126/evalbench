@@ -7,6 +7,8 @@ from vertexai.generative_models._generative_models import (
 )
 from google.api_core.exceptions import ResourceExhausted
 from .generator import QueryGenerator
+from util.sanitizer import sanitize_sql
+import logging
 
 
 class GeminiGenerator(QueryGenerator):
@@ -26,19 +28,17 @@ class GeminiGenerator(QueryGenerator):
         self.base_prompt = self.base_prompt
 
     def generate_internal(self, prompt):
+        logger = logging.getLogger(__name__)
         try:
             response = self.model.generate_content(
                 self.base_prompt + prompt,
                 generation_config=self.generation_config,
             )
             if isinstance(response, GenerationResponse):
-                r = response.text
-                r = r.replace(
-                    "```sql", ""
-                )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
-                r = r.replace(
-                    "```", ""
-                )  # required for gemini_1.0_pro, gemini_2.0_flash, gemini_2.0_pro
+                r = sanitize_sql(response.text)
             return r
         except ResourceExhausted as e:
             raise ResourceExhaustedError(e)
+        except Exception as e:
+            logger.exception("Unhandled exception during generate_content")
+            raise

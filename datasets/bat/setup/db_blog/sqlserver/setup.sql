@@ -15,11 +15,11 @@ CREATE TABLE dbo.tbl_attachments (
   uploaded_by_ip NVARCHAR(15) NULL,
   last_modified DATETIME NULL,
   expiration_date DATETIME NULL,
-  tags_file NVARCHAR(MAX) NULL,  
-  category_file NVARCHAR(MAX) NULL,
-  access_permissions NVARCHAR(MAX) NULL,
+  tags_file NVARCHAR(MAX) NULL CONSTRAINT chk_tags_file_json CHECK (ISJSON(tags_file) = 1), 
+  category_file NVARCHAR(MAX) NULL CONSTRAINT chk_category_file_json CHECK (ISJSON(category_file) = 1),
+  access_permissions NVARCHAR(MAX) NULL CONSTRAINT chk_access_permissions_json CHECK (ISJSON(access_permissions) = 1),
   storage_location NVARCHAR(255) NULL,
-  metadata NVARCHAR(MAX) NULL,
+  metadata NVARCHAR(MAX) NULL CONSTRAINT chk_metadata_json CHECK (ISJSON(metadata) = 1),
   is_featured BIT NULL,
   parent_attachment_id INT NULL
 );
@@ -75,9 +75,9 @@ CREATE TABLE dbo.tbl_comments (
   user_agent NVARCHAR(255) NULL,
   is_flagged BIT NULL,
   reply_count INT NULL,
-  mentions NVARCHAR(MAX) NULL,
-  attachments NVARCHAR(MAX) NULL,
-  metadata NVARCHAR(MAX) NULL,
+  mentions NVARCHAR(MAX) NULL CONSTRAINT chk_mentions_json CHECK (ISJSON(mentions) = 1),
+  attachments NVARCHAR(MAX) NULL CONSTRAINT chk_attachments_json CHECK (ISJSON(attachments) = 1),
+  metadata NVARCHAR(MAX) NULL CONSTRAINT chk_comments_metadata_json CHECK (ISJSON(metadata) = 1),
   is_edited BIT NULL
 );
 
@@ -95,7 +95,7 @@ CREATE TABLE dbo.tbl_followers (
   following_id INT NULL,
   created_at DATETIME NULL,
   updated_at DATETIME NULL,
-  follower_data NVARCHAR(MAX) NULL
+  follower_data NVARCHAR(MAX) NULL CONSTRAINT chk_follower_data_json CHECK (ISJSON(follower_data) = 1)
 );
 
 CREATE TABLE dbo.tbl_labels (
