@@ -242,7 +242,9 @@ class SQLiteDB(DB):
         pass
 
     def _get_connection_path(self, db_path, db_name):
-        if not db_name.endswith(".db"):
-            db_name = db_name + ".db"
+        extension = self.extension
+        if not db_name.endswith(extension):
+            db_name = db_name + extension
+
         connection_path = os.path.join(db_path, f"{db_name}")
         return connection_path

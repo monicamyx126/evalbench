@@ -13,6 +13,8 @@ class DB(ABC):
         self.db_name = db_config["database_name"]
         self.db_type = db_config["db_type"]
         self.username = db_config.get("user_name") or ""
+        if self.db_type == "sqlite":
+            self.extension = db_config.get("extension") or ".db"
         if "password" in db_config and db_config["password"]:
             self.password = db_config["password"]
         elif "secret_manager_path" in db_config and db_config["secret_manager_path"]:
