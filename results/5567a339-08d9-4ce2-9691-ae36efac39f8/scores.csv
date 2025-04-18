@@ -1,0 +1,23 @@
+comparator,comparison_error,comparison_logs,database,dialects,generated_error,generated_sql,id,job_id,score
+exact_match,,Used eval_query to score.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_labels"" ADD COLUMN ""comments_description"" TEXT;",43,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+set_match,,,db_blog,['sqlite'],,"ALTER TABLE ""tbl_labels"" ADD COLUMN ""comments_description"" TEXT;",43,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+llmrater,,Skipped. Exact Match was found.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_labels"" ADD COLUMN ""comments_description"" TEXT;",43,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+returned_sql,,,db_blog,['sqlite'],,"ALTER TABLE ""tbl_labels"" ADD COLUMN ""comments_description"" TEXT;",43,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+executable_sql,,Generated query was executable.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_labels"" ADD COLUMN ""comments_description"" TEXT;",43,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+exact_match,,Used eval_query to score.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_users"" ADD COLUMN ""full_name"" TEXT GENERATED ALWAYS AS (""first_name"" || ' ' || ""last_name"") STORED;",256,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+set_match,,,db_blog,['sqlite'],,"ALTER TABLE ""tbl_users"" ADD COLUMN ""full_name"" TEXT GENERATED ALWAYS AS (""first_name"" || ' ' || ""last_name"") STORED;",256,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+llmrater,,Skipped. Exact Match was found.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_users"" ADD COLUMN ""full_name"" TEXT GENERATED ALWAYS AS (""first_name"" || ' ' || ""last_name"") STORED;",256,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+returned_sql,,,db_blog,['sqlite'],,"ALTER TABLE ""tbl_users"" ADD COLUMN ""full_name"" TEXT GENERATED ALWAYS AS (""first_name"" || ' ' || ""last_name"") STORED;",256,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+executable_sql,,Generated query was executable.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_users"" ADD COLUMN ""full_name"" TEXT GENERATED ALWAYS AS (""first_name"" || ' ' || ""last_name"") STORED;",256,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+exact_match,,Used eval_query to score.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_posts"" RENAME COLUMN ""content"" TO ""post_content"";",185,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+set_match,,,db_blog,['sqlite'],,"ALTER TABLE ""tbl_posts"" RENAME COLUMN ""content"" TO ""post_content"";",185,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+llmrater,,Skipped. Exact Match was found.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_posts"" RENAME COLUMN ""content"" TO ""post_content"";",185,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+returned_sql,,,db_blog,['sqlite'],,"ALTER TABLE ""tbl_posts"" RENAME COLUMN ""content"" TO ""post_content"";",185,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+executable_sql,,Generated query was executable.,db_blog,['sqlite'],,"ALTER TABLE ""tbl_posts"" RENAME COLUMN ""content"" TO ""post_content"";",185,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+exact_match,,Used eval_query to score.,db_blog,['sqlite'],,"SELECT DISTINCT ""role_name"" FROM ""tbl_user_roles""",255,5567a339-08d9-4ce2-9691-ae36efac39f8,0.0
+set_match,,,db_blog,['sqlite'],,"SELECT DISTINCT ""role_name"" FROM ""tbl_user_roles""",255,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+llmrater,,"Both outputs are identical empty lists.
+
+FINAL ANSWER: INFORMATION_MATCHES",db_blog,['sqlite'],,"SELECT DISTINCT ""role_name"" FROM ""tbl_user_roles""",255,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+returned_sql,,,db_blog,['sqlite'],,"SELECT DISTINCT ""role_name"" FROM ""tbl_user_roles""",255,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0
+executable_sql,,Generated query was executable.,db_blog,['sqlite'],,"SELECT DISTINCT ""role_name"" FROM ""tbl_user_roles""",255,5567a339-08d9-4ce2-9691-ae36efac39f8,100.0

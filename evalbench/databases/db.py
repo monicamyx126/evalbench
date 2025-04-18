@@ -72,10 +72,10 @@ class DB(ABC):
             db_schema.tables.append(tmp_table)
         return self.generate_ddl(db_schema)
 
-    def create_tmp_databases(self, db_config, num_dbs: int) -> list[str]:
+    def create_tmp_databases(self, num_dbs: int) -> list[str]:
         tmp_dbs = []
         for _ in range(num_dbs):
-            base_db_name = db_config["database_name"]
+            base_db_name = self.db_name
             tmp_db_name = f"tmp_{base_db_name}_{generate_key()}"
             self.create_tmp_database(tmp_db_name)
             tmp_dbs.append(tmp_db_name)

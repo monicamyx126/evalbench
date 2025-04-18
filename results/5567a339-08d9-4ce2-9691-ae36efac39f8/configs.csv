@@ -1,0 +1,22 @@
+job_id,run_time,config,value
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.dataset_config,datasets/bat/prompts.json
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.database_configs,['datasets/bat/db_configs/sqlite.yaml']
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.dialects,['sqlite']
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.query_types,['ddl']
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.model_config,datasets/bat/model_configs/gemini_2.5_pro_model.yaml
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.prompt_generator,SQLGenBasePromptGenerator
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.setup_directory,datasets/bat/setup
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.scorers.exact_match,
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.scorers.llmrater.model_config,datasets/bat/model_configs/gemini_1.5-pro-002_model.yaml
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.scorers.returned_sql,
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.scorers.set_match,
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.scorers.executable_sql,
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,experiment_config.reporting.csv.output_directory,results
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,model_config.generator,gcp_vertex_gemini
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,model_config.vertex_model,gemini-2.5-pro-exp-03-25
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,model_config.base_prompt,
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,model_config.execs_per_minute,5
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,db_configs.sqlite.db_type,sqlite
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,db_configs.sqlite.database_name,db_blog
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,db_configs.sqlite.database_path,db_connections/bat/
+5567a339-08d9-4ce2-9691-ae36efac39f8,2025-04-18 12:32:24.887701,db_configs.sqlite.max_executions_per_minute,180

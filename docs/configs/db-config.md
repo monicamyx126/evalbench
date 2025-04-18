@@ -17,6 +17,7 @@ The YAML configuration file is structured as follows:
 | `user_name`                 | Conditionally (if needed)    | Required only for databases that need authentication (e.g., MySQL, PostgreSQL). Not needed for databases like SQLite.                                 |
 | `password`                  | Conditionally (if needed)    | The password for the database. Can be interchanged with `secret_manager_path` if you prefer using GCP Secret Manager for secure storage.              |
 | `secret_manager_path`       | No (alternative to password) | An alternative to `password` that specifies the path to your secret in GCP Secret Manager. Use this if you prefer not to store the password directly. |
+| `location`                  | Yes                         | Specifies the location of your dataset. Required for BigQuery. Default is "US".
 
 ## Important Notes
 

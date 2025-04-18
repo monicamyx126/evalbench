@@ -1,0 +1,404 @@
+CREATE TABLE `{{dataset}}.tbl_attachments` (
+  attachment_id INT64 NOT NULL,
+  post_id INT64,
+  user_id INT64,
+  file_name STRING,
+  file_path STRING,
+  file_size INT64,
+  file_type STRING,
+  upload_date DATETIME,
+  description STRING,
+  is_active BOOL,
+  visibility_status STRING,
+  download_count INT64,
+  file_extension STRING,
+  uploaded_by_ip STRING,
+  last_modified DATETIME,
+  expiration_date DATETIME,
+  tags_file JSON,
+  category_file JSON,
+  access_permissions JSON,
+  storage_location STRING,
+  metadata JSON,
+  is_featured BOOL,
+  parent_attachment_id INT64,
+  PRIMARY KEY(attachment_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_categories` (
+  category_id INT64 NOT NULL,
+  created_by INT64,
+  updated_by INT64,
+  name STRING,
+  description STRING,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  parent_category INT64,
+  slug STRING,
+  image STRING,
+  count INT64,
+  visibility BOOL,
+  is_edited BOOL,
+  PRIMARY KEY(category_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_categories_hierarchy` (
+  category_hierarchy_id INT64 NOT NULL,
+  category_id INT64,
+  created_by INT64,
+  updated_by INT64,
+  name STRING,
+  description STRING,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  status STRING,
+  visibility STRING,
+  orden_priority INT64,
+  icon STRING,
+  color STRING,
+  metadata STRING,
+  parent_category_name STRING,
+  PRIMARY KEY(category_hierarchy_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_comments` (
+  comment_id INT64 NOT NULL,
+  content STRING,
+  user_id INT64,
+  post_id INT64,
+  parent_comment_id INT64,
+  likes_count INT64,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  is_approved BOOL,
+  dislikes_count INT64,
+  report_count INT64,
+  is_deleted BOOL,
+  user_ip STRING,
+  user_agent STRING,
+  is_flagged BOOL,
+  reply_count INT64,
+  mentions JSON,
+  attachments JSON,
+  metadata JSON,
+  is_edited BOOL,
+  PRIMARY KEY(comment_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_country` (
+  country_name STRING NOT NULL,
+  country_id INT64,
+  continent STRING,
+  region STRING,
+  X FLOAT64,
+  Y FLOAT64,
+  PRIMARY KEY(country_name) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_followers` (
+  follower_id INT64 NOT NULL,
+  following_id INT64,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  follower_data JSON,
+  PRIMARY KEY(follower_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_labels` (
+  label_id INT64 NOT NULL,
+  creator_id INT64,
+  updated_by INT64,
+  name STRING,
+  description STRING,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  post_count INT64,
+  visibility_status STRING,
+  is_active BOOL,
+  usage_frequency INT64,
+  parent_label_id INT64,
+  PRIMARY KEY(label_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_media` (
+  media_id INT64 NOT NULL,
+  post_id INT64,
+  type STRING,
+  url STRING,
+  description STRING,
+  upload_date TIMESTAMP,
+  updated_at TIMESTAMP,
+  filename STRING,
+  file_size INT64,
+  caption STRING,
+  uploader_id INT64,
+  visibility STRING,
+  access_rights JSON,
+  file_path STRING,
+  metadata JSON,
+  hash_ STRING, --changed the name so if any query uses this, take care
+  is_encrypted BOOL,
+  encryption_key STRING,
+  encryption_algorithm STRING,
+  status_id INT64,
+  PRIMARY KEY(media_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_notifications` (
+  notification_id INT64 NOT NULL,
+  user_id INT64,
+  notification_type STRING,
+  sender_id INT64,
+  post_id INT64,
+  comment_id INT64,
+  notification_message STRING,
+  notification_date DATETIME,
+  is_read BOOL,
+  is_archived BOOL,
+  is_deleted BOOL,
+  link_to_notification STRING,
+  notification_priority INT64,
+  additional_data JSON,
+  notification_subject STRING,
+  notification_status STRING,
+  notification_action STRING,
+  related_user_id INT64,
+  source_application STRING,
+  notification_category STRING,
+  expiration_date DATETIME,
+  delivery_method STRING,
+  notification_channel STRING,
+  notification_language STRING,
+  recipient_group STRING,
+  notification_tags JSON,
+  notification_expiry_time DATETIME,
+  notification_context JSON,
+  notification_origin STRING,
+  PRIMARY KEY(notification_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_posts` (
+  post_id INT64 NOT NULL,
+  user_id INT64,
+  title STRING,
+  content STRING,
+  published_at DATETIME,
+  is_published BOOL,
+  views_count INT64,
+  likes_count INT64,
+  shares_count INT64,
+  created_at DATETIME,
+  updated_at DATETIME,
+  slug STRING,
+  excerpt STRING,
+  status_id INT64,
+  category_id INT64,
+  dislikes_count INT64,
+  comments_count INT64,
+  is_featured BOOL,
+  author_name STRING,
+  image_url STRING,
+  tags JSON,
+  reading_time INT64,
+  external_link STRING,
+  metadata JSON,
+  PRIMARY KEY(post_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_posts_tags` (
+  post_id INT64 NOT NULL,
+  tag_id INT64 NOT NULL,
+  comments JSON,
+  label_status STRING,
+  label_at TIMESTAMP,
+  PRIMARY KEY(post_id, tag_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_private_messages` (
+  message_id INT64 NOT NULL,
+  sender_id INT64,
+  receiver_id INT64,
+  subject STRING,
+  body STRING,
+  sending_time TIMESTAMP,
+  is_read BOOL,
+  is_archived BOOL,
+  is_deleted_by_sender BOOL,
+  is_deleted_by_receiver BOOL,
+  is_flagged BOOL,
+  priority INT64,
+  attachment_id INT64,
+  conversation_id INT64,
+  status STRING,
+  parent_message_id INT64,
+  read_timestamp TIMESTAMP,
+  message_data JSON,
+  PRIMARY KEY(message_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_reactions` (
+  reaction_id INT64 NOT NULL,
+  comment_id INT64,
+  user_id INT64,
+  post_id INT64,
+  reaction_type STRING,
+  reaction_date TIMESTAMP,
+  reaction_score INT64,
+  reaction_text STRING,
+  is_active BOOL,
+  reaction_count INT64,
+  source_ip STRING,
+  device_info JSON,
+  PRIMARY KEY(reaction_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_reports` (
+  report_id INT64 NOT NULL,
+  user_id INT64,
+  post_id INT64,
+  report_reason STRING,
+  report_timestamp TIMESTAMP,
+  is_resolved BOOL,
+  resolved_by INT64,
+  resolution_timestamp TIMESTAMP,
+  report_comments STRING,
+  severity_level INT64,
+  report_type STRING,
+  report_entity_type STRING,
+  report_entity_id INT64,
+  action_taken STRING,
+  action_timestamp TIMESTAMP,
+  report_ip_address STRING,
+  reported_user_id INT64,
+  reported_comment_id INT64,
+  reported_user_reputation INT64,
+  report_category STRING,
+  reported_context_text STRING,
+  attachments JSON,
+  flagged_user BOOL,
+  report_source STRING,
+  report_feedback STRING,
+  report_verification_status STRING,
+  report_mechanism STRING,
+  report_priority INT64,
+  assigned_to INT64,
+  report_history JSON,
+  PRIMARY KEY(report_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_status` (
+  status_id INT64 NOT NULL,
+  Name STRING,
+  PRIMARY KEY(status_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_tags` (
+  tag_id INT64 NOT NULL,
+  creator_id INT64,
+  category_id INT64,
+  name STRING,
+  description STRING,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  slug STRING,
+  count INT64,
+  visibility BOOL,
+  active BOOL,
+  parent_tag INT64,
+  status_id INT64,
+  access_level INT64,
+  is_approved BOOL,
+  metadata JSON,
+  is_edited BOOL,
+  PRIMARY KEY(tag_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_tags_hierarchy` (
+  tag_hierarchy_id INT64 NOT NULL,
+  tag_id INT64,
+  relationship_type STRING,
+  weight NUMERIC,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  active BOOL,
+  description STRING,
+  creator_id INT64,
+  modifier_id INT64,
+  is_deleted BOOL,
+  deleted_at TIMESTAMP,
+  revision_history JSON,
+  comments JSON,
+  PRIMARY KEY(tag_hierarchy_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_user_activity` (
+  activity_id INT64 NOT NULL,
+  user_id INT64,
+  activity_type STRING,
+  activity_timestamp TIMESTAMP,
+  post_id INT64,
+  comment_id INT64,
+  activity_description STRING,
+  activity_source STRING,
+  activity_location STRING,
+  activity_duration INT64,
+  activity_device STRING,
+  activity_status STRING,
+  activity_impact STRING,
+  activity_privacy_level STRING,
+  activity_related_users JSON,
+  activiy_extra_data JSON,
+  ip_address STRING,
+  user_agent STRING,
+  url STRING,
+  session_id STRING,
+  browser STRING,
+  operating_system STRING,
+  referrer STRING,
+  event_id INT64,
+  error_message STRING,
+  location_coordinates JSON,
+  session_duration INT64,
+  PRIMARY KEY(activity_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_user_roles` (
+  role_id INT64 NOT NULL,
+  created_by INT64,
+  updated_by INT64,
+  description STRING,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  permissions JSON,
+  role_name STRING,
+  is_active BOOL,
+  restrictions JSON,
+  expiry_date DATE,
+  created_by_ip STRING,
+  updated_by_ip STRING,
+  created_by_device STRING,
+  updated_by_device STRING,
+  active_sessions INT64,
+  last_sessions JSON,
+  PRIMARY KEY(role_id) NOT ENFORCED
+);
+
+CREATE TABLE `{{dataset}}.tbl_users` (
+  user_id INT64 NOT NULL,
+  first_name STRING,
+  last_name STRING,
+  username STRING,
+  password_hash STRING,
+  social_media_links JSON,
+  contact_info JSON,
+  avatar_url STRING,
+  bio STRING,
+  website STRING,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+  notification_preferences STRING,
+  role_id INT64,
+  last_login TIMESTAMP,
+  active BOOL,
+  PRIMARY KEY(user_id) NOT ENFORCED
+);

@@ -40,27 +40,27 @@ def load_db_data_from_csvs(data_directory: str):
                 tables[table_name] = rows
     return tables
 
-
-def load_setup_scripts(setup_scripts_directory_path: str):
-    pre_setup = _load_setup_sql(
-        os.path.join(setup_scripts_directory_path, "pre_setup.sql")
+def load_setup_scripts(setup_scripts_directory_path: str, db_name: str): # do only if bigquery
+    pre_setup = _load_and_replace_sql(
+        os.path.join(setup_scripts_directory_path, "pre_setup.sql"),
+        db_name
     )
-    setup = _load_setup_sql(os.path.join(setup_scripts_directory_path, "setup.sql"))
-    post_setup = _load_setup_sql(
-        os.path.join(setup_scripts_directory_path, "post_setup.sql")
+    setup = _load_and_replace_sql(
+        os.path.join(setup_scripts_directory_path, "setup.sql"),
+        db_name
+    )
+    post_setup = _load_and_replace_sql(
+        os.path.join(setup_scripts_directory_path, "post_setup.sql"),
+        db_name
     )
     return (pre_setup, setup, post_setup)
 
-
-def _load_setup_sql(sql_file_path: str):
-    try:
-        with open(sql_file_path, "r") as file:
-            sql_content = file.read()
+def _load_and_replace_sql(file_path: str, db_name: str) -> str:
+    with open(file_path, "r") as file:
+        content = file.read()
+        sql_content = content.replace("{{dataset}}", db_name) #replacement required only for BigQuery
         sql_commands = [cmd.strip() for cmd in sql_content.split(";") if cmd.strip()]
-        return sql_commands
-    except Exception as e:
-        return []
-
+    return sql_commands
 
 def config_to_df(
     job_id: str,

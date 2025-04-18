@@ -128,11 +128,40 @@ Here is the natural language question for generating SQL:
 {USER_PROMPT}
 """
 
+BIGQUERY_PROMPT_TEMPLATE_WITH_RULES = """You are a BigQuery SQL expert.
+
+The database structure is defined by the following table schemas:
+
+**************************
+{SCHEMA}
+**************************
+
+Please generate a BigQuery SQL query for the following question following these rules:
+- Output the query only without any explanation.
+- Do not use markdown code blocks around the outputted query.
+- Always use quotes around table and column names.
+
+SQL generation rules:
+- Use aliases for tables to avoid ambiguity.
+- Only use tables and columns from the provided schema.
+- Ensure the generated SQL query is valid and executable.
+- Choose appropriate join types for relationships between tables.
+- Use functions and operators compatible with the data types of columns.
+
+Think step by step about generating a correct BigQuery SQL query!
+
+**************************
+
+Here is the natural language question for generating SQL:
+{USER_PROMPT}
+"""
+
 _PROMPTS_BY_DIALECT = {
     "sqlite": SQLITE_PROMPT_TEMPLATE_WITH_RULES,
     "postgres": PG_PROMPT_TEMPLATE_WITH_RULES,
     "mysql": MYSQL_PROMPT_TEMPLATE_WITH_RULES,
     "sqlserver": SQLSERVER_PROMPT_TEMPLATE_WITH_RULES,
+    "bigquery": BIGQUERY_PROMPT_TEMPLATE_WITH_RULES
 }
 
 

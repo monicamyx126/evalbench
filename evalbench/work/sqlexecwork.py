@@ -117,10 +117,15 @@ class SQLExecWork(Work):
             and len(self.eval_result["golden_sql"]) > 0
         ):
             golden_sql = self.eval_result["golden_sql"][0]
+        if golden_sql is not None:
+            golden_sql = golden_sql.replace("{{dataset}}", self.db.db_name) #replacement required only for BigQuery
         return golden_sql
 
     def _get_eval_query(self):
         if self.eval_result["eval_query"] and len(self.eval_result["eval_query"]) > 0:
-            return self.eval_result["eval_query"][0]
+            eval_query = self.eval_result["eval_query"][0]
+            if eval_query is not None:
+                eval_query = eval_query.replace("{{dataset}}", self.db.db_name) #replacement required only for BigQuery
+            return eval_query
         else:
             return None
