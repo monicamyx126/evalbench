@@ -40,7 +40,8 @@ def load_db_data_from_csvs(data_directory: str):
                 tables[table_name] = rows
     return tables
 
-def load_setup_scripts(setup_scripts_directory_path: str, db_name: str): # do only if bigquery
+
+def load_setup_scripts(setup_scripts_directory_path: str, db_name: str):
     pre_setup = _load_and_replace_sql(
         os.path.join(setup_scripts_directory_path, "pre_setup.sql"),
         db_name
@@ -55,12 +56,14 @@ def load_setup_scripts(setup_scripts_directory_path: str, db_name: str): # do on
     )
     return (pre_setup, setup, post_setup)
 
+
 def _load_and_replace_sql(file_path: str, db_name: str) -> str:
     with open(file_path, "r") as file:
         content = file.read()
-        sql_content = content.replace("{{dataset}}", db_name) #replacement required only for BigQuery
+        sql_content = content.replace("{{dataset}}", db_name)  # replacement required only for BigQuery
         sql_commands = [cmd.strip() for cmd in sql_content.split(";") if cmd.strip()]
     return sql_commands
+
 
 def config_to_df(
     job_id: str,

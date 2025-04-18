@@ -10,6 +10,7 @@ from google.cloud.bigquery import QueryJobConfig, ConnectionProperty
 from util.gcp import get_gcp_project
 from google.api_core.exceptions import GoogleAPICallError
 
+
 class BQDB(DB):
 
     #####################################################
@@ -145,7 +146,6 @@ class BQDB(DB):
     #####################################################
     #####################################################
 
-
     def generate_ddl(self, schema: DatabaseSchema) -> List[str]:
         ddl_statements = []
         try:
@@ -188,14 +188,13 @@ class BQDB(DB):
         except Exception as e:
             raise RuntimeError(f"Failed to drop tables in dataset {self.db_name}: {e}")
 
-        
     def is_json(self, value) -> bool:
         try:
             json.loads(value)
         except (ValueError, TypeError, json.JSONDecodeError):
             return False
         return True
-    
+
     def is_float(self, value) -> bool:
         try:
             float(value)
@@ -223,7 +222,7 @@ class BQDB(DB):
                     elif self.is_json(unquoted):
                         formatted_values.append(f"PARSE_JSON({value})")
                     else:
-                        formatted_values.append(f"{value.replace("''", "\\'")}") 
+                        formatted_values.append(f"{value.replace("''", "\\'")}")
 
                 inline_columns = ", ".join(formatted_values)
                 insertion_statements.append(
@@ -233,7 +232,7 @@ class BQDB(DB):
             self.batch_execute(insertion_statements)
         except RuntimeError as error:
             raise RuntimeError(f"Could not insert data into database: {error}")
-        
+
     #####################################################
     #####################################################
     # Database User Management
