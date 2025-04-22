@@ -53,6 +53,7 @@ def load_setup_scripts(setup_scripts_directory_path: str, db_name: str):
     )
     return (pre_setup, setup, post_setup)
 
+
 def _load_setup_sql(sql_file_path: str):
     try:
         with open(sql_file_path, "r") as file:
