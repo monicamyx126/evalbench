@@ -25,7 +25,7 @@
           "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at BETWEEN DATE('2024-01-01') AND DATE('2024-12-31') AND json_extract(u.social_media_links, '$.twitter') IS NOT NULL;"
         ],
         "bigquery": [
-          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM {{dataset}}.tbl_users u INNER JOIN {{dataset}}.tbl_posts p ON u.user_id = p.user_id WHERE p.created_at BETWEEN DATE('2024-01-01') AND DATE('2024-12-31') AND JSON_EXTRACT_SCALAR(u.social_media_links, '$.twitter') IS NOT NULL;SELECT u.user_id, p.post_id, COUNT(c.comment_id) AS comment_count FROM `{{dataset}}.tbl_users` AS u INNER JOIN `{{dataset}}.tbl_posts` AS p ON u.user_id = p.user_id LEFT JOIN `{{dataset}}.tbl_comments` AS c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM {{dataset}}.tbl_users u INNER JOIN {{dataset}}.tbl_posts p ON u.user_id = p.user_id WHERE p.created_at BETWEEN DATE('2024-01-01') AND DATE('2024-12-31') AND JSON_EXTRACT_SCALAR(u.social_media_links, '$.twitter') IS NOT NULL;"
         ]
       },
       "eval_query": {
@@ -843,7 +843,7 @@
           "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE is_resolved = 0 AND user_id IN (SELECT following_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'));"
         ],
         "bigquery": [
-          "SELECT u.user_id, COUNT(f.follower_id) AS follower_count FROM `{{dataset}}.tbl_users` AS u LEFT JOIN `{{dataset}}.tbl_followers` AS f ON u.user_id = f.following_id GROUP BY u.user_id;"
+          "SELECT SUM(likes_count) AS total_likes FROM `{{dataset}}.tbl_comments` WHERE comment_id IN (SELECT reported_comment_id FROM `{{dataset}}.tbl_reports` WHERE is_resolved = FALSE AND user_id IN (SELECT following_id FROM `{{dataset}}.tbl_followers` GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT pt.post_id FROM `{{dataset}}.tbl_posts_tags` AS pt INNER JOIN `{{dataset}}.tbl_tags` AS t ON pt.tag_id = t.tag_id WHERE t.name = 'Programming'))"
         ]
       },
       "eval_query": {
@@ -1492,7 +1492,7 @@
           "ALTER TABLE tbl_tags ADD COLUMN access_level_enum TEXT CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
         ],
         "bigquery": [
-          "ALTER TABLE `{{dataset}}.tbl_tags1` ADD COLUMN access_level_enum STRING;"
+          "ALTER TABLE `{{dataset}}.tbl_tags` ADD COLUMN access_level_enum STRING;"
         ]
       },
       "eval_query": {

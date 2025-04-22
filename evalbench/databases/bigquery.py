@@ -65,6 +65,9 @@ class BQDB(DB):
             result: List = []
             eval_result: List = []
             error = None
+            query_replaced = query.replace("{{dataset}}", self.db_name)
+            if eval_query is not None:
+                eval_query_replaced = eval_query.replace("{{dataset}}", self.db_name)
             try:
                 if rollback:
                     try:
@@ -80,10 +83,10 @@ class BQDB(DB):
                             job_config=QueryJobConfig(connection_properties=conn_props)
                         ).result()
 
-                        result = self._execute_queries(query, job_config=QueryJobConfig(connection_properties=conn_props))
+                        result = self._execute_queries(query_replaced, job_config=QueryJobConfig(connection_properties=conn_props))
 
                         if eval_query:
-                            eval_result = self._execute_queries(eval_query, job_config=QueryJobConfig(connection_properties=conn_props))
+                            eval_result = self._execute_queries(eval_query_replaced, job_config=QueryJobConfig(connection_properties=conn_props))
 
                         self.client.query(
                             "ROLLBACK TRANSACTION;",
@@ -91,7 +94,8 @@ class BQDB(DB):
                         ).result()
 
                     except Exception as e:
-                        print(f"Error: {str(e)}")
+                        error = str(e)
+                        print(f"Error: {error}")
 
                     finally:
                         if 'session_id' in locals():
@@ -100,19 +104,19 @@ class BQDB(DB):
                                 job_config=QueryJobConfig(connection_properties=conn_props)
                             ).result()
                 if not rollback:
-                    result = self._execute_queries(query)
+                    result = self._execute_queries(query_replaced)
 
                 if eval_query and not rollback:
-                    eval_result = self._execute_queries(eval_query)
+                    eval_result = self._execute_queries(eval_query_replaced)
 
             except (GoogleAPICallError, Exception) as e:
-                error_message = str(e)
-                if "resources exceeded" in error_message:
+                error = str(e)
+                if "resources exceeded" in error:
                     raise ResourceExhaustedError(f"BigQuery resources exhausted: {e}") from e
-                elif "quota exceeded" in error_message:
+                elif "quota exceeded" in error:
                     raise ResourceExhaustedError(f"BigQuery quota exceeded: {e}") from e
                 else:
-                    print(error_message)
+                    print(error)
 
             return result, eval_result, error
 
@@ -215,7 +219,7 @@ class BQDB(DB):
                         formatted_values.append("TRUE")
                     elif value == "'0'":
                         formatted_values.append("FALSE")
-                    elif self.is_float(unquoted):
+                    elif self.is_float(value):
                         formatted_values.append(f"{value}")
                     elif value in ('True', 'true', 'False', 'false'):
                         formatted_values.append(f"{value}")
