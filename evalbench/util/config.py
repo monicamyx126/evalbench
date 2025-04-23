@@ -41,7 +41,7 @@ def load_db_data_from_csvs(data_directory: str):
     return tables
 
 
-def load_setup_scripts(setup_scripts_directory_path: str, db_name: str):
+def load_setup_scripts(setup_scripts_directory_path: str):
     pre_setup = _load_setup_sql(
         os.path.join(setup_scripts_directory_path, "pre_setup.sql"),
     )

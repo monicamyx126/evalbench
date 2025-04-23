@@ -56,7 +56,7 @@ class DB(ABC):
         self.drop_all_tables()
         self.batch_execute(pre_setup)
         self.batch_execute(setup)
-        self.insert_data(self.data)
+        self.insert_data(self.data, setup)
         self.batch_execute(post_setup)
         if setup_users:
             self.setup_tmp_users()
@@ -186,7 +186,7 @@ class DB(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def insert_data(self, data: dict[str, List[str]]) -> None:
+    def insert_data(self, data: dict[str, List[str]], setup: Optional[List[str]] = None) -> None:
         """
         Inserts data into the database tables.
         * Raises RuntimeError if it cannot insert data.

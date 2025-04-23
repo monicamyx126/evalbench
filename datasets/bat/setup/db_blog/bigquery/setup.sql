@@ -136,7 +136,7 @@ CREATE TABLE `{{dataset}}.tbl_media` (
   access_rights JSON,
   file_path STRING,
   metadata JSON,
-  hash_ STRING, --changed the name so if any query uses this, take care
+  hash_ STRING,
   is_encrypted BOOL,
   encryption_key STRING,
   encryption_algorithm STRING,

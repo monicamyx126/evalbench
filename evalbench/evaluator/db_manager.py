@@ -100,7 +100,7 @@ def _create_ddl_tmp_db(tmp_db, db_name, db_config, setup_config):
 def _get_setup_values(setup_config, db_name: str, db_type: str, tmp_db: Optional[str] = None):
     try:
         setup_scripts = load_setup_scripts(
-            setup_config["setup_directory"] + "/" + db_name + "/" + db_type, tmp_db if tmp_db is not None else db_name
+            setup_config["setup_directory"] + "/" + db_name + "/" + db_type
         )
         data = load_db_data_from_csvs(
             setup_config["setup_directory"] + "/" + db_name + "/data"

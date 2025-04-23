@@ -1,9 +1,10 @@
 from google.cloud import bigquery
 import logging
+import re
 from .db import DB
 from .util import with_cache_execute, DatabaseSchema
 from util.rate_limit import rate_limit, ResourceExhaustedError
-from typing import List, Optional, Tuple, Any
+from typing import List, Optional, Tuple, Any, Dict
 import json
 import sqlparse
 from google.cloud.bigquery import QueryJobConfig, ConnectionProperty
@@ -192,38 +193,64 @@ class BQDB(DB):
         except Exception as e:
             raise RuntimeError(f"Failed to drop tables in dataset {self.db_name}: {e}")
 
-    def is_json(self, value) -> bool:
-        try:
-            json.loads(value)
-        except (ValueError, TypeError, json.JSONDecodeError):
-            return False
-        return True
-
-    def is_float(self, value) -> bool:
+    def _is_float(self, value) -> bool:
         try:
             float(value)
         except ValueError:
             return False
         return True
 
-    def insert_data(self, data: dict[str, List[str]]):
+    def _get_column_name_to_type_mapping(self, sql_statements: List[str]) -> Dict[str, Dict[str, str]]:
+        schema_mapping = {}
+
+        for statement in sql_statements:
+            table_match = re.search(r'CREATE TABLE\s+`{{dataset}}\.(\w+)`', statement)
+            if not table_match:
+                continue
+            table_name = table_match.group(1)
+            column_section_match = re.search(r'\(\n(.*?)\n\)', statement, re.DOTALL)
+            if not column_section_match:
+                continue
+            columns_raw = column_section_match.group(1).split(",\n")
+            column_type_mapping = {}
+            for col in columns_raw:
+                if col.strip().startswith("PRIMARY KEY"):
+                    continue
+                col_parts = col.strip().split()
+                if len(col_parts) >= 2:
+                    column_name = col_parts[0]
+                    column_type = col_parts[1]
+                    column_type_mapping[column_name] = column_type
+
+            schema_mapping[table_name] = column_type_mapping
+
+        return schema_mapping
+
+    def insert_data(self, data: dict[str, List[str]], setup: List[str]):
         if not data:
             return
+        schema_mapping = self._get_column_name_to_type_mapping(setup)
         insertion_statements = []
+
         for table_name in data:
+            column_names = list(schema_mapping[table_name].keys())
             for row in data[table_name]:
                 formatted_values = []
-                for value in row:
-                    unquoted = value.strip("'")
-                    if value == "'1'":
-                        formatted_values.append("TRUE")
-                    elif value == "'0'":
-                        formatted_values.append("FALSE")
-                    elif self.is_float(value):
+
+                for index, value in enumerate(row):
+                    col_name = column_names[index]
+                    col_type = schema_mapping[table_name][col_name].upper()
+
+                    if col_type == 'BOOL':
+                        if value == "'1'":
+                            formatted_values.append("TRUE")
+                        elif value == "'0'":
+                            formatted_values.append("FALSE")
+                        else:
+                            formatted_values.append(f"{value}")
+                    elif self._is_float(value):
                         formatted_values.append(f"{value}")
-                    elif value in ('True', 'true', 'False', 'false'):
-                        formatted_values.append(f"{value}")
-                    elif self.is_json(unquoted):
+                    elif col_type == 'JSON':
                         formatted_values.append(f"PARSE_JSON({value})")
                     else:
                         formatted_values.append(f"{value.replace("''", "\\'")}")
