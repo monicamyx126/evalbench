@@ -78,7 +78,7 @@ def _prepare_db_queue_for_ddl(core_db: DB, db_name, db_config, setup_config, num
     tmp_dbs = core_db.create_tmp_databases(num_dbs)
     with ThreadPoolExecutor() as executor:
         create_ddl_tmp_db_p = partial(
-            _create_ddl_tmp_db, db_name=db_name, db_config=db_config, setup_config=setup_config
+            _create_ddl_tmp_db, db_config=db_config, setup_scripts=setup_scripts
         )
         results = executor.map(create_ddl_tmp_db_p, tmp_dbs)
         for tmp_db in results:
@@ -86,10 +86,7 @@ def _prepare_db_queue_for_ddl(core_db: DB, db_name, db_config, setup_config, num
     return db_queue
 
 
-def _create_ddl_tmp_db(tmp_db, db_name, db_config, setup_config):
-    setup_scripts, _ = _get_setup_values(
-        setup_config, db_name, db_config.get("db_type"), tmp_db
-    )
+def _create_ddl_tmp_db(tmp_db, db_config, setup_scripts):
     tmp_ddl_db_config = deepcopy(db_config)
     tmp_ddl_db_config["is_tmp_db"] = True
     tmp_db = get_database(tmp_ddl_db_config, tmp_db)
@@ -97,7 +94,7 @@ def _create_ddl_tmp_db(tmp_db, db_name, db_config, setup_config):
     return tmp_db
 
 
-def _get_setup_values(setup_config, db_name: str, db_type: str, tmp_db: Optional[str] = None):
+def _get_setup_values(setup_config, db_name: str, db_type: str):
     try:
         setup_scripts = load_setup_scripts(
             setup_config["setup_directory"] + "/" + db_name + "/" + db_type
