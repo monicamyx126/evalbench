@@ -56,7 +56,7 @@ class DB(ABC):
         self.drop_all_tables()
         self.batch_execute(pre_setup)
         self.batch_execute(setup)
-        self.insert_data(self.data)
+        self.insert_data(self.data, setup)
         self.batch_execute(post_setup)
         if setup_users:
             self.setup_tmp_users()
@@ -74,10 +74,10 @@ class DB(ABC):
             db_schema.tables.append(tmp_table)
         return self.generate_ddl(db_schema)
 
-    def create_tmp_databases(self, db_config, num_dbs: int) -> list[str]:
+    def create_tmp_databases(self, num_dbs: int) -> list[str]:
         tmp_dbs = []
         for _ in range(num_dbs):
-            base_db_name = db_config["database_name"]
+            base_db_name = self.db_name
             tmp_db_name = f"tmp_{base_db_name}_{generate_key()}"
             self.create_tmp_database(tmp_db_name)
             tmp_dbs.append(tmp_db_name)
@@ -186,7 +186,7 @@ class DB(ABC):
         raise NotImplementedError("Subclasses must implement this method")
 
     @abstractmethod
-    def insert_data(self, data: dict[str, List[str]]) -> None:
+    def insert_data(self, data: dict[str, List[str]], setup: Optional[List[str]] = None) -> None:
         """
         Inserts data into the database tables.
         * Raises RuntimeError if it cannot insert data.

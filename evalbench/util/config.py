@@ -43,11 +43,13 @@ def load_db_data_from_csvs(data_directory: str):
 
 def load_setup_scripts(setup_scripts_directory_path: str):
     pre_setup = _load_setup_sql(
-        os.path.join(setup_scripts_directory_path, "pre_setup.sql")
+        os.path.join(setup_scripts_directory_path, "pre_setup.sql"),
     )
-    setup = _load_setup_sql(os.path.join(setup_scripts_directory_path, "setup.sql"))
+    setup = _load_setup_sql(
+        os.path.join(setup_scripts_directory_path, "setup.sql"),
+    )
     post_setup = _load_setup_sql(
-        os.path.join(setup_scripts_directory_path, "post_setup.sql")
+        os.path.join(setup_scripts_directory_path, "post_setup.sql"),
     )
     return (pre_setup, setup, post_setup)
 

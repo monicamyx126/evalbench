@@ -207,7 +207,7 @@ class PGDB(DB):
         if error:
             raise RuntimeError(error)
 
-    def insert_data(self, data: dict[str, List[str]]):
+    def insert_data(self, data: dict[str, List[str]], setup: Optional[List[str]] = None):
         if not data:
             return
         insertion_statements = []

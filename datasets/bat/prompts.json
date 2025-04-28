@@ -1,1456 +1,1657 @@
 [
-  {
-    "id": 3,
-    "nl_prompt": "How many bloggers who have posted at least 1 blog in 2024 and have linked twitter account",
-    "query_type": "dql",
+    {
+      "id": 3,
+      "nl_prompt": "How many bloggers who have posted at least 1 blog in 2024 and have linked twitter account",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= DATE('2024-01-01') AND p.created_at <= DATE('2024-12-31') AND u.social_media_links ->> 'twitter' IS NOT NULL;"
+        ],
+        "mysql": [
+          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= DATE('2024-01-01') AND p.created_at <= DATE_ADD(DATE('2024-01-01'), INTERVAL 1 YEAR) AND JSON_EXTRACT(u.social_media_links, '$.twitter') IS NOT NULL;"
+        ],
+        "sqlserver": [
+          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= CAST('2024-01-01' AS DATE) AND p.created_at <= CAST('2024-12-31' AS DATE) AND JSON_VALUE(u.social_media_links, '$.twitter') IS NOT NULL;"
+        ],
+        "sqlite": [
+          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at BETWEEN DATE('2024-01-01') AND DATE('2024-12-31') AND json_extract(u.social_media_links, '$.twitter') IS NOT NULL;"
+        ],
+        "bigquery": [
+          "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM {{dataset}}.tbl_users u INNER JOIN {{dataset}}.tbl_posts p ON u.user_id = p.user_id WHERE p.created_at BETWEEN DATE('2024-01-01') AND DATE('2024-12-31') AND JSON_EXTRACT_SCALAR(u.social_media_links, '$.twitter') IS NOT NULL;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: moderate",
+        "SELECT",
+        "JOIN",
+        "JSON",
+        "JSON_EXTRACT",
+        "datalinking"
+      ],
+      "other": {
+        "Comment": "LGTM",
+        "nl_prompt_base": "How many bloggers who have posted at least 1 blog in 2024 and have linked twitter account",
+        "nl_prompt_extra_context": "",
+        "public": true
+      }
+    },
+    {
+      "id": 5,
+      "nl_prompt": "What is the number of comments per post for each user? -- Use user_id to identify users and post_id to identify posts.",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT u.user_id, p.post_id, COUNT(c.comment_id) comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+        ],
+        "mysql": [
+          "SELECT u.user_id, p.post_id, COUNT(c.comment_id) comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+        ],
+        "sqlserver": [
+          "SELECT u.user_id, p.post_id, COUNT(c.comment_id) AS comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+        ],
+        "sqlite": [
+          "SELECT u.user_id, p.post_id, COUNT(c.comment_id) AS comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+        ],
+        "bigquery": [
+          "SELECT u.user_id, p.post_id, COUNT(c.comment_id) AS comment_count FROM `{{dataset}}.tbl_users` AS u INNER JOIN `{{dataset}}.tbl_posts` AS p ON u.user_id = p.user_id LEFT JOIN `{{dataset}}.tbl_comments` AS c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: simple",
+        "SELECT",
+        "JOIN",
+        "AGGREGATE",
+        "CASE",
+        "LEFT_JOIN",
+        "IS_NULL"
+      ],
+      "other": {
+        "Comment": "LGTM",
+        "nl_prompt_base": "What is the number of comments per post for each user?",
+        "nl_prompt_extra_context": "Use user_id to identify users and post_id to identify posts.",
+        "public": true
+      }
+    },
+    {
+      "id": 9,
+      "nl_prompt": "Can you find all the users who have not made any posts?",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+        ],
+        "mysql": [
+          "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+        ],
+        "sqlserver": [
+          "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+        ],
+        "sqlite": [
+          "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+        ],
+        "bigquery": [
+          "SELECT u.user_id FROM `{{dataset}}.tbl_users` AS u LEFT JOIN `{{dataset}}.tbl_posts` AS p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: simple",
+        "SELECT",
+        "LEFT_JOIN"
+      ],
+      "other": {
+        "Comment": "LGTM",
+        "nl_prompt_base": "Can you find all the users who have not made any posts?",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
+    },
+    {
+      "id": 13,
+      "nl_prompt": "Retrieve the top 5 posts based on the number of likes, among users who created the post's category. -- Include the post id and the count of number of likes",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT p.post_id, p.likes_count as total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
+        ],
+        "mysql": [
+          "SELECT p.post_id, p.likes_count as total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
+        ],
+        "sqlserver": [
+          "SELECT TOP 5 p.post_id, p.likes_count AS total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC;"
+        ],
+        "sqlite": [
+          "SELECT p.post_id, p.likes_count AS total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
+        ],
+        "bigquery": [
+          "SELECT p.post_id, p.likes_count AS total_likes FROM `{{dataset}}.tbl_posts` AS p INNER JOIN `{{dataset}}.tbl_categories` AS c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: simple",
+        "SELECT",
+        "JOIN"
+      ],
+      "other": {
+        "Comment": "LGTM.",
+        "nl_prompt_base": "Retrieve the top 5 posts based on the number of likes, among users who created the post's category.",
+        "nl_prompt_extra_context": "Include the post id and the count of number of likes",
+        "public": true
+      }
+    },
+    {
+      "id": 16,
+      "nl_prompt": "How many followers does each user have?",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
+        ],
+        "mysql": [
+          "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
+        ],
+        "sqlserver": [
+          "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
+        ],
+        "sqlite": [
+          "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
+        ],
+        "bigquery": [
+          "SELECT u.user_id, COUNT(f.follower_id) AS follower_count FROM `{{dataset}}.tbl_users` AS u LEFT JOIN `{{dataset}}.tbl_followers` AS f ON u.user_id = f.following_id GROUP BY u.user_id;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: simple",
+        "SELECT",
+        "JOIN",
+        "AGGREGATE",
+        "LEFT_JOIN"
+      ],
+      "other": {
+        "Comment": "LGTM",
+        "nl_prompt_base": "How many followers does each user have?",
+        "nl_prompt_extra_context": "Include user id to identify users",
+        "public": true
+      }
+    },
+    {
+      "id": 18,
+      "nl_prompt": "What posts have been reported and are pending review? What is the reason for the review? -- Identify posts by including post_id",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
+        ],
+        "mysql": [
+          "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
+        ],
+        "sqlserver": [
+          "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = 0;"
+        ],
+        "sqlite": [
+          "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = 0;"
+        ],
+        "bigquery": [
+          "SELECT p.post_id, r.report_reason FROM `{{dataset}}.tbl_posts` p INNER JOIN `{{dataset}}.tbl_reports` r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: simple",
+        "SELECT",
+        "JOIN"
+      ],
+      "other": {
+        "Comment": "LGTM. 'Pending review' is unspecified, but is_resolved=FALSE is a reasonable interpretation.",
+        "nl_prompt_base": "What posts have been reported and are pending review? What is the reason for the review?",
+        "nl_prompt_extra_context": "Identify posts by including post_id",
+        "public": true
+      }
+    },
+    {
+      "id": 19,
+      "nl_prompt": "What is the most common reason for reporting a post, and what is the average time to resolve the report in minutes?",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
+        ],
+        "mysql": [
+          "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(TIMESTAMPDIFF(SECOND, report_timestamp, resolution_timestamp) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
+        ],
+        "sqlserver": [
+          "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(DATEDIFF(MINUTE, report_timestamp, resolution_timestamp)) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time FROM rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
+        ],
+        "sqlite": [
+          "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG((julianday(resolution_timestamp) - julianday(report_timestamp)) * 1440) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time FROM rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
+        ],
+        "bigquery": [
+          "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(TIMESTAMP_DIFF(resolution_timestamp, report_timestamp, MINUTE)) AS avg_resolution_time FROM `{{dataset}}.tbl_reports` GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time FROM rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: moderate",
+        "SELECT",
+        "AGGREGATE",
+        "DATE",
+        "time"
+      ],
+      "other": {
+        "Comment": "LGTM",
+        "nl_prompt_base": "What is the most common reason for reporting a post, and what is the average time to resolve the report in minutes?",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
+    },
+    {
+      "id": 23,
+      "nl_prompt": "What is the average number of posts per day and per category? -- Include the category name",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT TO_CHAR(p.created_at, 'YYYY-MM-DD') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT DATE_TRUNC('day', created_at) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
+        ],
+        "mysql": [
+          "SELECT DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY created_at, c.name ORDER BY created_at, name ASC;"
+        ],
+        "sqlserver": [
+          "SELECT FORMAT(p.created_at, 'yyyy-MM-dd') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT CAST(created_at AS DATE) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY CAST(created_at AS DATE), category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
+        ],
+        "sqlite": [
+          "SELECT strftime('%Y-%m-%d', p.created_at) AS created_at, c.name, AVG(post_count) AS average_posts FROM (SELECT DATE(created_at) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
+        ],
+        "bigquery": [
+          "SELECT FORMAT_TIMESTAMP('%F', p.created_at) AS created_at, c.name, AVG(post_count) AS average_posts FROM (SELECT DATE_TRUNC(created_at, DAY) AS created_at, category_id, COUNT(post_id) AS post_count FROM `{{dataset}}.tbl_posts` GROUP BY created_at, category_id) p INNER JOIN `{{dataset}}.tbl_categories` c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: challenging",
+        "SELECT",
+        "AGGREGATE",
+        "JOIN",
+        "DATE",
+        "time"
+      ],
+      "other": {
+        "Comment": "LGTM. Ordering is not well defined but seems reasonable to expect ordering by date.",
+        "nl_prompt_base": "What is the average number of posts per day and per category?",
+        "nl_prompt_extra_context": "Include the category name",
+        "public": true
+      }
+    },
+    {
+      "id": 99,
+      "nl_prompt": "How many succesfull login activities have been performed? -- Include the total, number of successes and the percentage",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
+        ],
+        "mysql": [
+          "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
+        ],
+        "sqlserver": [
+          "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) * 100.0 / NULLIF(COUNT(CASE WHEN activity_type = 'login' THEN 1 END), 0)) AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
+        ],
+        "sqlite": [
+          "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) * 100.0 / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
+        ],
+        "bigquery": [
+          "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM `{{dataset}}.tbl_user_activity` WHERE activity_type = 'login';"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: moderate",
+        "SELECT",
+        "AGGREGATE",
+        "CONDITIONS",
+        "datalinking"
+      ],
+      "other": {
+        "Comment": "LGTM. Data needs more examples to test -- there are no unsucceful logins",
+        "nl_prompt_base": "How many succesfull login activities have been performed?",
+        "nl_prompt_extra_context": "Include the total, number of successes and the percentage",
+        "public": true
+      }
+    },
+    {
+      "id": 100,
+      "nl_prompt": "Identify which is the most active hour of the day across all users",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
+        ],
+        "mysql": [
+          "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC"
+        ],
+        "sqlserver": [
+          "SELECT TOP 1 DATEPART(HOUR, activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY DATEPART(HOUR, activity_timestamp) ORDER BY activity_count DESC;"
+        ],
+        "sqlite": [
+          "SELECT strftime('%H', activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
+        ],
+        "bigquery": [
+          "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM `{{dataset}}.tbl_user_activity` GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: moderate",
+        "SELECT",
+        "EXTRACT",
+        "AGGREGATE",
+        "SORT",
+        "LIMIT",
+        "HOUR",
+        "time"
+      ],
+      "other": {
+        "comment": "LGTM",
+        "nl_prompt_base": "Identify which is the most active hour of the day across all users",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
+    },
+    {
+      "id": 133,
+      "nl_prompt": "Identify the attachments that are tagged as 'database' and have read-only access",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT * FROM tbl_attachments WHERE tags_file @> '[\"database\"]' AND (access_permissions ->> 'read_only')::boolean;"
+        ],
+        "mysql": [
+          "SELECT a.* FROM tbl_attachments a WHERE JSON_CONTAINS(a.tags_file, '\"database\"') AND JSON_UNQUOTE(JSON_EXTRACT(a.access_permissions, '$.read_only')) = 'true';"
+        ],
+        "sqlserver": [
+          "SELECT * FROM tbl_attachments WHERE JSON_VALUE(tags_file, '$[0]') = 'database' AND CAST(JSON_VALUE(access_permissions, '$.read_only') AS bit) = 1;"
+        ],
+        "sqlite": [
+          "SELECT * FROM tbl_attachments WHERE json_extract(tags_file, '$[0]') = 'database' AND json_extract(access_permissions, '$.read_only') = true;"
+        ],
+        "bigquery": [
+          "SELECT * FROM `{{dataset}}.tbl_attachments` WHERE 'database' IN UNNEST(JSON_VALUE_ARRAY(tags_file)) AND CAST(JSON_VALUE(access_permissions, '$.read_only') AS BOOL);"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: Moderate",
+        "SELECT",
+        "JSON",
+        "JOIN",
+        "datalinking"
+      ],
+      "other": {
+        "comment": "LGTM",
+        "nl_prompt_base": "Identify the attachments that are tagged as 'database' and have read-only access",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
+    },
+    {
+      "id": 156,
+      "nl_prompt": "List the latest uploaded media file for each user -- include user_id, user name and media url",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+        ],
+        "mysql": [
+          "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+        ],
+        "sqlserver": [
+          "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+        ],
+        "sqlite": [
+          "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN (SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
+        ],
+        "bigquery": [
+          "SELECT m1.uploader_id, u.username, m1.url FROM `{{dataset}}.tbl_media` m1 INNER JOIN (SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM `{{dataset}}.tbl_media` GROUP BY uploader_id) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN `{{dataset}}.tbl_users` u ON m1.uploader_id = u.user_id;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "SELECT",
+        "AGGREGATE",
+        "JOIN",
+        "difficulty: moderate"
+      ],
+      "other": {
+        "comment": "LGTM",
+        "nl_prompt_base": "List the latest uploaded media file for each user",
+        "nl_prompt_extra_context": "include user_id, user name and media url",
+        "public": true
+      }
+    },
+    {
+      "id": 180,
+      "nl_prompt": "Which posts have tags related to both 'programming' and 'database' ?",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT * FROM tbl_posts WHERE tags::jsonb @> '[ \"programming\", \"database\" ]'::jsonb;"
+        ],
+        "mysql": [
+          "SELECT * FROM tbl_posts WHERE JSON_CONTAINS(tags, '\"programming\"') AND JSON_CONTAINS(tags, '\"database\"');"
+        ],
+        "sqlserver": [
+          "SELECT * FROM tbl_posts WHERE EXISTS (SELECT 1 FROM OPENJSON(tags) WHERE value = 'programming') AND EXISTS (SELECT 1 FROM OPENJSON(tags) WHERE value = 'database');"
+        ],
+        "sqlite": [
+          "SELECT * FROM tbl_posts WHERE EXISTS (SELECT 1 FROM json_each(tags) WHERE value IN ('programming', 'database'));"
+        ],
+        "bigquery": [
+          "SELECT * FROM `{{dataset}}.tbl_posts` WHERE EXISTS (SELECT tag FROM UNNEST(JSON_VALUE_ARRAY(tags)) AS tag WHERE tag IN ('programming', 'database'));"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: simple",
+        "SELECT",
+        "JSON",
+        "difficulty: moderate",
+        "JSON_CONTAINS"
+      ],
+      "other": {
+        "nl_prompt_base": "Which posts have tags related to both 'programming' and 'database' ?",
+        "nl_prompt_extra_context": "",
+        "public": true
+      }
+    },
+    {
+      "id": 299,
+      "nl_prompt": "Total number of likes on comments reported by popular users on programming posts where the report is not resolved yet -- Popular users have more than 4 unique followers.",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE NOT is_resolved AND user_id IN (SELECT following_id user_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
+        ],
+        "mysql": [
+          "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE NOT is_resolved AND user_id IN (SELECT following_id user_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
+        ],
+        "sqlserver": [
+          "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE is_resolved = 0 AND user_id IN (SELECT following_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
+        ],
+        "sqlite": [
+          "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE is_resolved = 0 AND user_id IN (SELECT following_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'));"
+        ],
+        "bigquery": [
+          "SELECT SUM(likes_count) AS total_likes FROM `{{dataset}}.tbl_comments` WHERE comment_id IN (SELECT reported_comment_id FROM `{{dataset}}.tbl_reports` WHERE is_resolved = FALSE AND user_id IN (SELECT following_id FROM `{{dataset}}.tbl_followers` GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT pt.post_id FROM `{{dataset}}.tbl_posts_tags` AS pt INNER JOIN `{{dataset}}.tbl_tags` AS t ON pt.tag_id = t.tag_id WHERE t.name = 'Programming'))"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: challenging",
+        "SELECT",
+        "AGGREGATE",
+        "JOIN",
+        "HAVING",
+        "COUNT",
+        "datalinking"
+      ],
+      "other": {
+        "public": true,
+        "Comment": "LGTM",
+        "nl_prompt_base": "Total number of likes on comments reported by popular users on programming posts where the report is not resolved yet.",
+        "nl_prompt_extra_context": "Popular users have more than 4 unique followers."
+      }
+    },
+    {
+      "id": 300,
+      "nl_prompt": "Number of messages per day for conversations that span multiple days and have no read messages.",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "WITH conversations AS (SELECT conversation_id, MAX(sending_time) - MIN(sending_time) conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, DATE(sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > INTERVAL '1 day' GROUP BY pm.conversation_id, DATE(sending_time)"
+        ],
+        "mysql": [
+          "SELECT pm.conversation_id, DATE(pm.sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN (SELECT conversation_id, TIMESTAMPDIFF(SECOND, MIN(sending_time), MAX(sending_time)) AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) AS conversations ON pm.conversation_id = conversations.conversation_id WHERE conversations.conv_length > 86400 GROUP BY pm.conversation_id, DATE(pm.sending_time);"
+        ],
+        "sqlserver": [
+          "WITH conversations AS (SELECT conversation_id, DATEDIFF(SECOND, MIN(sending_time), MAX(sending_time)) AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read = 1 THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, CAST(sending_time AS DATE) AS sending_date, COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > 86400 GROUP BY pm.conversation_id, CAST(sending_time AS DATE);"
+        ],
+        "sqlite": [
+          "WITH conversations AS (SELECT conversation_id, (julianday(MAX(sending_time)) - julianday(MIN(sending_time))) * 86400 AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, DATE(pm.sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > 86400 GROUP BY pm.conversation_id, DATE(pm.sending_time);"
+        ],
+        "bigquery": [
+          "WITH conversations AS (SELECT conversation_id, TIMESTAMP_DIFF(MAX(sending_time), MIN(sending_time), SECOND) AS conv_length FROM `{{dataset}}.tbl_private_messages` WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, DATE(pm.sending_time), COUNT(*) FROM `{{dataset}}.tbl_private_messages` pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > 86400 GROUP BY pm.conversation_id, DATE(pm.sending_time);"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: challenging",
+        "SELECT",
+        "AGGREGATE",
+        "JOIN",
+        "HAVING",
+        "COUNT",
+        "DATE",
+        "time"
+      ],
+      "other": {
+        "public": true,
+        "Comment": "LGTM",
+        "nl_prompt_base": "Number of messages per day for conversations that span multiple days and have no read messages.",
+        "nl_prompt_extra_context": ""
+      }
+    },
+    {
+      "id": 301,
+      "nl_prompt": "Show average comment length by browser for users who exclusively use a specific browser",
+      "query_type": "dql",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser"
+        ],
+        "mysql": [
+          "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser"
+        ],
+        "sqlserver": [
+          "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LEN(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser;"
+        ],
+        "sqlite": [
+          "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser;"
+        ],
+        "bigquery": [
+          "WITH users_exclusive AS (SELECT user_id FROM `{{dataset}}.tbl_user_activity` GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM `{{dataset}}.tbl_user_activity` WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM `{{dataset}}.tbl_comments` c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          null
+        ],
+        "mysql": [
+          null
+        ],
+        "sqlserver": [
+          null
+        ],
+        "sqlite": [
+          null
+        ],
+        "bigquery": [
+          null
+        ]
+      },
+      "setup_sql": {},
+      "cleanup_sql": {},
+      "tags": [
+        "DQL",
+        "difficulty: challenging",
+        "SELECT",
+        "AGGREGATE",
+        "JOIN",
+        "HAVING"
+      ],
+      "other": {
+        "public": true,
+        "Comment": "LGTM",
+        "nl_prompt_base": "Show average comment length by browser for users who exclusively use a specific browser",
+        "nl_prompt_extra_context": ""
+      }
+    },
+    {
+      "id": 42,
+      "nl_prompt": "Can you update my username to 'magic_one' -- user_id = 9;",
+      "query_type": "dml",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
+        ],
+        "mysql": [
+          "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
+        ],
+        "sqlserver": [
+          "UPDATE tbl_users SET username = 'magic_one', updated_at = GETDATE() WHERE user_id = 9;"
+        ],
+        "sqlite": [
+          "UPDATE tbl_users SET username = 'magic_one', updated_at = CURRENT_TIMESTAMP WHERE user_id = 9;"
+        ],
+        "bigquery": [
+          "UPDATE `{{dataset}}.tbl_users` SET username = 'magic_one', updated_at = CURRENT_TIMESTAMP() WHERE user_id = 9;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
+        ],
+        "mysql": [
+          "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
+        ],
+        "sqlserver": [
+          "SELECT username, updated_at, CASE WHEN updated_at > '2024-02-27 07:27:14' THEN 1 ELSE 0 END AS is_updated FROM tbl_users WHERE user_id = 9;"
+        ],
+        "sqlite": [
+          "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' AS is_updated FROM tbl_users WHERE user_id = 9;"
+        ],
+        "bigquery": [
+          "SELECT username, updated_at, updated_at > TIMESTAMP '2024-02-27 07:27:14' FROM `{{dataset}}.tbl_users` WHERE user_id = 9;"
+        ]
+      },
+      "setup_sql": {
+        "postgres": [],
+        "mysql": [],
+        "sqlserver": [],
+        "sqlite": [],
+        "bigquery": []
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+        ],
+        "mysql": [
+          "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+        ],
+        "sqlserver": [
+          "UPDATE tbl_users SET username = 'sophia.anderson', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+        ],
+        "sqlite": [
+          "UPDATE tbl_users SET username = 'sophia.anderson', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
+        ],
+        "bigquery": [
+          "UPDATE `{{dataset}}.tbl_users` SET username = 'sophia.anderson', updated_at = TIMESTAMP '2024-02-27 07:26:14' WHERE user_id = 9;"
+        ]
+      },
+      "tags": [
+        "DML",
+        "difficulty: moderate",
+        "UPDATE"
+      ],
+      "other": {
+        "Comment": "LGTM. Instructions do not include updated_at, but that is implied.",
+        "nl_prompt_base": "Can you update my username to 'magic_one'",
+        "nl_prompt_extra_context": "user_id = 9;",
+        "public": true
+      }
+    },
+    {
+      "id": 184,
+      "nl_prompt": "Update the post content in tbl_posts -- post_id = 3, new content should be 'Updated content'",
+      "query_type": "dml",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+        ],
+        "mysql": [
+          "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+        ],
+        "sqlserver": [
+          "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+        ],
+        "sqlite": [
+          "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
+        ],
+        "bigquery": [
+          "UPDATE `{{dataset}}.tbl_posts` SET content = 'Updated content' WHERE post_id = 3;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT content FROM tbl_posts WHERE post_id = 3;"
+        ],
+        "mysql": [
+          "Select COUNT(1) = 1 from tbl_posts where post_id = 3 and content = 'Updated Content';"
+        ],
+        "sqlserver": [
+          "SELECT content FROM tbl_posts WHERE post_id = 3;"
+        ],
+        "sqlite": [
+          "SELECT content FROM tbl_posts WHERE post_id = 3;"
+        ],
+        "bigquery": [
+          "SELECT content FROM `{{dataset}}.tbl_posts` WHERE post_id = 3;"
+        ]
+      },
+      "setup_sql": {
+        "postgres": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "mysql": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "sqlserver": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "sqlite": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "bigquery": [
+          "UPDATE `{{dataset}}.tbl_posts` SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ]
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "mysql": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "sqlserver": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "sqlite": [
+          "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ],
+        "bigquery": [
+          "UPDATE `{{dataset}}.tbl_posts` SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
+        ]
+      },
+      "tags": [
+        "DML",
+        "difficulty: simple",
+        "UPDATE"
+      ],
+      "other": {
+        "nl_prompt_base": "Update the post content in tbl_posts",
+        "nl_prompt_extra_context": "post_id = 3, new content should be 'Updated content'",
+        "public": true
+      }
+    },
+    {
+      "id": 200,
+      "nl_prompt": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata -- attachment_id =1,2",
+      "query_type": "dml",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"compliance\", \"data_governance\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"regulatory\", \"policy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains compliance-related content focused on data governance and regulatory standards.\"') WHERE attachment_id = 2;"
+        ],
+        "mysql": [
+          "UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_security'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_privacy'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'security'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'privacy'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1; UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'user_data'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'customer_information'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'personal_data'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'client_data'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains user data and customer information for analysis purposes.') WHERE attachment_id = 2;"
+        ],
+        "sqlserver": [
+          "UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'data_security'), 'append $', 'data_privacy'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'security'), 'append $', 'privacy'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'compliance_tracking'), 'append $', 'policy_management'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'regulation'), 'append $', 'audit'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment includes policy management and compliance tracking information.') WHERE attachment_id = 2;"
+        ],
+        "sqlite": [
+          "UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"data_security\"', '$[#]', '\"data_privacy\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"security\"', '$[#]', '\"privacy\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"compliance\"', '$[#]', '\"user_protection\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"governance\"', '$[#]', '\"confidentiality\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment focuses on user protection, compliance, and governance standards.\"') WHERE attachment_id = 2;"
+        ],
+        "bigquery": [
+          "UPDATE {{dataset}}.tbl_attachments SET tags_file = JSON_ARRAY_INSERT(COALESCE(tags_file, JSON '[]'), '$', JSON '\"data_security\"', '$', JSON '\"data_privacy\"'), category_file = JSON_ARRAY_INSERT(COALESCE(category_file, JSON '[]'), '$', JSON '\"security\"', '$', JSON '\"privacy\"'), access_permissions = JSON_SET(JSON_SET(COALESCE(access_permissions, JSON '{}'), '$.read_write', TRUE), '$.read_only', FALSE), metadata = JSON_SET(COALESCE(metadata, JSON '{}'), '$.additional_info', 'This attachment contains sensitive data...') WHERE attachment_id = 1;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
+        ],
+        "mysql": [
+          "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
+        ],
+        "sqlserver": [
+          "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
+        ],
+        "sqlite": [
+          "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
+        ],
+        "bigquery": [
+          "SELECT attachment_id, tags_file, category_file, metadata FROM `{{dataset}}.tbl_attachments` WHERE attachment_id IN (1, 2);" 
+        ]
+      },
+      "setup_sql": {
+        "postgres": [
+          "INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+        ],
+        "mysql": [
+          "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"\"database\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"programming\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"\"marketing\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"digital\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
+        ],
+        "sqlserver": [
+          "DELETE FROM tbl_attachments WHERE attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', N'[\"database\", \"attachment\"]', N'[\"programming\"]', N'{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+        ],
+        "sqlite": [
+          "INSERT INTO tbl_attachments (attachment_id, post_id, user_id, file_name, file_path, file_size, file_type, upload_date, description, is_active, visibility_status, download_count, file_extension, uploaded_by_ip, last_modified, expiration_date, tags_file, category_file, access_permissions, storage_location, metadata, is_featured, parent_attachment_id) VALUES (1, 1, 1, 'attachment1.pdf', '/attachments/attachment1.pdf', 1024, 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', 1, 'public', 50, 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, 0, NULL);"
+        ],
+        "bigquery": [
+          "INSERT INTO `{{dataset}}.tbl_attachments` VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
+        ]
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "delete from tbl_attachments where attachment_id = 1;"
+        ],
+        "mysql": [
+          "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"database\\\", \\\"attachment\\\"]', '[\\\"programming\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"marketing\\\", \\\"attachment\\\"]', '[\\\"digital\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
+        ],
+        "sqlserver": [
+          "DELETE FROM tbl_attachments WHERE attachment_id = 1;"
+        ],
+        "sqlite": [
+          "DELETE FROM tbl_attachments WHERE attachment_id = 1;"
+        ],
+        "bigquery": [
+         "DELETE FROM `{{dataset}}.tbl_attachments` WHERE attachment_id = 1;" 
+        ]
+      },
+      "tags": [
+        "DML",
+        "difficulty: challenging",
+        "UPDATE",
+        "COALESCE",
+        "JSON_SET",
+        "JSON",
+        "JSON_ARRAY"
+      ],
+      "other": {
+        "nl_prompt_base": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata",
+        "nl_prompt_extra_context": "attachment_id =1,2",
+        "public": true
+      }
+    },
+    {
+      "id": 43,
+      "nl_prompt": "Update the labels table to include a json field called comments_description.",
+      "query_type": "ddl",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_labels ADD comments_description NVARCHAR(MAX) CONSTRAINT chk_comments_description_json CHECK (ISJSON(comments_description) = 1);"
+        ],
+        "sqlite": [
+          "ALTER TABLE tbl_labels ADD COLUMN comments_description TEXT CHECK (json_valid(comments_description));"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_labels` ADD COLUMN comments_description JSON;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+        ],
+        "mysql": [
+          "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
+        ],
+        "sqlserver": [
+          "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_labels' AND COLUMN_NAME = 'comments_description' AND DATA_TYPE = 'nvarchar';"
+        ],
+        "sqlite": [
+          "SELECT COUNT(*) FROM tbl_labels WHERE json_valid(comments_description);"
+        ],
+        "bigquery": [
+          "SELECT COUNT(*) FROM `cloud-db-nl2sql.tmp_db_blog_d_9t7prf11a6.INFORMATION_SCHEMA.COLUMNS` WHERE table_name = 'tbl_labels' AND column_name = 'comments_description' AND data_type = 'JSON';"
+        ]
+      },
+      "setup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_labels DROP CONSTRAINT chk_comments_description_json; ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        ],
+        "sqlite": [
+          "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `cloud-db-nl2sql.tmp_db_blog_d_9t7prf11a6.tbl_labels` DROP COLUMN comments_description;"
+        ]
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_labels DROP CONSTRAINT chk_comments_description_json; ALTER TABLE tbl_labels DROP COLUMN comments_description;"
+        ],
+        "sqlite": [
+          "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `cloud-db-nl2sql.tmp_db_blog_d_9t7prf11a6s.tbl_labels` DROP COLUMN comments_description;"
+        ]
+      },
+      "tags": [
+        "DDL",
+        "difficulty: simple",
+        "ALTER",
+        "ADD_COLUMN",
+        "JSON"
+      ],
+      "other": {
+        "Comment": "LGTM",
+        "nl_prompt_base": "Update the labels table to include a json type field called comments_description.",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
+    },
+    {
+      "id": 185,
+      "nl_prompt": "Rename the content column in the tbl_posts table to post_content",
+      "query_type": "ddl",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
+      ],
+      "golden_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+        ],
+        "sqlserver": [
+          "EXEC sp_rename 'tbl_posts.content', 'post_content', 'COLUMN';"
+        ],
+        "sqlite": [
+          "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_posts` RENAME COLUMN content TO post_content;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT post_content FROM tbl_posts;"
+        ],
+        "mysql": [
+          "SELECT post_content FROM tbl_posts;"
+        ],
+        "sqlserver": [
+          "SELECT post_content FROM tbl_posts;"
+        ],
+        "sqlite": [
+          "SELECT post_content FROM tbl_posts;"
+        ],
+        "bigquery": [
+          "SELECT post_content FROM `{{dataset}}.tbl_posts`;"
+        ]
+      },
+      "setup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+        ],
+        "sqlserver": [
+          "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
+        ],
+        "sqlite": [
+          "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_posts` RENAME COLUMN post_content TO content;"
+        ]
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+        ],
+        "sqlserver": [
+          "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
+        ],
+        "sqlite": [
+          "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_posts` RENAME COLUMN post_content TO content;"
+        ]
+      },
+      "tags": [
+        "DDL",
+        "difficulty: simple",
+        "ALTER",
+        "RENAME"
+      ],
+      "other": {
+        "comment": "LGTM",
+        "nl_prompt_base": "Rename the content column in the tbl_posts table to post_content",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
+    },
+    {
+      "id": 255,
+      "nl_prompt": "Create an Enumerated Type for Access Levels",
+      "query_type": "ddl",
     "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= DATE('2024-01-01') AND p.created_at <= DATE('2024-12-31') AND u.social_media_links ->> 'twitter' IS NOT NULL;"
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
       ],
-      "mysql": [
-        "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= DATE('2024-01-01') AND p.created_at <= DATE_ADD(DATE('2024-01-01'), INTERVAL 1 YEAR) AND JSON_EXTRACT(u.social_media_links, '$.twitter') IS NOT NULL;"
+      "golden_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_tags ADD COLUMN access_level_enum VARCHAR(10) CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_tags ADD COLUMN access_level_enum ENUM('Public', 'Private', 'Restricted');"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_tags ADD access_level_enum VARCHAR(10) CONSTRAINT chk_access_level CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+        ],
+        "sqlite": [
+          "ALTER TABLE tbl_tags ADD COLUMN access_level_enum TEXT CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_tags` ADD COLUMN access_level_enum STRING;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+        ],
+        "mysql": [
+          "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
+        ],
+        "sqlserver": [
+          "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_tags' AND COLUMN_NAME = 'access_level_enum';"
+        ],
+        "sqlite": [
+          "SELECT COUNT(*) FROM PRAGMA_TABLE_INFO('tbl_tags') WHERE name = 'access_level_enum';"
+        ],
+        "bigquery": [
+          "SELECT COUNT(*) FROM `{{dataset}}.INFORMATION_SCHEMA.COLUMNS` WHERE TABLE_NAME = 'tbl_tags1' AND column_name = 'access_level_enum';"
+        ]
+      },
+      "setup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
+        ],
+        "sqlite": [
+          "BEGIN TRANSACTION; CREATE TABLE tbl_tags_new (tag_id INTEGER NOT NULL PRIMARY KEY, creator_id INTEGER DEFAULT NULL, category_id INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT NULL, updated_at TIMESTAMP DEFAULT NULL, slug TEXT DEFAULT NULL, count INTEGER DEFAULT NULL, visibility BOOLEAN DEFAULT NULL, active BOOLEAN DEFAULT NULL, parent_tag INTEGER DEFAULT NULL, status_id INTEGER DEFAULT NULL, access_level INTEGER DEFAULT NULL, is_approved BOOLEAN DEFAULT NULL, metadata JSON DEFAULT NULL, is_edited BOOLEAN DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (category_id) REFERENCES tbl_categories(category_id)); INSERT INTO tbl_tags_new (tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited) SELECT tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited FROM tbl_tags; DROP TABLE tbl_tags; ALTER TABLE tbl_tags_new RENAME TO tbl_tags; COMMIT;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_tags1` DROP COLUMN IF EXISTS access_level_enum;"
+        ]
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
+        ],
+        "sqlite": [
+          "BEGIN TRANSACTION; CREATE TABLE tbl_tags_new (tag_id INTEGER NOT NULL PRIMARY KEY, creator_id INTEGER DEFAULT NULL, category_id INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT NULL, updated_at TIMESTAMP DEFAULT NULL, slug TEXT DEFAULT NULL, count INTEGER DEFAULT NULL, visibility BOOLEAN DEFAULT NULL, active BOOLEAN DEFAULT NULL, parent_tag INTEGER DEFAULT NULL, status_id INTEGER DEFAULT NULL, access_level INTEGER DEFAULT NULL, is_approved BOOLEAN DEFAULT NULL, metadata JSON DEFAULT NULL, is_edited BOOLEAN DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (category_id) REFERENCES tbl_categories(category_id)); INSERT INTO tbl_tags_new (tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited) SELECT tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited FROM tbl_tags; DROP TABLE tbl_tags; ALTER TABLE tbl_tags_new RENAME TO tbl_tags; COMMIT;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_tags1` DROP COLUMN IF EXISTS access_level_enum;"
+        ]
+      },
+      "tags": [
+        "DDL",
+        "difficulty: simple",
+        "CREATE",
+        "ENUM",
+        "ALTER",
+        "ADD_COLUMN"
       ],
-      "sqlserver": [
-        "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at >= CAST('2024-01-01' AS DATE) AND p.created_at <= CAST('2024-12-31' AS DATE) AND JSON_VALUE(u.social_media_links, '$.twitter') IS NOT NULL;"
-      ],
-      "sqlite": [
-        "SELECT COUNT(DISTINCT u.user_id) AS num_bloggers FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.created_at BETWEEN DATE('2024-01-01') AND DATE('2024-12-31') AND json_extract(u.social_media_links, '$.twitter') IS NOT NULL;"
-      ]
+      "other": {
+        "nl_prompt_base": "Create an Enumerated Type for Access Levels",
+        "nl_prompt_extra_context": null,
+        "public": true
+      }
     },
-    "eval_query": {
-      "postgres": [
-        null
+    {
+      "id": 256,
+      "nl_prompt": "Add a Generated Column full_name to tbl_users. -- Store first name and last name concatenated",
+      "query_type": "ddl",
+      "database": "db_blog",
+      "dialects": [
+        "postgres",
+        "mysql",
+        "sqlserver",
+        "sqlite",
+        "bigquery"
       ],
-      "mysql": [
-        null
+      "golden_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (CONCAT(first_name, ' ', last_name)) STORED;"
+        ],
+        "sqlserver": [
+          "ALTER TABLE tbl_users ADD full_name AS CONCAT(first_name, ' ', last_name) PERSISTED;"
+        ],
+        "sqlite": [
+          "ALTER TABLE tbl_users ADD COLUMN full_name TEXT GENERATED ALWAYS AS (first_name || ' ' || last_name) VIRTUAL;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_users` ADD COLUMN full_name STRING; UPDATE `{{dataset}}.tbl_users` SET full_name = CONCAT(first_name, ' ', last_name) WHERE TRUE;"
+        ]
+      },
+      "eval_query": {
+        "postgres": [
+          "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+        ],
+        "mysql": [
+          "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
+        ],
+        "sqlserver": [
+          "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name';"
+        ],
+        "sqlite": [
+          "SELECT COUNT(*) FROM pragma_table_info('tbl_users') WHERE name = 'full_name';"
+        ],
+        "bigquery": [
+          "SELECT COUNT(*) FROM `{{dataset}}.INFORMATION_SCHEMA.COLUMNS` WHERE table_name = 'tbl_users' AND column_name = 'full_name';"
+        ]
+      },
+      "setup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_users DROP COLUMN full_name;"
+        ],
+        "sqlserver": [
+          "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
+        ],
+        "sqlite": [
+          "BEGIN TRANSACTION; CREATE TABLE tbl_users_new (user_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password_hash TEXT, social_media_links TEXT, contact_info TEXT, avatar_url TEXT, bio TEXT, website TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, notification_preferences TEXT, role_id INTEGER, last_login TIMESTAMP, active INTEGER); INSERT INTO tbl_users_new (user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active) SELECT user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active FROM tbl_users; DROP TABLE tbl_users; ALTER TABLE tbl_users_new RENAME TO tbl_users; COMMIT;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_users` DROP COLUMN IF EXISTS full_name;"
+        ]
+      },
+      "cleanup_sql": {
+        "postgres": [
+          "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
+        ],
+        "mysql": [
+          "ALTER TABLE tbl_users DROP COLUMN full_name;"
+        ],
+        "sqlserver": [
+          "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
+        ],
+        "sqlite": [
+          "BEGIN TRANSACTION; CREATE TABLE tbl_users_new (user_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password_hash TEXT, social_media_links TEXT, contact_info TEXT, avatar_url TEXT, bio TEXT, website TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, notification_preferences TEXT, role_id INTEGER, last_login TIMESTAMP, active INTEGER); INSERT INTO tbl_users_new (user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active) SELECT user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active FROM tbl_users; DROP TABLE tbl_users; ALTER TABLE tbl_users_new RENAME TO tbl_users; COMMIT;"
+        ],
+        "bigquery": [
+          "ALTER TABLE `{{dataset}}.tbl_users` DROP COLUMN IF EXISTS full_name;"
+        ]
+      },
+      "tags": [
+        "DDL",
+        "difficulty: moderate",
+        "ALTER",
+        "ADD_COLUMN",
+        "CONCAT",
+        "SORT"
       ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: moderate",
-      "SELECT",
-      "JOIN",
-      "JSON",
-      "JSON_EXTRACT",
-      "datalinking"
-    ],
-    "other": {
-      "Comment": "LGTM",
-      "nl_prompt_base": "How many bloggers who have posted at least 1 blog in 2024 and have linked twitter account",
-      "nl_prompt_extra_context": "",
-      "public": true
+      "other": {
+        "nl_prompt_base": "Add a Generated Column full_name to tbl_users",
+        "nl_prompt_extra_context": "Store first name and last name concatenated",
+        "public": true
+      }
     }
-  },
-  {
-    "id": 5,
-    "nl_prompt": "What is the number of comments per post for each user? -- Use user_id to identify users and post_id to identify posts.",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT u.user_id, p.post_id, COUNT(c.comment_id) comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
-      ],
-      "mysql": [
-        "SELECT u.user_id, p.post_id, COUNT(c.comment_id) comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
-      ],
-      "sqlserver": [
-        "SELECT u.user_id, p.post_id, COUNT(c.comment_id) AS comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
-      ],
-      "sqlite": [
-        "SELECT u.user_id, p.post_id, COUNT(c.comment_id) AS comment_count FROM tbl_users u INNER JOIN tbl_posts p ON u.user_id = p.user_id LEFT JOIN tbl_comments c ON p.post_id = c.post_id GROUP BY u.user_id, p.post_id;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: simple",
-      "SELECT",
-      "JOIN",
-      "AGGREGATE",
-      "CASE",
-      "LEFT_JOIN",
-      "IS_NULL"
-    ],
-    "other": {
-      "Comment": "LGTM",
-      "nl_prompt_base": "What is the number of comments per post for each user?",
-      "nl_prompt_extra_context": "Use user_id to identify users and post_id to identify posts.",
-      "public": true
-    }
-  },
-  {
-    "id": 9,
-    "nl_prompt": "Can you find all the users who have not made any posts?",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
-      ],
-      "mysql": [
-        "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
-      ],
-      "sqlserver": [
-        "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
-      ],
-      "sqlite": [
-        "SELECT u.user_id FROM tbl_users u LEFT JOIN tbl_posts p ON u.user_id = p.user_id WHERE p.post_id IS NULL;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: simple",
-      "SELECT",
-      "LEFT_JOIN"
-    ],
-    "other": {
-      "Comment": "LGTM",
-      "nl_prompt_base": "Can you find all the users who have not made any posts?",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 13,
-    "nl_prompt": "Retrieve the top 5 posts based on the number of likes, among users who created the post's category. -- Include the post id and the count of number of likes",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT p.post_id, p.likes_count as total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
-      ],
-      "mysql": [
-        "SELECT p.post_id, p.likes_count as total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
-      ],
-      "sqlserver": [
-        "SELECT TOP 5 p.post_id, p.likes_count AS total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC;"
-      ],
-      "sqlite": [
-        "SELECT p.post_id, p.likes_count AS total_likes FROM tbl_posts p INNER JOIN tbl_categories c ON p.category_id = c.category_id AND p.user_id = c.created_by ORDER BY total_likes DESC LIMIT 5;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: simple",
-      "SELECT",
-      "JOIN"
-    ],
-    "other": {
-      "Comment": "LGTM.",
-      "nl_prompt_base": "Retrieve the top 5 posts based on the number of likes, among users who created the post's category.",
-      "nl_prompt_extra_context": "Include the post id and the count of number of likes",
-      "public": true
-    }
-  },
-  {
-    "id": 16,
-    "nl_prompt": "How many followers does each user have?",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
-      ],
-      "mysql": [
-        "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
-      ],
-      "sqlserver": [
-        "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
-      ],
-      "sqlite": [
-        "SELECT tbl_users.user_id, COUNT(tbl_followers.follower_id) AS follower_count FROM tbl_users LEFT JOIN tbl_followers ON tbl_users.user_id = tbl_followers.following_id GROUP BY tbl_users.user_id;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: simple",
-      "SELECT",
-      "JOIN",
-      "AGGREGATE",
-      "LEFT_JOIN"
-    ],
-    "other": {
-      "Comment": "LGTM",
-      "nl_prompt_base": "How many followers does each user have?",
-      "nl_prompt_extra_context": "Include user id to identify users",
-      "public": true
-    }
-  },
-  {
-    "id": 18,
-    "nl_prompt": "What posts have been reported and are pending review? What is the reason for the review? -- Identify posts by including post_id",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
-      ],
-      "mysql": [
-        "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = FALSE;"
-      ],
-      "sqlserver": [
-        "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = 0;"
-      ],
-      "sqlite": [
-        "SELECT p.post_id, r.report_reason FROM tbl_posts p INNER JOIN tbl_reports r ON p.post_id = r.post_id WHERE r.is_resolved = 0;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: simple",
-      "SELECT",
-      "JOIN"
-    ],
-    "other": {
-      "Comment": "LGTM. 'Pending review' is unspecified, but is_resolved=FALSE is a reasonable interpretation.",
-      "nl_prompt_base": "What posts have been reported and are pending review? What is the reason for the review?",
-      "nl_prompt_extra_context": "Identify posts by including post_id",
-      "public": true
-    }
-  },
-  {
-    "id": 19,
-    "nl_prompt": "What is the most common reason for reporting a post, and what is the average time to resolve the report in minutes?",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(EXTRACT(EPOCH FROM (resolution_timestamp - report_timestamp)) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
-      ],
-      "mysql": [
-        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(TIMESTAMPDIFF(SECOND, report_timestamp, resolution_timestamp) / 60) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time from rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
-      ],
-      "sqlserver": [
-        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG(DATEDIFF(MINUTE, report_timestamp, resolution_timestamp)) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time FROM rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
-      ],
-      "sqlite": [
-        "WITH rc AS (SELECT report_reason, COUNT(*) AS report_count, AVG((julianday(resolution_timestamp) - julianday(report_timestamp)) * 1440) AS avg_resolution_time FROM tbl_reports GROUP BY report_reason) SELECT report_reason, report_count, avg_resolution_time FROM rc WHERE report_count = (SELECT MAX(report_count) FROM rc);"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: moderate",
-      "SELECT",
-      "AGGREGATE",
-      "DATE",
-      "time"
-    ],
-    "other": {
-      "Comment": "LGTM",
-      "nl_prompt_base": "What is the most common reason for reporting a post, and what is the average time to resolve the report in minutes?",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 23,
-    "nl_prompt": "What is the average number of posts per day and per category? -- Include the category name",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT TO_CHAR(p.created_at, 'YYYY-MM-DD') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT DATE_TRUNC('day', created_at) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
-      ],
-      "mysql": [
-        "SELECT DATE_FORMAT(p.created_at, '%Y-%m-%d') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY created_at, c.name ORDER BY created_at, name ASC;"
-      ],
-      "sqlserver": [
-        "SELECT FORMAT(p.created_at, 'yyyy-MM-dd') AS created_at, c.name, AVG(post_count) AS average_posts FROM ( SELECT CAST(created_at AS DATE) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY CAST(created_at AS DATE), category_id ) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
-      ],
-      "sqlite": [
-        "SELECT strftime('%Y-%m-%d', p.created_at) AS created_at, c.name, AVG(post_count) AS average_posts FROM (SELECT DATE(created_at) AS created_at, category_id, COUNT(post_id) AS post_count FROM tbl_posts GROUP BY created_at, category_id) p INNER JOIN tbl_categories c ON p.category_id = c.category_id GROUP BY p.created_at, c.name ORDER BY created_at, name ASC;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: challenging",
-      "SELECT",
-      "AGGREGATE",
-      "JOIN",
-      "DATE",
-      "time"
-    ],
-    "other": {
-      "Comment": "LGTM. Ordering is not well defined but seems reasonable to expect ordering by date.",
-      "nl_prompt_base": "What is the average number of posts per day and per category?",
-      "nl_prompt_extra_context": "Include the category name",
-      "public": true
-    }
-  },
-  {
-    "id": 99,
-    "nl_prompt": "How many succesfull login activities have been performed? -- Include the total, number of successes and the percentage",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
-      ],
-      "mysql": [
-        "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) * 100 AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
-      ],
-      "sqlserver": [
-        "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) * 100.0 / NULLIF(COUNT(CASE WHEN activity_type = 'login' THEN 1 END), 0)) AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
-      ],
-      "sqlite": [
-        "SELECT COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) AS successful_logins, COUNT(CASE WHEN activity_type = 'login' THEN 1 END) AS total_logins, (COUNT(CASE WHEN activity_type = 'login' AND activity_status = 'success' THEN 1 END) * 100.0 / COUNT(CASE WHEN activity_type = 'login' THEN 1 END)) AS success_percentage FROM tbl_user_activity WHERE activity_type = 'login';"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: moderate",
-      "SELECT",
-      "AGGREGATE",
-      "CONDITIONS",
-      "datalinking"
-    ],
-    "other": {
-      "Comment": "LGTM. Data needs more examples to test -- there are no unsucceful logins",
-      "nl_prompt_base": "How many succesfull login activities have been performed?",
-      "nl_prompt_extra_context": "Include the total, number of successes and the percentage",
-      "public": true
-    }
-  },
-  {
-    "id": 100,
-    "nl_prompt": "Identify which is the most active hour of the day across all users",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
-      ],
-      "mysql": [
-        "SELECT EXTRACT(HOUR FROM activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC"
-      ],
-      "sqlserver": [
-        "SELECT TOP 1 DATEPART(HOUR, activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY DATEPART(HOUR, activity_timestamp) ORDER BY activity_count DESC;"
-      ],
-      "sqlite": [
-        "SELECT strftime('%H', activity_timestamp) AS active_hour, COUNT(*) AS activity_count FROM tbl_user_activity GROUP BY active_hour ORDER BY activity_count DESC LIMIT 1;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: moderate",
-      "SELECT",
-      "EXTRACT",
-      "AGGREGATE",
-      "SORT",
-      "LIMIT",
-      "HOUR",
-      "time"
-    ],
-    "other": {
-      "comment": "LGTM",
-      "nl_prompt_base": "Identify which is the most active hour of the day across all users",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 133,
-    "nl_prompt": "Identify the attachments that are tagged as 'database' and have read-only access",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT * FROM tbl_attachments WHERE tags_file @> '[\"database\"]' AND (access_permissions ->> 'read_only')::boolean;"
-      ],
-      "mysql": [
-        "SELECT a.* FROM tbl_attachments a WHERE JSON_CONTAINS(a.tags_file, '\"database\"') AND JSON_UNQUOTE(JSON_EXTRACT(a.access_permissions, '$.read_only')) = 'true';"
-      ],
-      "sqlserver": [
-        "SELECT * FROM tbl_attachments WHERE JSON_VALUE(tags_file, '$[0]') = 'database' AND CAST(JSON_VALUE(access_permissions, '$.read_only') AS bit) = 1;"
-      ],
-      "sqlite": [
-        "SELECT * FROM tbl_attachments WHERE json_extract(tags_file, '$[0]') = 'database' AND json_extract(access_permissions, '$.read_only') = true;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: Moderate",
-      "SELECT",
-      "JSON",
-      "JOIN",
-      "datalinking"
-    ],
-    "other": {
-      "comment": "LGTM",
-      "nl_prompt_base": "Identify the attachments that are tagged as 'database' and have read-only access",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 156,
-    "nl_prompt": "List the latest uploaded media file for each user -- include user_id, user name and media url",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
-      ],
-      "mysql": [
-        "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
-      ],
-      "sqlserver": [
-        "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN ( SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id ) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
-      ],
-      "sqlite": [
-        "SELECT m1.uploader_id, u.username, m1.url FROM tbl_media m1 INNER JOIN (SELECT uploader_id, MAX(upload_date) AS max_upload_date FROM tbl_media GROUP BY uploader_id) m2 ON m1.uploader_id = m2.uploader_id AND m1.upload_date = m2.max_upload_date INNER JOIN tbl_users u ON m1.uploader_id = u.user_id;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "SELECT",
-      "AGGREGATE",
-      "JOIN",
-      "difficulty: moderate"
-    ],
-    "other": {
-      "comment": "LGTM",
-      "nl_prompt_base": "List the latest uploaded media file for each user",
-      "nl_prompt_extra_context": "include user_id, user name and media url",
-      "public": true
-    }
-  },
-  {
-    "id": 180,
-    "nl_prompt": "Which posts have tags related to both 'programming' and 'database' ?",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT * FROM tbl_posts WHERE tags::jsonb @> '[ \"programming\", \"database\" ]'::jsonb;"
-      ],
-      "mysql": [
-        "SELECT * FROM tbl_posts WHERE JSON_CONTAINS(tags, '\"programming\"') AND JSON_CONTAINS(tags, '\"database\"');"
-      ],
-      "sqlserver": [
-        "SELECT * FROM tbl_posts WHERE EXISTS (SELECT 1 FROM OPENJSON(tags) WHERE value = 'programming') AND EXISTS (SELECT 1 FROM OPENJSON(tags) WHERE value = 'database');"
-      ],
-      "sqlite": [
-        "SELECT * FROM tbl_posts WHERE EXISTS (SELECT 1 FROM json_each(tags) WHERE value IN ('programming', 'database'));"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: simple",
-      "SELECT",
-      "JSON",
-      "difficulty: moderate",
-      "JSON_CONTAINS"
-    ],
-    "other": {
-      "nl_prompt_base": "Which posts have tags related to both 'programming' and 'database' ?",
-      "nl_prompt_extra_context": "",
-      "public": true
-    }
-  },
-  {
-    "id": 299,
-    "nl_prompt": "Total number of likes on comments reported by popular users on programming posts where the report is not resolved yet -- Popular users have more than 4 unique followers.",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE NOT is_resolved AND user_id IN (SELECT following_id user_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
-      ],
-      "mysql": [
-        "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE NOT is_resolved AND user_id IN (SELECT following_id user_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
-      ],
-      "sqlserver": [
-        "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE is_resolved = 0 AND user_id IN (SELECT following_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'))"
-      ],
-      "sqlite": [
-        "SELECT SUM(likes_count) FROM tbl_comments WHERE comment_id IN (SELECT reported_comment_id FROM tbl_reports WHERE is_resolved = 0 AND user_id IN (SELECT following_id FROM tbl_followers GROUP BY following_id HAVING COUNT(follower_id) > 4) AND post_id IN (SELECT post_id FROM tbl_posts_tags INNER JOIN tbl_tags ON tbl_posts_tags.tag_id = tbl_tags.tag_id WHERE name = 'Programming'));"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: challenging",
-      "SELECT",
-      "AGGREGATE",
-      "JOIN",
-      "HAVING",
-      "COUNT",
-      "datalinking"
-    ],
-    "other": {
-      "public": true,
-      "Comment": "LGTM",
-      "nl_prompt_base": "Total number of likes on comments reported by popular users on programming posts where the report is not resolved yet.",
-      "nl_prompt_extra_context": "Popular users have more than 4 unique followers."
-    }
-  },
-  {
-    "id": 300,
-    "nl_prompt": "Number of messages per day for conversations that span multiple days and have no read messages.",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "WITH conversations AS (SELECT conversation_id, MAX(sending_time) - MIN(sending_time) conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, DATE(sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > INTERVAL '1 day' GROUP BY pm.conversation_id, DATE(sending_time)"
-      ],
-      "mysql": [
-        "SELECT pm.conversation_id, DATE(pm.sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN (SELECT conversation_id, TIMESTAMPDIFF(SECOND, MIN(sending_time), MAX(sending_time)) AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) AS conversations ON pm.conversation_id = conversations.conversation_id WHERE conversations.conv_length > 86400 GROUP BY pm.conversation_id, DATE(pm.sending_time);"
-      ],
-      "sqlserver": [
-        "WITH conversations AS (SELECT conversation_id, DATEDIFF(SECOND, MIN(sending_time), MAX(sending_time)) AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read = 1 THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, CAST(sending_time AS DATE) AS sending_date, COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > 86400 GROUP BY pm.conversation_id, CAST(sending_time AS DATE);"
-      ],
-      "sqlite": [
-        "WITH conversations AS (SELECT conversation_id, (julianday(MAX(sending_time)) - julianday(MIN(sending_time))) * 86400 AS conv_length FROM tbl_private_messages WHERE conversation_id IS NOT NULL GROUP BY conversation_id HAVING SUM(CASE WHEN is_read THEN 1 ELSE 0 END) = 0) SELECT pm.conversation_id, DATE(pm.sending_time), COUNT(*) FROM tbl_private_messages pm INNER JOIN conversations c ON pm.conversation_id = c.conversation_id WHERE c.conv_length > 86400 GROUP BY pm.conversation_id, DATE(pm.sending_time);"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: challenging",
-      "SELECT",
-      "AGGREGATE",
-      "JOIN",
-      "HAVING",
-      "COUNT",
-      "DATE",
-      "time"
-    ],
-    "other": {
-      "public": true,
-      "Comment": "LGTM",
-      "nl_prompt_base": "Number of messages per day for conversations that span multiple days and have no read messages.",
-      "nl_prompt_extra_context": ""
-    }
-  },
-  {
-    "id": 301,
-    "nl_prompt": "Show average comment length by browser for users who exclusively use a specific browser",
-    "query_type": "dql",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser"
-      ],
-      "mysql": [
-        "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser"
-      ],
-      "sqlserver": [
-        "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LEN(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser;"
-      ],
-      "sqlite": [
-        "WITH users_exclusive AS (SELECT user_id FROM tbl_user_activity GROUP BY user_id HAVING COUNT(DISTINCT browser) = 1), users_browsers AS (SELECT user_id, browser FROM tbl_user_activity WHERE user_id IN (SELECT user_id FROM users_exclusive)) SELECT browser, AVG(LENGTH(content)) FROM tbl_comments c INNER JOIN users_browsers u ON c.user_id = u.user_id GROUP BY browser;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        null
-      ],
-      "mysql": [
-        null
-      ],
-      "sqlserver": [
-        null
-      ],
-      "sqlite": [
-        null
-      ]
-    },
-    "setup_sql": {},
-    "cleanup_sql": {},
-    "tags": [
-      "DQL",
-      "difficulty: challenging",
-      "SELECT",
-      "AGGREGATE",
-      "JOIN",
-      "HAVING"
-    ],
-    "other": {
-      "public": true,
-      "Comment": "LGTM",
-      "nl_prompt_base": "Show average comment length by browser for users who exclusively use a specific browser",
-      "nl_prompt_extra_context": ""
-    }
-  },
-  {
-    "id": 42,
-    "nl_prompt": "Can you update my username to 'magic_one' -- user_id = 9;",
-    "query_type": "dml",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
-      ],
-      "mysql": [
-        "UPDATE tbl_users SET username = 'magic_one', updated_at = NOW() WHERE user_id = 9;"
-      ],
-      "sqlserver": [
-        "UPDATE tbl_users SET username = 'magic_one', updated_at = GETDATE() WHERE user_id = 9;"
-      ],
-      "sqlite": [
-        "UPDATE tbl_users SET username = 'magic_one', updated_at = CURRENT_TIMESTAMP WHERE user_id = 9;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
-      ],
-      "mysql": [
-        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' FROM tbl_users WHERE user_id = 9;"
-      ],
-      "sqlserver": [
-        "SELECT username, updated_at, CASE WHEN updated_at > '2024-02-27 07:27:14' THEN 1 ELSE 0 END AS is_updated FROM tbl_users WHERE user_id = 9;"
-      ],
-      "sqlite": [
-        "SELECT username, updated_at, updated_at > '2024-02-27 07:27:14' AS is_updated FROM tbl_users WHERE user_id = 9;"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [],
-      "mysql": [],
-      "sqlserver": [],
-      "sqlite": []
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
-      ],
-      "mysql": [
-        "UPDATE tbl_users SET username = 'sophia.anderson ', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
-      ],
-      "sqlserver": [
-        "UPDATE tbl_users SET username = 'sophia.anderson', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
-      ],
-      "sqlite": [
-        "UPDATE tbl_users SET username = 'sophia.anderson', updated_at = '2024-02-27 07:26:14' WHERE user_id = 9;"
-      ]
-    },
-    "tags": [
-      "DML",
-      "difficulty: moderate",
-      "UPDATE"
-    ],
-    "other": {
-      "Comment": "LGTM. Instructions do not include updated_at, but that is implied.",
-      "nl_prompt_base": "Can you update my username to 'magic_one'",
-      "nl_prompt_extra_context": "user_id = 9;",
-      "public": true
-    }
-  },
-  {
-    "id": 184,
-    "nl_prompt": "Update the post content in tbl_posts -- post_id = 3, new content should be 'Updated content'",
-    "query_type": "dml",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
-      ],
-      "mysql": [
-        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
-      ],
-      "sqlserver": [
-        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
-      ],
-      "sqlite": [
-        "UPDATE tbl_posts SET content = 'Updated content' WHERE post_id = 3;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT content FROM tbl_posts WHERE post_id = 3;"
-      ],
-      "mysql": [
-        "Select COUNT(1) = 1 from tbl_posts where post_id = 3 and content = 'Updated Content';"
-      ],
-      "sqlserver": [
-        "SELECT content FROM tbl_posts WHERE post_id = 3;"
-      ],
-      "sqlite": [
-        "SELECT content FROM tbl_posts WHERE post_id = 3;"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ],
-      "mysql": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ],
-      "sqlserver": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ],
-      "sqlite": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ]
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ],
-      "mysql": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ],
-      "sqlserver": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ],
-      "sqlite": [
-        "UPDATE tbl_posts SET content = 'Tips and tricks for efficient web development.' WHERE post_id = 3;"
-      ]
-    },
-    "tags": [
-      "DML",
-      "difficulty: simple",
-      "UPDATE"
-    ],
-    "other": {
-      "nl_prompt_base": "Update the post content in tbl_posts",
-      "nl_prompt_extra_context": "post_id = 3, new content should be 'Updated content'",
-      "public": true
-    }
-  },
-  {
-    "id": 200,
-    "nl_prompt": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata -- attachment_id =1,2",
-    "query_type": "dml",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"data_security\", \"data_privacy\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"security\", \"privacy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = COALESCE(tags_file, '[]'::jsonb) || '[\"compliance\", \"data_governance\"]'::jsonb, category_file = COALESCE(category_file, '[]'::jsonb) || '[\"regulatory\", \"policy\"]'::jsonb, access_permissions = JSONB_SET( JSONB_SET(COALESCE(access_permissions, '{}'::jsonb), '{read_write}', 'true'::jsonb), '{read_only}', 'false'::jsonb), metadata = JSONB_SET(COALESCE(metadata, '{}'::jsonb), '{additional_info}', '\"This attachment contains compliance-related content focused on data governance and regulatory standards.\"') WHERE attachment_id = 2;"
-      ],
-      "mysql": [
-        "UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_security'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'data_privacy'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'security'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'privacy'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1; UPDATE tbl_attachments SET tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'user_data'), tags_file = JSON_ARRAY_APPEND(tags_file, '$', 'customer_information'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'personal_data'), category_file = JSON_ARRAY_APPEND(category_file, '$', 'client_data'), access_permissions = JSON_SET(access_permissions, '$.read_write', true, '$.read_only', false), metadata = JSON_SET(metadata, '$.additional_info', 'This attachment contains user data and customer information for analysis purposes.') WHERE attachment_id = 2;"
-      ],
-      "sqlserver": [
-        "UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'data_security'), 'append $', 'data_privacy'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'security'), 'append $', 'privacy'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment contains sensitive data related to security and privacy measures.') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = JSON_MODIFY(JSON_MODIFY(COALESCE(tags_file, '[]'), 'append $', 'compliance_tracking'), 'append $', 'policy_management'), category_file = JSON_MODIFY(JSON_MODIFY(COALESCE(category_file, '[]'), 'append $', 'regulation'), 'append $', 'audit'), access_permissions = JSON_MODIFY(JSON_MODIFY(COALESCE(access_permissions, '{}'), '$.read_write', 'true'), '$.read_only', 'false'), metadata = JSON_MODIFY(COALESCE(metadata, '{}'), '$.additional_info', 'This attachment includes policy management and compliance tracking information.') WHERE attachment_id = 2;"
-      ],
-      "sqlite": [
-        "UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"data_security\"', '$[#]', '\"data_privacy\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"security\"', '$[#]', '\"privacy\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment contains sensitive data related to security and privacy measures.\"') WHERE attachment_id = 1;UPDATE tbl_attachments SET tags_file = json_insert(COALESCE(tags_file, '[]'), '$[#]', '\"compliance\"', '$[#]', '\"user_protection\"'), category_file = json_insert(COALESCE(category_file, '[]'), '$[#]', '\"governance\"', '$[#]', '\"confidentiality\"'), metadata = json_set(COALESCE(metadata, '{}'), '$.additional_info', '\"This attachment focuses on user protection, compliance, and governance standards.\"') WHERE attachment_id = 2;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
-      ],
-      "mysql": [
-        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
-      ],
-      "sqlserver": [
-        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
-      ],
-      "sqlite": [
-        "SELECT attachment_id, tags_file, category_file, metadata FROM tbl_attachments WHERE attachment_id IN (1, 2);"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [
-        "INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
-      ],
-      "mysql": [
-        "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"\"database\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"programming\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"\"marketing\\\"\", \\\"\"attachment\\\"\"]', '[\\\"\"digital\\\"\"]', '{\\\"\"read_write\\\"\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
-      ],
-      "sqlserver": [
-        "DELETE FROM tbl_attachments WHERE attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', N'[\"database\", \"attachment\"]', N'[\"programming\"]', N'{\"read_write\": true}', 'cloud', NULL, '0', NULL);"
-      ],
-      "sqlite": [
-        "INSERT INTO tbl_attachments (attachment_id, post_id, user_id, file_name, file_path, file_size, file_type, upload_date, description, is_active, visibility_status, download_count, file_extension, uploaded_by_ip, last_modified, expiration_date, tags_file, category_file, access_permissions, storage_location, metadata, is_featured, parent_attachment_id) VALUES (1, 1, 1, 'attachment1.pdf', '/attachments/attachment1.pdf', 1024, 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', 1, 'public', 50, 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\"database\", \"attachment\"]', '[\"programming\"]', '{\"read_write\": true}', 'cloud', NULL, 0, NULL);"
-      ]
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "delete from tbl_attachments where attachment_id = 1;"
-      ],
-      "mysql": [
-        "SET SQL_SAFE_UPDATES = 0; delete from tbl_attachments where attachment_id = 1; INSERT INTO tbl_attachments VALUES ('1', '1', '1', 'attachment1.pdf', '/attachments/attachment1.pdf', '1024', 'pdf', '2024-02-26 11:00:00', 'Attachment for the SQL post', '1', 'public', '50', 'pdf', '192.168.1.1', '2024-02-26 11:00:00', '2024-03-26 11:00:00', '[\\\"database\\\", \\\"attachment\\\"]', '[\\\"programming\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); delete from tbl_attachments where attachment_id = 2; INSERT INTO tbl_attachments VALUES ('2', '2', '2', 'attachment2.jpg', '/attachments/attachment2.jpg', '2048', 'jpg', '2024-02-25 17:00:00', 'Attachment for the Marketing post', '1', 'public', '30', 'jpg', '192.168.1.2', '2024-02-25 17:00:00', '2024-03-25 17:00:00', '[\\\"marketing\\\", \\\"attachment\\\"]', '[\\\"digital\\\"]', '{\\\"read_write\\\": true}', 'cloud', NULL, '0', NULL); SET SQL_SAFE_UPDATES = 1;"
-      ],
-      "sqlserver": [
-        "DELETE FROM tbl_attachments WHERE attachment_id = 1;"
-      ],
-      "sqlite": [
-        "DELETE FROM tbl_attachments WHERE attachment_id = 1;"
-      ]
-    },
-    "tags": [
-      "DML",
-      "difficulty: challenging",
-      "UPDATE",
-      "COALESCE",
-      "JSON_SET",
-      "JSON",
-      "JSON_ARRAY"
-    ],
-    "other": {
-      "nl_prompt_base": "Can we update the attachment table with more information like tag_file, category_file, acess_permission and metadata",
-      "nl_prompt_extra_context": "attachment_id =1,2",
-      "public": true
-    }
-  },
-  {
-    "id": 43,
-    "nl_prompt": "Update the labels table to include a json field called comments_description.",
-    "query_type": "ddl",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_labels ADD COLUMN comments_description JSON;"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_labels ADD comments_description NVARCHAR(MAX) CONSTRAINT chk_comments_description_json CHECK (ISJSON(comments_description) = 1);"
-      ],
-      "sqlite": [
-        "ALTER TABLE tbl_labels ADD COLUMN comments_description TEXT CHECK (json_valid(comments_description));"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
-      ],
-      "mysql": [
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_labels' AND column_name='comments_description' AND data_type = 'json'"
-      ],
-      "sqlserver": [
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_labels' AND COLUMN_NAME = 'comments_description' AND DATA_TYPE = 'nvarchar';"
-      ],
-      "sqlite": [
-        "SELECT COUNT(*) FROM tbl_labels WHERE json_valid(comments_description);"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_labels DROP CONSTRAINT chk_comments_description_json; ALTER TABLE tbl_labels DROP COLUMN comments_description;"
-      ],
-      "sqlite": [
-        "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
-      ]
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_labels DROP COLUMN comments_description;"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_labels DROP CONSTRAINT chk_comments_description_json; ALTER TABLE tbl_labels DROP COLUMN comments_description;"
-      ],
-      "sqlite": [
-        "BEGIN TRANSACTION; CREATE TABLE tbl_labels_new (label_id INTEGER PRIMARY KEY, creator_id INTEGER DEFAULT NULL, updated_by INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TEXT DEFAULT NULL, updated_at TEXT DEFAULT NULL, post_count INTEGER DEFAULT NULL, visibility_status TEXT DEFAULT NULL, is_active INTEGER DEFAULT NULL, usage_frequency INTEGER DEFAULT NULL, parent_label_id INTEGER DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id), FOREIGN KEY (parent_label_id) REFERENCES tbl_labels(label_id)); INSERT INTO tbl_labels_new (label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id) SELECT label_id, creator_id, updated_by, name, description, created_at, updated_at, post_count, visibility_status, is_active, usage_frequency, parent_label_id FROM tbl_labels; DROP TABLE tbl_labels; ALTER TABLE tbl_labels_new RENAME TO tbl_labels; COMMIT;"
-      ]
-    },
-    "tags": [
-      "DDL",
-      "difficulty: simple",
-      "ALTER",
-      "ADD_COLUMN",
-      "JSON"
-    ],
-    "other": {
-      "Comment": "LGTM",
-      "nl_prompt_base": "Update the labels table to include a json type field called comments_description.",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 185,
-    "nl_prompt": "Rename the content column in the tbl_posts table to post_content",
-    "query_type": "ddl",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
-      ],
-      "sqlserver": [
-        "EXEC sp_rename 'tbl_posts.content', 'post_content', 'COLUMN';"
-      ],
-      "sqlite": [
-        "ALTER TABLE tbl_posts RENAME COLUMN content TO post_content;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT post_content FROM tbl_posts;"
-      ],
-      "mysql": [
-        "SELECT post_content FROM tbl_posts;"
-      ],
-      "sqlserver": [
-        "SELECT post_content FROM tbl_posts;"
-      ],
-      "sqlite": [
-        "SELECT post_content FROM tbl_posts;"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
-      ],
-      "sqlserver": [
-        "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
-      ],
-      "sqlite": [
-        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
-      ]
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
-      ],
-      "sqlserver": [
-        "EXEC sp_rename 'tbl_posts.post_content', 'content', 'COLUMN';"
-      ],
-      "sqlite": [
-        "ALTER TABLE tbl_posts RENAME COLUMN post_content TO content;"
-      ]
-    },
-    "tags": [
-      "DDL",
-      "difficulty: simple",
-      "ALTER",
-      "RENAME"
-    ],
-    "other": {
-      "comment": "LGTM",
-      "nl_prompt_base": "Rename the content column in the tbl_posts table to post_content",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 255,
-    "nl_prompt": "Create an Enumerated Type for Access Levels",
-    "query_type": "ddl",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum VARCHAR(10) CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum ENUM('Public', 'Private', 'Restricted');"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_tags ADD access_level_enum VARCHAR(10) CONSTRAINT chk_access_level CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
-      ],
-      "sqlite": [
-        "ALTER TABLE tbl_tags ADD COLUMN access_level_enum TEXT CHECK (access_level_enum IN ('Public', 'Private', 'Restricted'));"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
-      ],
-      "mysql": [
-        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_tags' AND column_name='access_level_enum '"
-      ],
-      "sqlserver": [
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_tags' AND COLUMN_NAME = 'access_level_enum';"
-      ],
-      "sqlite": [
-        "SELECT COUNT(*) FROM PRAGMA_TABLE_INFO('tbl_tags') WHERE name = 'access_level_enum';"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
-      ],
-      "sqlite": [
-        "BEGIN TRANSACTION; CREATE TABLE tbl_tags_new (tag_id INTEGER NOT NULL PRIMARY KEY, creator_id INTEGER DEFAULT NULL, category_id INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT NULL, updated_at TIMESTAMP DEFAULT NULL, slug TEXT DEFAULT NULL, count INTEGER DEFAULT NULL, visibility BOOLEAN DEFAULT NULL, active BOOLEAN DEFAULT NULL, parent_tag INTEGER DEFAULT NULL, status_id INTEGER DEFAULT NULL, access_level INTEGER DEFAULT NULL, is_approved BOOLEAN DEFAULT NULL, metadata JSON DEFAULT NULL, is_edited BOOLEAN DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (category_id) REFERENCES tbl_categories(category_id)); INSERT INTO tbl_tags_new (tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited) SELECT tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited FROM tbl_tags; DROP TABLE tbl_tags; ALTER TABLE tbl_tags_new RENAME TO tbl_tags; COMMIT;"
-      ]
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_tags DROP COLUMN IF EXISTS access_level_enum;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_tags DROP COLUMN access_level_enum;"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_tags DROP CONSTRAINT chk_access_level, COLUMN access_level_enum;"
-      ],
-      "sqlite": [
-        "BEGIN TRANSACTION; CREATE TABLE tbl_tags_new (tag_id INTEGER NOT NULL PRIMARY KEY, creator_id INTEGER DEFAULT NULL, category_id INTEGER DEFAULT NULL, name TEXT DEFAULT NULL, description TEXT DEFAULT NULL, created_at TIMESTAMP DEFAULT NULL, updated_at TIMESTAMP DEFAULT NULL, slug TEXT DEFAULT NULL, count INTEGER DEFAULT NULL, visibility BOOLEAN DEFAULT NULL, active BOOLEAN DEFAULT NULL, parent_tag INTEGER DEFAULT NULL, status_id INTEGER DEFAULT NULL, access_level INTEGER DEFAULT NULL, is_approved BOOLEAN DEFAULT NULL, metadata JSON DEFAULT NULL, is_edited BOOLEAN DEFAULT NULL, FOREIGN KEY (creator_id) REFERENCES tbl_users(user_id), FOREIGN KEY (category_id) REFERENCES tbl_categories(category_id)); INSERT INTO tbl_tags_new (tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited) SELECT tag_id, creator_id, category_id, name, description, created_at, updated_at, slug, count, visibility, active, parent_tag, status_id, access_level, is_approved, metadata, is_edited FROM tbl_tags; DROP TABLE tbl_tags; ALTER TABLE tbl_tags_new RENAME TO tbl_tags; COMMIT;"
-      ]
-    },
-    "tags": [
-      "DDL",
-      "difficulty: simple",
-      "CREATE",
-      "ENUM",
-      "ALTER",
-      "ADD_COLUMN"
-    ],
-    "other": {
-      "nl_prompt_base": "Create an Enumerated Type for Access Levels",
-      "nl_prompt_extra_context": null,
-      "public": true
-    }
-  },
-  {
-    "id": 256,
-    "nl_prompt": "Add a Generated Column full_name to tbl_users. -- Store first name and last name concatenated",
-    "query_type": "ddl",
-    "database": "db_blog",
-    "dialects": [
-      "postgres",
-      "mysql",
-      "sqlserver",
-      "sqlite"
-    ],
-    "golden_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_users ADD COLUMN full_name VARCHAR(255) GENERATED ALWAYS AS (CONCAT(first_name, ' ', last_name)) STORED;"
-      ],
-      "sqlserver": [
-        "ALTER TABLE tbl_users ADD full_name AS CONCAT(first_name, ' ', last_name) PERSISTED;"
-      ],
-      "sqlite": [
-        "ALTER TABLE tbl_users ADD COLUMN full_name TEXT GENERATED ALWAYS AS (first_name || ' ' || last_name) VIRTUAL;"
-      ]
-    },
-    "eval_query": {
-      "postgres": [
-        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
-      ],
-      "mysql": [
-        "SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tbl_users' AND column_name='full_name'"
-      ],
-      "sqlserver": [
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name';"
-      ],
-      "sqlite": [
-        "SELECT COUNT(*) FROM pragma_table_info('tbl_users') WHERE name = 'full_name';"
-      ]
-    },
-    "setup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_users DROP COLUMN full_name;"
-      ],
-      "sqlserver": [
-        "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
-      ],
-      "sqlite": [
-        "BEGIN TRANSACTION; CREATE TABLE tbl_users_new (user_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password_hash TEXT, social_media_links TEXT, contact_info TEXT, avatar_url TEXT, bio TEXT, website TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, notification_preferences TEXT, role_id INTEGER, last_login TIMESTAMP, active INTEGER); INSERT INTO tbl_users_new (user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active) SELECT user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active FROM tbl_users; DROP TABLE tbl_users; ALTER TABLE tbl_users_new RENAME TO tbl_users; COMMIT;"
-      ]
-    },
-    "cleanup_sql": {
-      "postgres": [
-        "ALTER TABLE tbl_users DROP COLUMN IF EXISTS full_name;"
-      ],
-      "mysql": [
-        "ALTER TABLE tbl_users DROP COLUMN full_name;"
-      ],
-      "sqlserver": [
-        "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tbl_users' AND COLUMN_NAME = 'full_name') ALTER TABLE tbl_users DROP COLUMN full_name;"
-      ],
-      "sqlite": [
-        "BEGIN TRANSACTION; CREATE TABLE tbl_users_new (user_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT, password_hash TEXT, social_media_links TEXT, contact_info TEXT, avatar_url TEXT, bio TEXT, website TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, notification_preferences TEXT, role_id INTEGER, last_login TIMESTAMP, active INTEGER); INSERT INTO tbl_users_new (user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active) SELECT user_id, first_name, last_name, username, password_hash, social_media_links, contact_info, avatar_url, bio, website, created_at, updated_at, notification_preferences, role_id, last_login, active FROM tbl_users; DROP TABLE tbl_users; ALTER TABLE tbl_users_new RENAME TO tbl_users; COMMIT;"
-      ]
-    },
-    "tags": [
-      "DDL",
-      "difficulty: moderate",
-      "ALTER",
-      "ADD_COLUMN",
-      "CONCAT",
-      "SORT"
-    ],
-    "other": {
-      "nl_prompt_base": "Add a Generated Column full_name to tbl_users",
-      "nl_prompt_extra_context": "Store first name and last name concatenated",
-      "public": true
-    }
-  }
-]
+  ]

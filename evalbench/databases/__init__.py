@@ -3,6 +3,7 @@ from .mysql import MySQLDB
 from .sqlserver import SQLServerDB
 from .sqlite import SQLiteDB
 from .db import DB
+from .bigquery import BQDB
 
 
 def get_database(db_config, db_name) -> DB:
@@ -20,4 +21,6 @@ def get_database(db_config, db_name) -> DB:
         return SQLServerDB(db_config)
     if db_config["db_type"] == "sqlite":
         return SQLiteDB(db_config)
+    if db_config["db_type"] == "bigquery":
+        return BQDB(db_config)
     raise ValueError("DB Type not Supported")
