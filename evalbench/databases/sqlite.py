@@ -214,7 +214,7 @@ class SQLiteDB(DB):
         except Exception as error:
             logging.error(f"Failed to drop all tables: {error}")
 
-    def insert_data(self, data: dict[str, List[str]]):
+    def insert_data(self, data: dict[str, List[str]], setup: Optional[List[str]] = None):
         if not data:
             return
         insertion_statements = []

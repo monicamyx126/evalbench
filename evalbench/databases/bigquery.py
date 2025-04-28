@@ -226,7 +226,7 @@ class BQDB(DB):
 
         return schema_mapping
 
-    def insert_data(self, data: dict[str, List[str]], setup: List[str]):
+    def insert_data(self, data: dict[str, List[str]], setup: Optional[List[str]] = None):
         if not data:
             return
         schema_mapping = self._get_column_name_to_type_mapping(setup)

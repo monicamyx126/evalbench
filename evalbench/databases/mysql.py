@@ -224,7 +224,7 @@ class MySQLDB(DB):
             DROP_ALL_TABLES_QUERY.format(DATABASE=self.db_name).split(";")
         )
 
-    def insert_data(self, data: dict[str, List[str]]):
+    def insert_data(self, data: dict[str, List[str]], setup: Optional[List[str]] = None):
         if not data:
             return
         insertion_statements = []
