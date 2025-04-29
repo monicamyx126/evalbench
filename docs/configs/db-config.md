@@ -10,7 +10,7 @@ The YAML configuration file is structured as follows:
 
 | **Key**                     | **Required**                 | **Description**                                                                                                                                       |
 | --------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db_type`                    | Yes                         | Specifies the type of database. Supported types include `postgres`, `mysql`, `sqlserver`, and `sqlite`.                                               |
+| `db_type`                    | Yes                         | Specifies the type of database. Supported types include `postgres`, `mysql`, `alloydb`, `sqlserver`, and `sqlite`.                                               |
 | `database_name`             | Yes                          | The name of your database that is used for the default connection. This can be the default admin database (i.e. `postgres`) on the instance. This DB is only used to create databases needed for running evaluations.                                                                                                                            |
 | `database_path`             | Yes                          | The path or instance reference to your database (e.g., cloud instance path, local path). Please see note above on database_path for more information on SQLAlchemy with more instructions on how to connect to local or GCP databases. *NOTE: For Sqlite, database_path is the directory that the .db files are found or stored in.*                                                              |
 | `max_executions_per_minute` | No                           | Optional throttle limit for the number of executions per minute.                                                                                      |
@@ -24,7 +24,7 @@ The YAML configuration file is structured as follows:
 ## Important Notes
 
 - **Mandatory Fields:**
-  - `db`, `database_name`, and `database_path` are required.
+  - `db_type`, `database_name`, and `database_path` are required.
 - **Authentication:**
   - For databases that require authentication (e.g., MySQL), provide both `user_name` and either `password` or `secret_manager_path`.
   - For databases like SQLite, omit `user_name` and `password`.

@@ -140,7 +140,7 @@ class Orchestrator:
 
         prompt_generator = prompts.get_generator(core_db, self.config)
         model_generator = models.get_generator(
-            global_models, self.config["model_config"]
+            global_models, self.config["model_config"], core_db
         )
 
         for query_type in ["dql", "dml", "ddl"]:

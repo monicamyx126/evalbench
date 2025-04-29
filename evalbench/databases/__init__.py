@@ -4,6 +4,7 @@ from .sqlserver import SQLServerDB
 from .sqlite import SQLiteDB
 from .db import DB
 from .bigquery import BQDB
+from .alloydb import AlloyDB
 
 
 def get_database(db_config, db_name) -> DB:
@@ -23,4 +24,6 @@ def get_database(db_config, db_name) -> DB:
         return SQLiteDB(db_config)
     if db_config["db_type"] == "bigquery":
         return BQDB(db_config)
+    if db_config["db_type"] == "alloydb":
+        return AlloyDB(db_config)
     raise ValueError("DB Type not Supported")
