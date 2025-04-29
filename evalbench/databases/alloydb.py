@@ -3,7 +3,9 @@ from .db import DB
 from .postgres import PGDB
 import sqlalchemy
 from sqlalchemy.pool import NullPool
-from google.cloud.alloydb.connector import Connector as AlloyDBConnector, IPTypes as AlloyDBIPTypes
+from google.cloud.alloydb.connector import Connector as AlloyDBConnector
+from google.cloud.alloydb.connector import IPTypes as AlloyDBIPTypes
+
 
 class AlloyDB(PGDB):
     def __init__(self, db_config):
@@ -15,9 +17,10 @@ class AlloyDB(PGDB):
         self.nl_config = db_config['nl_config']
 
         self.connector = AlloyDBConnector()
+
         def get_conn_alloydb():
             return self.connector.connect(
-                self.db_path,  # This MUST be the AlloyDB instance connection string
+                self.db_path,
                 "pg8000",
                 user=self.username,
                 password=self.password,
