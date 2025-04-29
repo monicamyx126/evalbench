@@ -12,10 +12,8 @@ class AlloyDBGenerator(QueryGenerator):
     def get_sql(self, prompt: str) -> str:
         processed_nl_config = str(self.db.nl_config).replace("'", "''")
         processed_prompt = prompt.replace("'", "''")
-        return (
-                f"SELECT alloydb_ai_nl.get_sql('{processed_nl_config}', "
-                f"'{processed_prompt}') ->> 'sql';"
-        )
+        return (f"SELECT alloydb_ai_nl.get_sql('{processed_nl_config}', "
+                f"'{processed_prompt}') ->> 'sql';")
 
     def generate_internal(self, prompt):
         rows, _, err = self.db.execute(self.get_sql(prompt))
