@@ -253,7 +253,8 @@ class BQDB(DB):
                     elif col_type == 'JSON':
                         formatted_values.append(f"PARSE_JSON({value})")
                     else:
-                        formatted_values.append(f"{value.replace("''", "\\'")}")
+                        escaped_value = value.replace("''", "\\'")
+                        formatted_values.append(f"{escaped_value}")
 
                 inline_columns = ", ".join(formatted_values)
                 insertion_statements.append(
