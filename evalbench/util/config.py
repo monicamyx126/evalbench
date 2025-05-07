@@ -131,7 +131,7 @@ def set_session_configs(session, experiment_config: dict):
         and experiment_config["database_configs"]
         and len(experiment_config["database_configs"])
     ):
-        session["db_configs"] = breakdown_db_configs_by_type(
+        session["db_configs"] = breakdown_db_configs_by_dialect(
             experiment_config["database_configs"]
         )
     else:
@@ -152,16 +152,15 @@ def generate_key(length=12):
     return "".join(key)
 
 
-def breakdown_db_configs_by_type(db_configs: list[dict]):
-    db_configs_by_type = {}
+def breakdown_db_configs_by_dialect(db_configs: list[dict]):
+    db_configs_by_dialect = {}
     for db_config_yaml in db_configs:
         db_config = load_yaml_config(db_config_yaml)
-        db_type = db_config.get("db_type")
-        if not db_type:
+        dialect = db_config.get("dialect")
+        if not dict:
             continue
-        elif db_type in db_configs_by_type:
-            raise ValueError(
-                f"Duplicate db_type provided in databse_configs: {db_type}"
-            )
-        db_configs_by_type[db_type] = db_config
-    return db_configs_by_type
+        elif dialect in db_configs_by_dialect:
+            db_configs_by_dialect[dialect].append(db_config)
+        else:
+            db_configs_by_dialect[dialect] = [db_config]
+    return db_configs_by_dialect

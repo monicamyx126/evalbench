@@ -1,4 +1,5 @@
 db_type: sqlite
+dialect: sqlite
 database_name: <not-required-for-sqlite>
 database_path: db_connections/bird/
 max_executions_per_minute: 180

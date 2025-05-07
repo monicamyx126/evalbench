@@ -77,25 +77,26 @@ class Orchestrator:
                 ) as executor:
                     futures = []
                     for dialect in sub_datasets:
-                        db_config = self.db_configs.get(dialect)
-                        if not db_config:
+                        db_configs = self.db_configs.get(dialect)
+                        if not db_configs:
                             logging.info(
                                 f"Skipping queries for {dialect} as no applicable db_config"
                                 + " was found."
                             )
                             skip_dialect(sub_datasets[dialect], progress_reporting)
                             continue
-                        for database in sub_datasets[dialect]:
-                            future = executor.submit(
-                                self.evaluate_sub_dataset,
-                                sub_datasets,
-                                db_config,
-                                dialect,
-                                database,
-                                progress_reporting,
-                                global_models,
-                            )
-                            futures.append(future)
+                        for db_config in db_configs:
+                            for database in sub_datasets[dialect]:
+                                future = executor.submit(
+                                    self.evaluate_sub_dataset,
+                                    sub_datasets,
+                                    db_config,
+                                    dialect,
+                                    database,
+                                    progress_reporting,
+                                    global_models,
+                                )
+                                futures.append(future)
                     for future in concurrent.futures.as_completed(futures):
                         eval_outputs, scoring_results = future.result()
                         self.total_eval_outputs.extend(eval_outputs)
