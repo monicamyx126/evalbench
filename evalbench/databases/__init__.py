@@ -7,6 +7,7 @@ from .bigquery import BQDB
 from .alloydb import AlloyDB
 from .alloydb_omni import AlloyDBOmni
 
+
 def get_database(db_config, db_name) -> DB:
     # if db_name is provided:
     #   - It will override the provided default database_name
