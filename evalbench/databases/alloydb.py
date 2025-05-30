@@ -2,7 +2,6 @@
 from .db import DB
 from .postgres import PGDB
 import sqlalchemy
-import pg8000
 from sqlalchemy.pool import NullPool
 from google.cloud.alloydb.connector import Connector as AlloyDBConnector
 from google.cloud.alloydb.connector import IPTypes as AlloyDBIPTypes
