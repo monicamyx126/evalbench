@@ -53,11 +53,17 @@ class DB(ABC):
             return
         pre_setup, setup, post_setup = self.setup_scripts
 
-        self.drop_all_tables()
-        self.batch_execute(pre_setup)
-        self.batch_execute(setup)
-        self.insert_data(self.data, setup)
-        self.batch_execute(post_setup)
+        if self.data:
+            self.drop_all_tables()
+        if pre_setup:
+            self.batch_execute(pre_setup)
+        if setup:
+            self.batch_execute(setup) 
+        if self.data:      
+            self.insert_data(self.data, setup)
+
+        if post_setup:
+            self.batch_execute(post_setup)
         if setup_users:
             self.setup_tmp_users()
         self.was_re_setup_this_session = True
