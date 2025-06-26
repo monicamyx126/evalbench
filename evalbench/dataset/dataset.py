@@ -39,11 +39,29 @@ def load_dataset_from_json(json_file_path, config):
     return input_items
 
 
-def load_dataset_from_bird_format(dataset: Sequence[dict]):
+def load_dataset_from_bird_format(dataset: Sequence[dict],config):
     input_items: dict[str, list[EvalInputRequest]] = {"dql": [], "dml": [], "ddl": []}
-    dialect = "sqlite"
+    dataset_config = config['dataset_config']
+    dataset_str = str(dataset_config).split('/')[-1].replace(".json","")
+    dialects = config["dialects"]
     query_type = "dql"
     for item in dataset:
+        if "question_id" not in item and "id" in item:
+            item["question_id"] = item["id"]
+        if "question" not in item and "other" in item:
+            item["question"] = item["other"]["question"]
+        if "evidence" not in item and "other" in item:
+            item["evidence"] = item["other"]["evidence"]
+        if "question" not in item and "other" in item:
+            item["question"] = item["other"]["question"]
+        if "db_id" not in item:
+            item["db_id"] = dataset_str
+        if "SQL" not in item:
+            item["SQL"] = item["golden_sql"][dialects[0]]
+        if "difficulty" not in item and "tags" in item:
+            item["difficulty"] = item["tags"]
+
+
         eval_input = EvalInputRequest(
             id=item["question_id"],
             nl_prompt="".join([item["question"], item["evidence"]]).replace(
@@ -51,7 +69,7 @@ def load_dataset_from_bird_format(dataset: Sequence[dict]):
             ),
             query_type=query_type,
             database=item["db_id"],
-            dialects=[dialect],
+            dialects=config["dialects"],
             golden_sql=item['SQL'],
             eval_query="",
             setup_sql="",
