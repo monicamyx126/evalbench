@@ -43,6 +43,7 @@ def load_dataset_from_bird_format(dataset: Sequence[dict],config):
     dialects = config["dialects"]
     query_type = "dql"
     for item in dataset:
+        # Add "ifs" to handle situations when some keys do not in(or in different format of) the BIRD evaluation dataset
         if "question_id" not in item and "id" in item:
             item["question_id"] = item["id"]
         if "question" not in item and "other" in item:
