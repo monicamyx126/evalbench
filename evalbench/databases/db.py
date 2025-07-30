@@ -52,7 +52,8 @@ class DB(ABC):
             # and it can be re-used, don't re-run setup unless forced.
             return
         pre_setup, setup, post_setup = self.setup_scripts
-
+        # Only drop_all_tables, pre_setup, setup and post_setup when there are database setup data available; 
+        # Otherwise, reuse the current database schema and data
         if self.data:
             self.drop_all_tables()
         if pre_setup:
