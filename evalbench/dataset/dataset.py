@@ -25,7 +25,7 @@ def load_dataset_from_json(json_file_path, config):
     dataset_format = config.get("dataset_format", "evalbench-standard-format")
     if dataset_format == "evalbench-standard-format":
         input_items = load_dataset(all_items, config)
-    elif "bird-standard-format" in dataset_format:
+    elif dataset_format == "bird-standard-format":
         input_items = load_dataset_from_bird_format(all_items,config)
     else:
         raise ValueError("Dataset not in any of the recognised formats")
